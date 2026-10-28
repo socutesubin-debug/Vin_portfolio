@@ -1,0 +1,7 @@
+node_modules
+dist
+.vercel
+*.log
+# 배포물과 무관한 원본/보관 파일
+/*.glb
+/archive/

@@ -1,0 +1,38 @@
+:root {
+  /* Color — 노션 기준: 흰 배경 + 인디고 서랍장 */
+  --bg: #ffffff;
+  --bg-stage: #ecece9; /* Top View 구간 바닥(시안의 밝은 회색) */
+  --surface: #f7f8fa;
+  --paper: #fbfaf7;
+  --indigo: #2e2c8d;
+  --indigo-deep: #1f1d66;
+  --text: #17191e;
+  --text-2: #5c606b; /* #737782 제안값은 회색 배경에서 대비가 낮아 한 단계 진하게 사용 */
+  --border: #e4e7ec;
+  --focus: #2e2c8d;
+
+  /* Type */
+  --font-sans: 'Inter', 'Helvetica Neue', Arial, 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  /* Intro 문장: 시안의 Didone(Bodoni/Didot 계열) 하이 콘트라스트 세리프 */
+  --font-display: 'Bodoni Moda', 'Didot', 'Bodoni 72', 'Playfair Display', Georgia, serif;
+  --font-serif: 'Playfair Display', 'Didot', 'Bodoni 72', Georgia, 'Apple SD Gothic Neo', serif;
+
+  /* Space & shape */
+  --gutter: clamp(16px, 5vw, 88px);
+  --radius: 4px;
+  --shadow-paper: 0 30px 80px rgba(18, 20, 40, 0.18), 0 4px 14px rgba(18, 20, 40, 0.08);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Layers */
+  --z-bg: 0;
+  --z-statement: 1;
+  --z-canvas: 2;
+  --z-panel: 4;
+  --z-overlay: 10;
+  --z-header: 12;
+  --z-intro: 14;
+  --z-detail: 20;
+}
