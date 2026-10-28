@@ -1,0 +1,150 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: #ece8e1;
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.v2-stage {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-canvas);
+}
+
+.v2-scroll-track {
+  position: relative;
+  z-index: var(--z-bg);
+}
+
+/* 상단 중앙 메뉴 */
+.v2-nav {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-header);
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-top: 14px;
+  padding: 10px 22px;
+  max-width: calc(100% - 32px);
+  border-radius: 999px;
+  /* 어두운 장면(책상 아래)에서도 메뉴가 읽히게 */
+  background: rgba(250, 248, 244, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.v2-nav__brand {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.08em;
+}
+
+.v2-nav ul {
+  display: flex;
+  gap: clamp(14px, 3vw, 32px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.v2-nav__link {
+  position: relative;
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  font: 500 12px/1 var(--font-sans);
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: color 0.3s var(--ease-out);
+}
+
+.v2-nav__link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1.5px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease-out);
+}
+
+.v2-nav__link:hover,
+.v2-nav__link[aria-current='true'] {
+  color: var(--text);
+}
+
+.v2-nav__link[aria-current='true']::after {
+  transform: scaleX(1);
+}
+
+.v2-nav__link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+}
+
+@media (max-width: 480px) {
+  .v2-nav {
+    gap: 14px;
+  }
+  .v2-nav__brand {
+    display: none;
+  }
+}
+
+/* 개발용 카메라 패널 */
+.v2-dev {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: var(--z-overlay);
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(20, 22, 30, 0.78);
+  color: #e8eaf2;
+  font: 11px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+  pointer-events: none;
+}
+
+.v2-dev strong {
+  display: block;
+  margin-bottom: 2px;
+  color: #9fa8ff;
+  font-weight: 500;
+}
+
+.v2-dev pre {
+  margin: 0;
+  font: inherit;
+  white-space: pre;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-nav__link,
+  .v2-nav__link::after {
+    transition: none;
+  }
+}
