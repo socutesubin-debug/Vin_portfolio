@@ -32,7 +32,8 @@ export const CABINET = {
 export const PLACEMENT: Record<string, Vec3> = {
   desk: [0, 0, -0.45],
   cabinet: [0.5, 0, -0.4],
-  chair: [-0.38, 0, 0.38],
+  // 자리를 비운 느낌으로 왼쪽으로 빼 둔다(ABOUT 정면 시점을 가리지 않게)
+  chair: [-0.62, 0, 0.42],
   monitor: [-0.1, DESK.height, -0.62],
   keyboard: [-0.1, DESK.height, -0.32],
   mouse: [0.24, DESK.height, -0.3],

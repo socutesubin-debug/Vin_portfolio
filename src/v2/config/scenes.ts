@@ -20,12 +20,12 @@ export const SCENE_ORDER: SceneId[] = ['home', 'about', 'work', 'contact']
 export const SCENES: Record<SceneId, CameraShot> = {
   // 작업실 전체를 정면에서, 약간 위에서 내려다본다
   home: { label: 'HOME', position: [0, 2.1, 3.6], target: [0, 0.75, -0.35] },
-  // 모니터가 화면 중앙에 크게
-  about: { label: 'ABOUT', position: [-0.1, 1.12, 0.25], target: [-0.1, 1.06, -0.62] },
-  // 책상 아래 서랍장 정면
-  work: { label: 'WORK', position: [0.5, 0.42, 0.95], target: [0.5, 0.32, -0.15] },
-  // 책상 위 전화기, 오른쪽 앞 45도 측면
-  contact: { label: 'CONTACT', position: [1.1, 1.22, 0.08], target: [0.52, 0.8, -0.5] },
+  // 모니터 정면(눈높이), 아래로 키보드·마우스까지
+  about: { label: 'ABOUT', position: [-0.1, 1.05, 0.75], target: [-0.1, 1.0, -0.62] },
+  // 서랍장 정면, 위에서 아래로 내려다보는 근접 구도(서랍 속 프로젝트가 잘 보이게)
+  work: { label: 'WORK', position: [0.5, 0.95, 0.65], target: [0.5, 0.4, -0.15] },
+  // 책상 위 전화기, 오른쪽 앞 35도 측면(45도에서 왼쪽으로 10도)
+  contact: { label: 'CONTACT', position: [0.99, 1.22, 0.17], target: [0.52, 0.8, -0.5] },
 }
 
 export const CAMERA = {
