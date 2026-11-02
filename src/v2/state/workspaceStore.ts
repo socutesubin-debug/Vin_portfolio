@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import type { SceneId } from '../config/scenes'
-import { DEFAULT_CABINET_FINISH, type CabinetFinish } from '../config/cabinet'
 import { loadEasterEgg, saveEasterEgg } from './easterEgg'
 
 /** 사운드 켜짐은 브라우저에 기억한다(기본 꺼짐) */
@@ -41,8 +40,6 @@ interface WorkspaceState {
   gridOpen: boolean
   /** 2D 상세가 열린 프로젝트 id */
   openProject: string | null
-  /** 서랍장 마감(공간 시안 비교용) */
-  cabinetFinish: CabinetFinish
   /** 이스터에그: 숨은 열쇠를 주웠는지 */
   hasKey: boolean
   /** 이스터에그: 열쇠로 연 서랍 id(다시 와도 유지) */
@@ -67,7 +64,6 @@ interface WorkspaceState {
   finishUnpull: () => void
   setGridOpen: (open: boolean) => void
   setOpenProject: (id: string | null) => void
-  setCabinetFinish: (f: CabinetFinish) => void
   takeKey: () => void
   unlockDrawer: (id: string) => void
   /** 개발용: 열쇠·열린 서랍 초기화 */
@@ -80,12 +76,6 @@ interface WorkspaceState {
   setSoundOn: (on: boolean) => void
 }
 
-/** 주소 뒤 ?cabinet=silver|charcoal 로 시작 마감을 고를 수 있다 */
-function initialFinish(): CabinetFinish {
-  const q = new URLSearchParams(window.location.search).get('cabinet')
-  return q === 'silver' || q === 'charcoal' ? q : DEFAULT_CABINET_FINISH
-}
-
 export const useWorkspace = create<WorkspaceState>((set) => ({
   activeScene: 'home',
   openDrawer: null,
@@ -93,7 +83,6 @@ export const useWorkspace = create<WorkspaceState>((set) => ({
   pullClosing: false,
   gridOpen: false,
   openProject: null,
-  cabinetFinish: initialFinish(),
   ...loadEasterEgg(),
   toast: null,
   ringAt: null,
@@ -121,7 +110,6 @@ export const useWorkspace = create<WorkspaceState>((set) => ({
   finishUnpull: () => set({ pulled: null, pullClosing: false }),
   setGridOpen: (gridOpen) => set({ gridOpen }),
   setOpenProject: (openProject) => set({ openProject }),
-  setCabinetFinish: (cabinetFinish) => set({ cabinetFinish }),
   takeKey: () =>
     set((s) => {
       saveEasterEgg({ hasKey: true, unlocked: s.unlocked })

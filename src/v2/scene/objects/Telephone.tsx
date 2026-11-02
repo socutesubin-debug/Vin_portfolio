@@ -4,10 +4,12 @@ import { RoundedBox } from '@react-three/drei'
 import { Euler, MeshStandardMaterial, Quaternion, Vector3, type Group, type PerspectiveCamera } from 'three'
 import { HANDSET_POSE, isRinging } from '../../config/contact'
 import { nowSec, overlayOpen, useWorkspace } from '../../state/workspaceStore'
+import { FINISH } from '../../config/layout'
 import CoilCord from './phone/CoilCord'
 
-const BODY = '#efe6d6'
-const HANDSET = '#1d1e22'
+/** 포인트 ②: 빨간 다이얼 전화기(CONTACT 주인공). 본체·수화기·코드 모두 빨강 */
+const BODY = FINISH.red
+const HANDSET = FINISH.red
 
 /** 수화기가 거치대에 놓인 자리(전화기 기준) */
 const REST_POS = new Vector3(0, 0.1, -0.035)
@@ -42,7 +44,7 @@ export default function Telephone(props: ThreeElements['group']) {
   const hovered = useRef(false)
   const camera = useThree((s) => s.camera) as PerspectiveCamera
   const size = useThree((s) => s.size)
-  const lamp = useMemo(() => new MeshStandardMaterial({ color: '#7a2a1c', emissive: '#ff5a36', emissiveIntensity: 0 }), [])
+  const lamp = useMemo(() => new MeshStandardMaterial({ color: '#d9d2c2', emissive: '#fff3d6', emissiveIntensity: 0 }), [])
 
   useFrame((_, dt) => {
     const s = useWorkspace.getState()
@@ -136,20 +138,20 @@ export default function Telephone(props: ThreeElements['group']) {
       <group ref={shaker}>
         {/* 본체 */}
         <RoundedBox args={[0.2, 0.08, 0.22]} radius={0.025} position={[0, 0.04, 0]} castShadow receiveShadow>
-          <meshStandardMaterial color={BODY} roughness={0.45} />
+          <meshPhysicalMaterial color={BODY} roughness={0.3} clearcoat={0.7} clearcoatRoughness={0.15} />
         </RoundedBox>
         {/* 다이얼: 앞쪽 경사면 */}
         <group position={[0, 0.084, 0.055]} rotation-x={0.3}>
           <mesh>
             <cylinderGeometry args={[0.055, 0.055, 0.012, 32]} />
-            <meshStandardMaterial color="#d8cdb9" roughness={0.4} />
+            <meshStandardMaterial color="#f3efe6" roughness={0.35} />
           </mesh>
           <mesh position={[0, 0.007, 0]}>
             <cylinderGeometry args={[0.018, 0.018, 0.004, 24]} />
-            <meshStandardMaterial color={HANDSET} />
+            <meshStandardMaterial color="#1d1e22" />
           </mesh>
         </group>
-        {/* 표시등(앞면 오른쪽) */}
+        {/* 표시등(앞면 오른쪽): 빨간 본체에서 보이게 따뜻한 흰빛 */}
         <mesh position={[0.072, 0.05, 0.111]} material={lamp}>
           <sphereGeometry args={[0.006, 16, 10]} />
         </mesh>
@@ -158,17 +160,17 @@ export default function Telephone(props: ThreeElements['group']) {
         <group ref={handset} position={REST_POS.toArray()}>
           <mesh rotation-z={Math.PI / 2} castShadow>
             <cylinderGeometry args={[0.015, 0.015, 0.2, 16]} />
-            <meshStandardMaterial color={HANDSET} roughness={0.35} />
+            <meshPhysicalMaterial color={HANDSET} roughness={0.3} clearcoat={0.7} clearcoatRoughness={0.15} />
           </mesh>
           {[-0.095, 0.095].map((x) => (
             <mesh key={x} position={[x, -0.012, 0]} castShadow>
               <cylinderGeometry args={[0.032, 0.026, 0.035, 24]} />
-              <meshStandardMaterial color={HANDSET} roughness={0.35} />
+              <meshPhysicalMaterial color={HANDSET} roughness={0.3} clearcoat={0.7} clearcoatRoughness={0.15} />
             </mesh>
           ))}
         </group>
 
-        <CoilCord start={CORD_BODY} getEnd={getCordEnd} />
+        <CoilCord start={CORD_BODY} getEnd={getCordEnd} color={FINISH.red} />
       </group>
 
       {/* 마우스·탭 판정 영역(전화기 전체) */}

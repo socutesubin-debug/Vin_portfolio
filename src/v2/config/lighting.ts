@@ -40,26 +40,29 @@ export interface LightingPreset {
 }
 
 export const LIGHTING: Record<'day', LightingPreset> = {
+  // 기준 비주얼(레트로 사물 + 밝은 작업실): 전체는 밝고 깨끗하게, 햇살만 따뜻하고 선명하게
   day: {
-    background: '#efe9df',
-    exposure: 1.05,
+    background: '#f5f2ec',
+    exposure: 1.12,
     sun: {
-      color: '#ffdcae',
-      intensity: 4.4,
-      // 뒷벽(모니터 뒤)에 햇살 무늬가 생기지 않도록 살짝 방문자 쪽으로 비춘다 → 창 모양 빛은 책상·바닥에 떨어진다
-      position: [-4.6, 3.3, -0.7],
-      target: [0.2, 0.3, 0.1],
-      softness: 3,
+      color: '#ffe6c2',
+      intensity: 4.8,
+      // 왼쪽 창에서 낮은 각도로, 뒷벽 쪽으로 비춘다 → 창 모양 빛과 창틀 그림자가 뒷벽 왼쪽(모니터 왼편)과
+      // 창가 바닥에 대각선으로 길게 떨어진다
+      position: [-4.78, 3.16, 4.68],
+      target: [-0.3, 0.6, -0.6],
+      softness: 1.6,
     },
-    sky: { color: '#fff3e2', ground: '#cdb89c', intensity: 1.05 },
-    fill: { color: '#f6efe4', intensity: 0.55, position: [2.2, 2.4, 3.5] },
+    sky: { color: '#f8f6f1', ground: '#d9cfbf', intensity: 1.15 },
+    fill: { color: '#f7f4ee', intensity: 0.6, position: [2.2, 2.4, 3.5] },
     reflections: {
-      intensity: 0.6,
-      base: '#c9bfb2',
-      window: { color: '#fff1da', intensity: 4 },
-      room: { color: '#f2ebe0', intensity: 0.7 },
+      intensity: 0.65,
+      base: '#d8d3cb',
+      window: { color: '#fff6e8', intensity: 4 },
+      room: { color: '#f5f2ec', intensity: 0.8 },
     },
-    windowGlow: { color: '#fff6e8', intensity: 1.35 },
+    // 창밖 풍경(벽돌·나무) 밝기
+    windowGlow: { color: '#ffffff', intensity: 1.12 },
   },
 }
 

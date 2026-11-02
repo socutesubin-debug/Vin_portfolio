@@ -1,15 +1,17 @@
-import { useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { ACESFilmicToneMapping } from 'three'
 import { CAMERA, SCENES } from '../config/scenes'
 import { PLACEMENT } from '../config/layout'
-import { useWorkspace } from '../state/workspaceStore'
 import CameraRig from './CameraRig'
 import Lighting from './Lighting'
 import Room from './objects/Room'
 import Desk from './objects/Desk'
 import Chair from './objects/Chair'
-import Monitor from './objects/Monitor'
+import RetroComputer from './objects/RetroComputer'
+import FlipClock from './objects/FlipClock'
+import PenHolder from './objects/PenHolder'
+import Plant from './objects/Plant'
+import WallCalendar from './objects/WallCalendar'
 import Keyboard from './objects/Keyboard'
 import Mouse from './objects/Mouse'
 import DeskLamp from './objects/DeskLamp'
@@ -19,14 +21,6 @@ import Notebook from './objects/Notebook'
 import Mug from './objects/Mug'
 import HiddenKey from './objects/HiddenKey'
 import DrawerCabinet from './objects/DrawerCabinet'
-import { applyCabinetFinish } from './objects/cabinet/materials'
-
-/** 개발용 패널에서 서랍장 마감을 바꾸면 공용 재질 값을 갈아 끼운다 */
-function CabinetFinishSync() {
-  const finish = useWorkspace((s) => s.cabinetFinish)
-  useEffect(() => applyCabinetFinish(finish), [finish])
-  return null
-}
 
 /** 작업실 장면. 오브젝트는 각 컴포넌트를 GLB 버전으로 바꾸면 그대로 교체된다 */
 export default function WorkspaceCanvas() {
@@ -39,20 +33,23 @@ export default function WorkspaceCanvas() {
     >
       <CameraRig />
       <Lighting />
-      <CabinetFinishSync />
 
       <Room />
+      <Plant position={PLACEMENT.plant} />
+      <WallCalendar position={PLACEMENT.calendar} />
       <Desk position={PLACEMENT.desk} />
       <DrawerCabinet position={PLACEMENT.cabinet} />
       {/* 책상에서 빠져 비스듬히 돌아간 채 — "잠시 자리를 비운" 느낌 */}
       <Chair position={PLACEMENT.chair} rotation-y={0.6} />
 
-      {/* 주인공: 모니터 */}
-      <Monitor position={PLACEMENT.monitor} />
+      {/* 주인공: 레트로 컴퓨터(ABOUT에서 화면이 켜진다) */}
+      <RetroComputer position={PLACEMENT.computer} />
       <Keyboard position={PLACEMENT.keyboard} />
       <Mouse position={PLACEMENT.mouse} rotation-y={-0.12} />
       {/* 갓이 모니터를 가리지 않게 왼쪽 앞으로 뻗게 둔다 */}
       <DeskLamp position={PLACEMENT.lamp} rotation-y={-2.2} />
+      <FlipClock position={PLACEMENT.clock} rotation-y={0.25} />
+      <PenHolder position={PLACEMENT.penHolder} />
       <BusinessCard position={PLACEMENT.card} />
       {/* 주인공: 전화기(CONTACT 35도 장면) */}
       <Telephone position={PLACEMENT.telephone} rotation-y={-0.5} />

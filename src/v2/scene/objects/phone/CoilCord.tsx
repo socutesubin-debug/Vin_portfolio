@@ -13,7 +13,15 @@ const UP = new Vector3(0, 1, 0)
  * 감는 횟수가 고정이라 수화기가 멀어지면 코일 간격이 자연스럽게 늘어난다.
  * getEnd는 매 프레임 수화기 쪽 끝점(전화기 기준 좌표)을 돌려준다.
  */
-export default function CoilCord({ start, getEnd }: { start: Vector3; getEnd: (out: Vector3) => Vector3 }) {
+export default function CoilCord({
+  start,
+  getEnd,
+  color,
+}: {
+  start: Vector3
+  getEnd: (out: Vector3) => Vector3
+  color: string
+}) {
   const mesh = useRef<Mesh>(null)
   const last = useRef(new Vector3(Infinity, 0, 0))
   const end = useMemo(() => new Vector3(), [])
@@ -62,7 +70,7 @@ export default function CoilCord({ start, getEnd }: { start: Vector3; getEnd: (o
 
   return (
     <mesh ref={mesh} castShadow>
-      <meshStandardMaterial color="#1d1e22" roughness={0.45} />
+      <meshStandardMaterial color={color} roughness={0.4} />
     </mesh>
   )
 }

@@ -4,9 +4,9 @@ import { FINISH } from '../../config/layout'
 
 const SEAT_Y = 0.47
 const chrome = <meshStandardMaterial color={FINISH.silver} metalness={1} roughness={0.15} />
-const leather = <meshStandardMaterial color={FINISH.black} roughness={0.48} />
+const leather = <meshStandardMaterial color={FINISH.leather} roughness={0.42} />
 
-/** 사무용 의자: 블랙 좌판·등판 + 크롬 프레임. 원점은 바닥, 앉는 방향이 -z, 등받이가 +z */
+/** 사무용 의자: 다크 브라운 가죽 좌판·등판 + 크롬 프레임. 원점은 바닥, 앉는 방향이 -z, 등받이가 +z */
 export default function Chair(props: ThreeElements['group']) {
   return (
     <group {...props}>

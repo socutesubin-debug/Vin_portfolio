@@ -60,30 +60,11 @@ export const DRAWER_MOTION = {
   speed: 6,
 }
 
-export type CabinetFinish = 'silver' | 'charcoal'
-
-interface FinishSpec {
-  label: string
-  /** 몸체·서랍 앞판 */
-  body: { color: string; metalness: number; roughness: number; clearcoat: number }
-  /** 서랍 안쪽·칸 선반 */
-  inside: { color: string; metalness: number; roughness: number }
+/**
+ * 서랍장 마감: 올리브 그레이 도장 철제(기준 비주얼). 색·광택은 여기서만 바꾼다.
+ * body는 몸체·서랍 앞판, inside는 서랍 안쪽·칸 선반.
+ */
+export const CABINET_FINISH = {
+  body: { color: '#6b7060', metalness: 0.35, roughness: 0.5, clearcoat: 0.3 },
+  inside: { color: '#5d6153', metalness: 0.2, roughness: 0.65 },
 }
-
-/** 서랍장 마감 두 가지. 개발용 패널에서 바꿔 비교한다(주소 뒤 ?cabinet=charcoal 로도 고를 수 있다) */
-export const CABINET_FINISHES: Record<CabinetFinish, FinishSpec> = {
-  // 브러시드 알루미늄
-  silver: {
-    label: '실버',
-    body: { color: '#dadde1', metalness: 0.7, roughness: 0.32, clearcoat: 0 },
-    inside: { color: '#c3c6cb', metalness: 0.5, roughness: 0.5 },
-  },
-  // 분체 도장(무광에 가까운 차콜)
-  charcoal: {
-    label: '차콜',
-    body: { color: '#4b4d53', metalness: 0.3, roughness: 0.48, clearcoat: 0.25 },
-    inside: { color: '#3e4045', metalness: 0.2, roughness: 0.65 },
-  },
-}
-
-export const DEFAULT_CABINET_FINISH: CabinetFinish = 'silver'

@@ -1,97 +1,95 @@
 import { useEffect, useMemo } from 'react'
 import { ExtrudeGeometry, Path, Shape } from 'three'
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
-import { chrome, chromeDouble, cupInner, labelTexture } from './materials'
+import { chrome, labelTexture } from './materials'
 
-// 참고 디자인 치수(m)
-const FW = 0.2
-const FH = 0.085
-const T = 0.011
-const FY = 0.045
-const HW = FW / 2
-const HH = FH / 2
-const IW = HW - T * 1.6
-const IH = HH - T
-const CY = -0.035
-const CUP = { w: 0.085, h: 0.05, d: 0.045 }
+// 참고 디자인 단위(m). 원점은 서랍 앞판 가운데 조금 위
+const BAR = { length: 0.34, r: 0.011, y: -0.035, standoff: 0.03 }
+const LABEL = { w: 0.17, h: 0.064, y: 0.06, t: 0.008 }
+const KEY = { r: 0.019, y: 0.06 }
 
-const screwHalf = (r: number) => [r, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2] as const
-
-/** 라벨 홀더 프레임(라벨 카드 포함) + 컵 손잡이 */
-export default function DrawerHandle({ label }: { label: string }) {
-  const frameGeo = useMemo(() => {
-    const r = 0.008
+/** 열쇠 구멍: 크롬 원판 + 어두운 구멍(동그라미 + 아래로 긴 홈) */
+function Keyhole({ position }: { position: [number, number, number] }) {
+  const slot = useMemo(() => {
     const s = new Shape()
-    s.moveTo(-HW + r, -HH)
-    s.lineTo(HW - r, -HH)
-    s.quadraticCurveTo(HW, -HH, HW, -HH + r)
-    s.lineTo(HW, HH - r)
-    s.quadraticCurveTo(HW, HH, HW - r, HH)
-    s.lineTo(-HW + r, HH)
-    s.quadraticCurveTo(-HW, HH, -HW, HH - r)
-    s.lineTo(-HW, -HH + r)
-    s.quadraticCurveTo(-HW, -HH, -HW + r, -HH)
+    s.absarc(0, 0.004, 0.0055, 0, Math.PI * 2, false)
+    const g = new ExtrudeGeometry(s, { depth: 0.002, bevelEnabled: false })
+    return g
+  }, [])
+  useEffect(() => () => slot.dispose(), [slot])
+  return (
+    <group position={position}>
+      <mesh material={chrome} rotation-x={Math.PI / 2}>
+        <cylinderGeometry args={[KEY.r, KEY.r, 0.006, 28]} />
+      </mesh>
+      <mesh geometry={slot} position={[0, 0, 0.002]}>
+        <meshStandardMaterial color="#18191b" roughness={0.6} />
+      </mesh>
+      <mesh position={[0, -0.007, 0.0035]}>
+        <boxGeometry args={[0.004, 0.012, 0.002]} />
+        <meshStandardMaterial color="#18191b" roughness={0.6} />
+      </mesh>
+    </group>
+  )
+}
+
+/** 작은 라벨 홀더(크롬 테두리 + 라벨 카드) */
+function LabelHolder({ label }: { label: string }) {
+  const frame = useMemo(() => {
+    const { w, h, t } = LABEL
+    const s = new Shape()
+    s.moveTo(-w / 2, -h / 2)
+    s.lineTo(w / 2, -h / 2)
+    s.lineTo(w / 2, h / 2)
+    s.lineTo(-w / 2, h / 2)
+    s.closePath()
     const hole = new Path()
-    hole.moveTo(-IW, -IH)
-    hole.lineTo(IW, -IH)
-    hole.lineTo(IW, IH)
-    hole.lineTo(-IW, IH)
+    hole.moveTo(-w / 2 + t, -h / 2 + t)
+    hole.lineTo(w / 2 - t, -h / 2 + t)
+    hole.lineTo(w / 2 - t, h / 2 - t)
+    hole.lineTo(-w / 2 + t, h / 2 - t)
     hole.closePath()
     s.holes.push(hole)
-    return new ExtrudeGeometry(s, { depth: 0.004, bevelEnabled: true, bevelThickness: 0.002, bevelSize: 0.0015, bevelSegments: 3 })
+    return new ExtrudeGeometry(s, { depth: 0.004, bevelEnabled: true, bevelThickness: 0.0015, bevelSize: 0.001, bevelSegments: 2 })
   }, [])
-  const plateGeo = useMemo(() => new RoundedBoxGeometry(0.19, 0.06, 0.005, 3, 0.0025), [])
   const tex = useMemo(() => labelTexture(label), [label])
-
   useEffect(
     () => () => {
-      frameGeo.dispose()
-      plateGeo.dispose()
+      frame.dispose()
       tex.dispose()
     },
-    [frameGeo, plateGeo, tex],
+    [frame, tex],
   )
-
   return (
-    <group>
-      {/* 라벨 카드 */}
-      <mesh position={[0, FY, 0.001]}>
-        <planeGeometry args={[IW * 2, IH * 2]} />
+    <group position={[0, LABEL.y, 0]}>
+      <mesh position={[0, 0, 0.001]}>
+        <planeGeometry args={[LABEL.w - LABEL.t * 2, LABEL.h - LABEL.t * 2]} />
         <meshStandardMaterial map={tex} roughness={0.8} />
       </mesh>
-      <mesh geometry={frameGeo} material={chrome} position={[0, FY, 0.002]} castShadow />
-      {/* 안쪽 접힌 립(위/아래) */}
-      {[IH - 0.001, -IH + 0.001].map((y) => (
-        <mesh key={y} material={chrome} position={[0, FY + y, 0.007]} rotation-z={Math.PI / 2}>
-          <cylinderGeometry args={[0.0035, 0.0035, IW * 2, 12]} />
-        </mesh>
-      ))}
-      {/* 모서리 나사 */}
-      {[-HW + 0.009, HW - 0.009].flatMap((x) =>
-        [HH - 0.009, -HH + 0.009].map((y) => (
-          <mesh key={`${x}${y}`} material={chrome} position={[x, FY + y, 0.0075]} rotation-x={Math.PI / 2} scale-y={0.5}>
-            <sphereGeometry args={screwHalf(0.0055)} />
-          </mesh>
-        )),
-      )}
+      <mesh geometry={frame} material={chrome} />
+    </group>
+  )
+}
 
-      {/* 컵 손잡이 */}
-      <mesh geometry={plateGeo} material={chrome} position={[0, CY + 0.006, 0.0025]} castShadow />
-      {[-0.083, 0.083].map((x) => (
-        <mesh key={x} material={chrome} position={[x, CY + 0.006, 0.005]} rotation-x={Math.PI / 2} scale-y={0.5}>
-          <sphereGeometry args={screwHalf(0.005)} />
+/**
+ * 서랍 앞판 손잡이: 가로형 크롬 바 + (라벨이 있으면) 작은 라벨 홀더 + 열쇠 구멍.
+ * 라벨이 있으면 열쇠 구멍은 라벨 오른쪽, 없으면 바 위 가운데.
+ */
+export default function DrawerHandle({ label }: { label: string }) {
+  const { length, r, y, standoff } = BAR
+  return (
+    <group>
+      {/* 가로 바 */}
+      <mesh material={chrome} position={[0, y, standoff]} rotation-z={Math.PI / 2} castShadow>
+        <cylinderGeometry args={[r, r, length, 20]} />
+      </mesh>
+      {/* 바를 받치는 다리 두 개 */}
+      {[-length / 2 + 0.03, length / 2 - 0.03].map((x) => (
+        <mesh key={x} material={chrome} position={[x, y, standoff / 2]} rotation-x={Math.PI / 2}>
+          <cylinderGeometry args={[r * 0.8, r * 0.9, standoff, 14]} />
         </mesh>
       ))}
-      {/* 앞·위로 볼록하고 아래가 열린 후드 */}
-      <mesh material={chromeDouble} position={[0, CY - 0.008, 0.005]} scale={[CUP.w, CUP.h, CUP.d]} castShadow>
-        <sphereGeometry args={[1, 48, 24, 0, Math.PI, 0, Math.PI / 2]} />
-      </mesh>
-      <mesh material={chrome} position={[0, CY - 0.008, 0.005]} rotation-x={Math.PI / 2} scale={[CUP.w, CUP.d, CUP.w * 0.9]}>
-        <torusGeometry args={[1, 0.075, 12, 48, Math.PI]} />
-      </mesh>
-      <mesh material={cupInner} position={[0, CY - 0.008, 0.005]} scale={[CUP.w, CUP.h, CUP.d]}>
-        <sphereGeometry args={[0.97, 32, 16, 0, Math.PI, 0, Math.PI / 2]} />
-      </mesh>
+      {label && <LabelHolder label={label} />}
+      <Keyhole position={[label ? LABEL.w / 2 + 0.05 : 0, KEY.y, 0.003]} />
     </group>
   )
 }

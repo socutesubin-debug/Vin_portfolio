@@ -3,13 +3,13 @@ import type { ThreeElements } from '@react-three/fiber'
 import { Color } from 'three'
 import { ROOM } from '../../config/layout'
 import { ACTIVE_LIGHTING, LIGHTING } from '../../config/lighting'
-import { oakFloorTexture } from '../textures'
+import { oakFloorTexture, windowViewTexture } from '../textures'
 
 /** 측면 벽이 방문자 쪽으로 이어지는 끝(z) */
 const SIDE_FRONT_Z = 4
 
 /**
- * 바닥(오크 마루), 뒷벽(비워 두는 벽), 왼쪽 측면 벽과 큰 창.
+ * 바닥(밝은 우드), 뒷벽, 왼쪽 측면 벽과 큰 창(흰 창틀·창턱·창밖 벽돌과 나무), 흰 걸레받이.
  * 측면 벽과 창틀은 그림자를 만들어, 햇살이 창 모양으로만 방 안에 들어온다.
  */
 export default function Room(props: ThreeElements['group']) {
@@ -27,6 +27,9 @@ export default function Room(props: ThreeElements['group']) {
 
   const glow = LIGHTING[ACTIVE_LIGHTING].windowGlow
   const glowColor = useMemo(() => new Color(glow.color).multiplyScalar(glow.intensity), [glow])
+  const viewMap = useMemo(() => windowViewTexture(), [])
+  useEffect(() => () => viewMap.dispose(), [viewMap])
+  const BB = ROOM.baseboard
 
   // 측면 벽 조각(창 구멍을 남기고): [z중심, y중심, z길이, y높이]
   const sideLen = SIDE_FRONT_Z - wallZ
@@ -75,10 +78,26 @@ export default function Room(props: ThreeElements['group']) {
         </mesh>
       ))}
 
-      {/* 창밖: 밝고 부드럽게 날아간 빛 면 */}
-      <mesh position={[sideX - T - 0.6, wy, wz]} rotation-y={Math.PI / 2}>
-        <planeGeometry args={[ww + 1.2, wh + 1.2]} />
-        <meshBasicMaterial color={glowColor} toneMapped={false} />
+      {/* 창턱: 방 안쪽으로 살짝 나온 흰 판 */}
+      <mesh position={[sideX + ROOM.sill / 2 - 0.02, y0 - 0.012, wz]} castShadow receiveShadow>
+        <boxGeometry args={[ROOM.sill, 0.024, ww + 0.08]} />
+        <meshStandardMaterial color={colors.frame} roughness={0.55} />
+      </mesh>
+
+      {/* 흰 걸레받이: 뒷벽·측면 벽 아래 */}
+      <mesh position={[0, BB / 2, wallZ + 0.008]} receiveShadow>
+        <boxGeometry args={[floorSize, BB, 0.016]} />
+        <meshStandardMaterial color={colors.baseboard} roughness={0.5} />
+      </mesh>
+      <mesh position={[sideX + 0.008, BB / 2, wallZ + sideLen / 2]} receiveShadow>
+        <boxGeometry args={[0.016, BB, sideLen]} />
+        <meshStandardMaterial color={colors.baseboard} roughness={0.5} />
+      </mesh>
+
+      {/* 창밖: 건너편 벽돌 벽과 초록 나무(햇살에 밝게 날아간 느낌) */}
+      <mesh position={[sideX - T - 0.9, wy + 0.1, wz]} rotation-y={Math.PI / 2}>
+        <planeGeometry args={[ww + 2.2, wh + 2.2]} />
+        <meshBasicMaterial map={viewMap} color={glowColor} toneMapped={false} />
       </mesh>
     </group>
   )
