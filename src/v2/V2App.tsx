@@ -1,7 +1,13 @@
 import { useEffect } from 'react'
 import { useGSAP } from '../animations/gsap'
 import { SCENE_ORDER, SCENES, SCROLL, SHOW_CAMERA_PANEL } from './config/scenes'
-import { buildCameraTimeline, SCROLL_TRACK_ID, TIMELINE_LENGTH } from './animation/cameraTimeline'
+import {
+  buildCameraTimeline,
+  sceneFromUrl,
+  scrollToScene,
+  SCROLL_TRACK_ID,
+  TIMELINE_LENGTH,
+} from './animation/cameraTimeline'
 import { overlayOpen, useWorkspace } from './state/workspaceStore'
 import WorkspaceCanvas from './scene/WorkspaceCanvas'
 import TopNav from './ui/TopNav'
@@ -10,6 +16,7 @@ import WorkControls from './ui/WorkControls'
 import ProjectDetail from './ui/ProjectDetail'
 import FolderPreview from './ui/FolderPreview'
 import ProjectGrid from './ui/ProjectGrid'
+import KeyBadge from './ui/KeyBadge'
 import './ui/v2.css'
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -31,6 +38,8 @@ export default function V2App() {
 
   useGSAP(() => {
     buildCameraTimeline({ reduced: reducedMotion(), onScene: setActiveScene })
+    const start = sceneFromUrl()
+    if (start) requestAnimationFrame(() => scrollToScene(start, true))
   })
 
   return (
@@ -40,6 +49,7 @@ export default function V2App() {
       </div>
       <TopNav />
       <WorkControls />
+      <KeyBadge />
       {/* 겹침 순서: 폴더 미리보기 < 전체 보기 < 상세 */}
       <FolderPreview />
       <ProjectGrid />

@@ -3,9 +3,13 @@ import { MathUtils, type PerspectiveCamera } from 'three'
 import { camState } from '../animation/cameraTimeline'
 import { CAMERA, DRAWER_VIEW } from '../config/scenes'
 import { useWorkspace } from '../state/workspaceStore'
+import { CAB, CABINET_SCALE } from '../config/cabinet'
 
 /** 서랍 시점 덮어쓰기 정도(0 = 스크롤 카메라, 1 = 서랍 시점) */
 let drawerBlend = 0
+/** 열린 서랍 높이만큼 서랍 시점을 내린다(DRAWER_VIEW는 맨 위 서랍 기준). 서랍을 바꾸면 부드럽게 따라간다 */
+let drawerDrop = 0
+const DRAWER_STEP = CAB.DH * CABINET_SCALE
 const smooth = (t: number) => t * t * (3 - 2 * t)
 const mix = (a: number, b: number, t: number) => a + (b - a) * t
 const [DP, DT] = [DRAWER_VIEW.position, DRAWER_VIEW.target]
@@ -48,13 +52,16 @@ export default function CameraRig() {
     }
 
     // 서랍이 열려 있으면 서랍 안을 내려다보는 시점으로 부드럽게 옮겨 간다
-    const goal = useWorkspace.getState().openDrawer !== null ? 1 : 0
-    drawerBlend += (goal - drawerBlend) * (1 - Math.exp(-dt * DRAWER_VIEW.speed))
+    const open = useWorkspace.getState().openDrawer
+    const goal = open !== null ? 1 : 0
+    const ease = 1 - Math.exp(-dt * DRAWER_VIEW.speed)
+    drawerBlend += (goal - drawerBlend) * ease
+    if (open !== null) drawerDrop += (open * DRAWER_STEP - drawerDrop) * ease
     const w = smooth(drawerBlend)
 
     const { position: sp, target: st } = camState
-    const p = { x: mix(sp.x, DP[0], w), y: mix(sp.y, DP[1], w), z: mix(sp.z, DP[2], w) }
-    const t = { x: mix(st.x, DT[0], w), y: mix(st.y, DT[1], w), z: mix(st.z, DT[2], w) }
+    const p = { x: mix(sp.x, DP[0], w), y: mix(sp.y, DP[1] - drawerDrop, w), z: mix(sp.z, DP[2], w) }
+    const t = { x: mix(st.x, DT[0], w), y: mix(st.y, DT[1] - drawerDrop, w), z: mix(st.z, DT[2], w) }
     const k = mix(pullBack(aspect, fov), pullBack(aspect, fov, DRAWER_KEEP_TAN_H), w)
     cam.position.set(t.x + (p.x - t.x) * k, t.y + (p.y - t.y) * k, t.z + (p.z - t.z) * k)
     cam.lookAt(t.x, t.y, t.z)

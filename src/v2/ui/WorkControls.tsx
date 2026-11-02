@@ -45,9 +45,11 @@ export default function WorkControls() {
             <button type="button" className="v2-pill" onClick={() => setOpenDrawer(null)}>
               서랍 닫기
             </button>
-            <button type="button" className="v2-pill v2-pill--dark" onClick={() => setGridOpen(true)}>
-              전체 보기
-            </button>
+            {openDrawer === PROJECT_DRAWER && (
+              <button type="button" className="v2-pill v2-pill--dark" onClick={() => setGridOpen(true)}>
+                전체 보기
+              </button>
+            )}
           </>
         ) : (
           <span className="v2-pill v2-pill--quiet">맨 위 서랍을 열어 보세요</span>
@@ -55,7 +57,7 @@ export default function WorkControls() {
       </div>
 
       <nav className="v2-skip" aria-label="WORK 서랍">
-        {!drawerOpen ? (
+        {openDrawer !== PROJECT_DRAWER ? (
           <button type="button" onClick={() => setOpenDrawer(PROJECT_DRAWER)}>
             WORK 서랍 열기
           </button>

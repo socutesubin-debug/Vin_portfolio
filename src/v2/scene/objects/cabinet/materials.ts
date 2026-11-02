@@ -1,15 +1,22 @@
 import { DoubleSide, MeshPhysicalMaterial, MeshStandardMaterial, BackSide } from 'three'
 import { makeCanvasTexture, spacedText, SANS } from '../../../../utils/canvasTexture'
-import { CABINET_COLORS } from '../../../config/cabinet'
+import { CABINET_FINISHES, DEFAULT_CABINET_FINISH, type CabinetFinish } from '../../../config/cabinet'
 
-/** 서랍장 재질(참고 디자인 기준). 여러 메시가 같이 쓴다 */
-export const paint = new MeshPhysicalMaterial({
-  color: CABINET_COLORS.paint,
-  roughness: 0.42,
-  clearcoat: 0.7,
-  clearcoatRoughness: 0.15,
-})
-export const paintIn = new MeshStandardMaterial({ color: CABINET_COLORS.paintIn, roughness: 0.7 })
+/** 서랍장 몸체·안쪽 재질. 여러 메시가 같이 쓰고, 마감(실버/차콜)을 바꾸면 값만 갈아 끼운다 */
+export const paint = new MeshPhysicalMaterial({ clearcoatRoughness: 0.2 })
+export const paintIn = new MeshStandardMaterial()
+
+export function applyCabinetFinish(finish: CabinetFinish) {
+  const { body, inside } = CABINET_FINISHES[finish]
+  paint.color.set(body.color)
+  paint.metalness = body.metalness
+  paint.roughness = body.roughness
+  paint.clearcoat = body.clearcoat
+  paintIn.color.set(inside.color)
+  paintIn.metalness = inside.metalness
+  paintIn.roughness = inside.roughness
+}
+applyCabinetFinish(DEFAULT_CABINET_FINISH)
 export const chrome = new MeshStandardMaterial({ color: '#ffffff', metalness: 1, roughness: 0.12, envMapIntensity: 2 })
 export const chromeDouble = chrome.clone()
 chromeDouble.side = DoubleSide

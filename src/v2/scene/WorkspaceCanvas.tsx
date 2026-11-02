@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
-import { Canvas, useThree } from '@react-three/fiber'
-import { ACESFilmicToneMapping, PMREMGenerator } from 'three'
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
+import { Canvas } from '@react-three/fiber'
+import { ACESFilmicToneMapping } from 'three'
 import { CAMERA, SCENES } from '../config/scenes'
-import { PLACEMENT, ROOM } from '../config/layout'
+import { PLACEMENT } from '../config/layout'
+import { useWorkspace } from '../state/workspaceStore'
 import CameraRig from './CameraRig'
+import Lighting from './Lighting'
 import Room from './objects/Room'
 import Desk from './objects/Desk'
 import Chair from './objects/Chair'
@@ -14,25 +15,16 @@ import Mouse from './objects/Mouse'
 import DeskLamp from './objects/DeskLamp'
 import BusinessCard from './objects/BusinessCard'
 import Telephone from './objects/Telephone'
+import Notebook from './objects/Notebook'
+import Mug from './objects/Mug'
+import HiddenKey from './objects/HiddenKey'
 import DrawerCabinet from './objects/DrawerCabinet'
+import { applyCabinetFinish } from './objects/cabinet/materials'
 
-const [winX, winY] = ROOM.window.center
-
-/** 크롬이 크롬답게 보이도록 주변 반사(RoomEnvironment). 다른 물체 밝기는 크게 안 바뀌게 약하게 쓴다 */
-function Reflections() {
-  const gl = useThree((s) => s.gl)
-  const scene = useThree((s) => s.scene)
-  useEffect(() => {
-    const pmrem = new PMREMGenerator(gl)
-    const target = pmrem.fromScene(new RoomEnvironment(), 0.04)
-    scene.environment = target.texture
-    scene.environmentIntensity = 0.35
-    return () => {
-      scene.environment = null
-      target.dispose()
-      pmrem.dispose()
-    }
-  }, [gl, scene])
+/** 개발용 패널에서 서랍장 마감을 바꾸면 공용 재질 값을 갈아 끼운다 */
+function CabinetFinishSync() {
+  const finish = useWorkspace((s) => s.cabinetFinish)
+  useEffect(() => applyCabinetFinish(finish), [finish])
   return null
 }
 
@@ -41,42 +33,35 @@ export default function WorkspaceCanvas() {
   return (
     <Canvas
       shadows="percentage"
-      dpr={[1, 2]}
-      gl={{ antialias: true, toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.05 }}
+      dpr={[1, 1.75]}
+      gl={{ antialias: true, toneMapping: ACESFilmicToneMapping }}
       camera={{ fov: CAMERA.fov, near: CAMERA.near, far: CAMERA.far, position: SCENES.home.position }}
     >
-      <color attach="background" args={[ROOM.colors.wall]} />
       <CameraRig />
-      <Reflections />
-
-      <hemisphereLight args={['#fffaf0', '#b8b0a4', 1.3]} />
-      {/* 창문 쪽에서 들어오는 빛 */}
-      <directionalLight
-        position={[winX - 1.2, winY + 1.8, ROOM.wallZ - 2]}
-        intensity={1.6}
-        color="#fff4e2"
-        castShadow
-        shadow-mapSize={[2048, 2048]}
-        shadow-bias={-0.0004}
-        shadow-camera-left={-3}
-        shadow-camera-right={3}
-        shadow-camera-top={3}
-        shadow-camera-bottom={-3}
-      />
-      {/* 방문자 쪽 보조광: 벽과 서랍장 앞면을 밝힌다 */}
-      <directionalLight position={[2, 2.5, 4]} intensity={1.1} />
+      <Lighting />
+      <CabinetFinishSync />
 
       <Room />
       <Desk position={PLACEMENT.desk} />
       <DrawerCabinet position={PLACEMENT.cabinet} />
-      <Chair position={PLACEMENT.chair} rotation-y={0.35} />
+      {/* 책상에서 빠져 비스듬히 돌아간 채 — "잠시 자리를 비운" 느낌 */}
+      <Chair position={PLACEMENT.chair} rotation-y={0.6} />
+
+      {/* 주인공: 모니터 */}
       <Monitor position={PLACEMENT.monitor} />
       <Keyboard position={PLACEMENT.keyboard} />
-      <Mouse position={PLACEMENT.mouse} />
+      <Mouse position={PLACEMENT.mouse} rotation-y={-0.12} />
       {/* 갓이 모니터를 가리지 않게 왼쪽 앞으로 뻗게 둔다 */}
       <DeskLamp position={PLACEMENT.lamp} rotation-y={-2.2} />
       <BusinessCard position={PLACEMENT.card} />
+      {/* 주인공: 전화기(CONTACT 35도 장면) */}
       <Telephone position={PLACEMENT.telephone} rotation-y={-0.5} />
+
+      {/* 작업 흔적 */}
+      <Notebook position={PLACEMENT.notebook} rotation-y={0.18} />
+      <Mug position={PLACEMENT.mug} rotation-y={2.4} />
+      {/* 이스터에그: 몸통이 머그 밑으로 들어가게 머그 쪽을 향한다 */}
+      <HiddenKey position={PLACEMENT.key} rotation-y={2.36} />
     </Canvas>
   )
 }

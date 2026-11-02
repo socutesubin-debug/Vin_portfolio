@@ -133,6 +133,34 @@ body {
   white-space: pre;
 }
 
+.v2-dev__finish {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-top: 6px;
+  pointer-events: auto;
+}
+
+.v2-dev__finish span {
+  margin-right: 4px;
+  color: #9fa8ff;
+}
+
+.v2-dev__finish button {
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.v2-dev__finish button[aria-pressed='true'] {
+  background: #e8eaf2;
+  color: #14161e;
+}
+
 /* WORK: 서랍 닫기 / 안내 */
 .v2-work-hint {
   position: fixed;
@@ -701,5 +729,66 @@ body {
   .v2-nav__link,
   .v2-nav__link::after {
     transition: none;
+  }
+}
+
+/* 이스터에그: 열쇠 아이콘 + 안내 문구 */
+.v2-key {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: var(--z-panel);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(250, 248, 244, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 14px rgba(40, 30, 10, 0.18);
+  color: #9a7a2e;
+  animation: v2-key-in 0.6s var(--ease-out);
+}
+
+@keyframes v2-key-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4) rotate(-40deg);
+  }
+}
+
+.v2-toast {
+  position: fixed;
+  top: 78px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-header);
+  max-width: calc(100% - 32px);
+  pointer-events: none;
+}
+
+.v2-toast span {
+  display: block;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: rgba(23, 25, 30, 0.86);
+  color: #fff;
+  font: 500 13px/1.3 var(--font-sans);
+  text-align: center;
+  animation: v2-toast-in 0.3s var(--ease-out);
+}
+
+@keyframes v2-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-key,
+  .v2-toast span {
+    animation: none;
   }
 }

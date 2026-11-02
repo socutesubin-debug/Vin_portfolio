@@ -5,7 +5,7 @@ import { RoundedBox } from '@react-three/drei'
 export default function Mouse(props: ThreeElements['group']) {
   return (
     <group {...props}>
-      <RoundedBox args={[0.06, 0.028, 0.1]} radius={0.012} position={[0, 0.014, 0]} castShadow>
+      <RoundedBox args={[0.06, 0.028, 0.1]} radius={0.012} position={[0, 0.014, 0]}>
         <meshStandardMaterial color="#e6e4df" roughness={0.5} />
       </RoundedBox>
     </group>

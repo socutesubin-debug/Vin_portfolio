@@ -6,6 +6,8 @@ import { CAB, CAB_N, DRAWER_MOTION as M, type DrawerSlot } from '../../../config
 import { overlayOpen, useWorkspace } from '../../../state/workspaceStore'
 import DrawerHandle from './DrawerHandle'
 import FileContents from './FileContents'
+import FabricSwatches from './FabricSwatches'
+import WorkInProgress from './WorkInProgress'
 import { paint, paintIn } from './materials'
 
 const { W, D, BASE, DH } = CAB
@@ -17,6 +19,10 @@ const BH = FH * 0.7
 /** 서랍 상자 중심(앞뒤) */
 const ZC = D / 2 - 0.025 - BD / 2
 const WALL = 0.012
+/** 서랍 상자 안쪽: 뒷판 안쪽면 ~ 앞판 뒷면 */
+const IN_BACK = ZC - BD / 2 + WALL / 2
+const IN_FRONT = D / 2 - 0.025
+const INSIDE = { width: FW - 0.06 - WALL * 2, depth: IN_FRONT - IN_BACK, height: BH, z: (IN_BACK + IN_FRONT) / 2 }
 
 const setCursor = (on: boolean) => {
   document.body.style.cursor = on ? 'pointer' : ''
@@ -24,7 +30,8 @@ const setCursor = (on: boolean) => {
 
 /**
  * 서랍 하나. 앞판(라벨·손잡이)에 마우스를 올리면 살짝 나오고 클릭하면 열린다.
- * 잠긴 서랍은 클릭하면 덜컥 흔들리기만 한다.
+ * 잠긴 서랍은 열쇠(이스터에그)가 없으면 클릭해도 덜컥 흔들리기만 하고, 열쇠가 있으면 열린다.
+ * 한 번 연 서랍은 다시 와도 잠기지 않고, 닫혀 있을 때 살짝 열린 채로 있다.
  */
 export default function Drawer({ slot, index }: { slot: DrawerSlot; index: number }) {
   const y0 = BASE + (CAB_N - 1 - index) * DH
@@ -37,9 +44,12 @@ export default function Drawer({ slot, index }: { slot: DrawerSlot; index: numbe
   const rattleAt = useRef(-1)
   const clock = useThree((s) => s.clock)
   const isOpen = useWorkspace((s) => s.openDrawer === index)
+  const unlocked = useWorkspace((s) => s.unlocked.includes(slot.id))
+  const locked = slot.locked && !unlocked
+  const ajar = slot.locked && unlocked
 
   useFrame((_, dt) => {
-    const target = isOpen ? M.open : hovered.current && !slot.locked ? M.hover : 0
+    const target = isOpen ? M.open : hovered.current && !locked ? M.hover : ajar ? M.ajar : 0
     pos.current += (target - pos.current) * (1 - Math.exp(-dt * M.speed))
     let z = pos.current
     let ry = 0
@@ -78,11 +88,18 @@ export default function Drawer({ slot, index }: { slot: DrawerSlot; index: numbe
   const onClick = (e: ThreeEvent<MouseEvent>) => {
     if (!active()) return
     e.stopPropagation()
-    if (slot.locked) {
+    const s = useWorkspace.getState()
+    if (locked) {
+      if (s.hasKey) {
+        // 열쇠로 연다(이후로는 계속 열려 있다)
+        s.unlockDrawer(slot.id)
+        s.setOpenDrawer(index)
+        return
+      }
       rattleAt.current = clock.elapsedTime
+      s.showToast('잠겨 있어요. 어딘가에 열쇠가 있을지도…')
       return
     }
-    const s = useWorkspace.getState()
     s.setOpenDrawer(s.openDrawer === index ? null : index)
   }
 
@@ -111,15 +128,13 @@ export default function Drawer({ slot, index }: { slot: DrawerSlot; index: numbe
         <boxGeometry args={[FW - 0.06, 0.01, BD]} />
       </mesh>
 
-      {slot.contents === 'projects' && (
-        // 상자 안쪽: 뒷판 안쪽면 ~ 앞판 뒷면
-        <group position={[0, by + 0.005, (ZC - BD / 2 + WALL / 2 + (D / 2 - 0.025)) / 2]}>
-          <FileContents
-            drawerIndex={index}
-            width={FW - 0.06 - WALL * 2}
-            depth={D / 2 - 0.025 - (ZC - BD / 2 + WALL / 2)}
-            height={BH}
-          />
+      {slot.contents && (
+        <group position={[0, by + 0.005, INSIDE.z]}>
+          {slot.contents === 'projects' && (
+            <FileContents drawerIndex={index} width={INSIDE.width} depth={INSIDE.depth} height={INSIDE.height} />
+          )}
+          {slot.contents === 'swatches' && <FabricSwatches width={INSIDE.width} depth={INSIDE.depth} />}
+          {slot.contents === 'wip' && <WorkInProgress width={INSIDE.width} depth={INSIDE.depth} />}
         </group>
       )}
     </group>

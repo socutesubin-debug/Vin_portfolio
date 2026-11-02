@@ -74,10 +74,16 @@ export function buildCameraTimeline({ reduced, onScene }: Options) {
 }
 
 /** 상단 메뉴: 해당 장면 위치로 부드럽게 스크롤한다 */
-export function scrollToScene(id: SceneId) {
+export function scrollToScene(id: SceneId, instant = false) {
   const st = ScrollTrigger.getById(TRIGGER_ID)
   if (!st) return
   const t = anchorOf(SCENE_ORDER.indexOf(id)) / TIMELINE_LENGTH
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  window.scrollTo({ top: st.start + (st.end - st.start) * t, behavior: reduced ? 'auto' : 'smooth' })
+  window.scrollTo({ top: st.start + (st.end - st.start) * t, behavior: instant || reduced ? 'auto' : 'smooth' })
+}
+
+/** 주소 뒤 ?scene=home|about|work|contact 로 열면 그 장면에서 시작한다(장면별 확인·캡처용) */
+export function sceneFromUrl(): SceneId | null {
+  const q = new URLSearchParams(window.location.search).get('scene')
+  return SCENE_ORDER.find((id) => id === q) ?? null
 }

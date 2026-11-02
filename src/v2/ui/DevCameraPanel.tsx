@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { liveCamera } from '../scene/CameraRig'
 import { useWorkspace } from '../state/workspaceStore'
+import { CABINET_FINISHES, type CabinetFinish } from '../config/cabinet'
 
 const fmt = (v: number[]) => `[${v.map((n) => n.toFixed(2)).join(', ')}]`
 
@@ -11,6 +12,11 @@ const fmt = (v: number[]) => `[${v.map((n) => n.toFixed(2)).join(', ')}]`
 export default function DevCameraPanel() {
   const ref = useRef<HTMLPreElement>(null)
   const scene = useWorkspace((s) => s.activeScene)
+  const finish = useWorkspace((s) => s.cabinetFinish)
+  const setFinish = useWorkspace((s) => s.setCabinetFinish)
+  const hasKey = useWorkspace((s) => s.hasKey)
+  const unlocked = useWorkspace((s) => s.unlocked)
+  const resetEgg = useWorkspace((s) => s.resetEasterEgg)
 
   useEffect(() => {
     let raf = 0
@@ -30,9 +36,25 @@ export default function DevCameraPanel() {
   }, [])
 
   return (
-    <aside className="v2-dev" aria-hidden="true">
+    <aside className="v2-dev" aria-label="개발용 패널">
       <strong>camera · {scene}</strong>
       <pre ref={ref} />
+      {/* 서랍장 마감 비교(실버/차콜) */}
+      <div className="v2-dev__finish" role="group" aria-label="서랍장 마감">
+        <span>서랍장</span>
+        {(Object.keys(CABINET_FINISHES) as CabinetFinish[]).map((f) => (
+          <button key={f} type="button" aria-pressed={finish === f} onClick={() => setFinish(f)}>
+            {CABINET_FINISHES[f].label}
+          </button>
+        ))}
+      </div>
+      {/* 이스터에그 상태 확인·초기화(새로고침하면 열쇠가 다시 머그 밑에 놓인다) */}
+      <div className="v2-dev__finish">
+        <span>열쇠 {hasKey ? '있음' : '없음'} · 연 서랍 {unlocked.length}</span>
+        <button type="button" onClick={resetEgg}>
+          초기화
+        </button>
+      </div>
     </aside>
   )
 }
