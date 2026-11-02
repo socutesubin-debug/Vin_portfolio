@@ -17,6 +17,8 @@ import ProjectDetail from './ui/ProjectDetail'
 import FolderPreview from './ui/FolderPreview'
 import ProjectGrid from './ui/ProjectGrid'
 import KeyBadge from './ui/KeyBadge'
+import ContactControls from './ui/ContactControls'
+import MessageCard from './ui/MessageCard'
 import './ui/v2.css'
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -26,7 +28,7 @@ export default function V2App() {
   const setActiveScene = useWorkspace((s) => s.setActiveScene)
   const covered = useWorkspace(overlayOpen)
 
-  // 폴더·그리드·상세가 떠 있는 동안 배경 스크롤을 잠근다(WORK에서 벗어나지 않게)
+  // 폴더·그리드·상세·메시지 카드가 떠 있는 동안 배경 스크롤을 잠근다(카메라가 움직이지 않게)
   useEffect(() => {
     if (!covered) return
     const html = document.documentElement
@@ -50,6 +52,8 @@ export default function V2App() {
       <TopNav />
       <WorkControls />
       <KeyBadge />
+      <ContactControls />
+      <MessageCard />
       {/* 겹침 순서: 폴더 미리보기 < 전체 보기 < 상세 */}
       <FolderPreview />
       <ProjectGrid />

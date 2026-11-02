@@ -3,6 +3,26 @@ import type { SceneId } from '../config/scenes'
 import { DEFAULT_CABINET_FINISH, type CabinetFinish } from '../config/cabinet'
 import { loadEasterEgg, saveEasterEgg } from './easterEgg'
 
+/** 사운드 켜짐은 브라우저에 기억한다(기본 꺼짐) */
+const SOUND_KEY = 'vin-v2-sound'
+function loadSound() {
+  try {
+    return window.localStorage.getItem(SOUND_KEY) === 'on'
+  } catch {
+    return false
+  }
+}
+function saveSound(on: boolean) {
+  try {
+    window.localStorage.setItem(SOUND_KEY, on ? 'on' : 'off')
+  } catch {
+    // 저장이 막혀 있으면 이번 방문 동안만
+  }
+}
+
+/** 울림 시각 기준(초) */
+export const nowSec = () => performance.now() / 1000
+
 /** 서랍에서 뽑힌 카드. origin은 카드가 뽑혀 올라간 화면 위치(px) — 폴더가 여기서 날아오고 여기로 돌아간다 */
 export interface Pulled {
   id: string
@@ -29,6 +49,16 @@ interface WorkspaceState {
   unlocked: string[]
   /** 화면 위쪽에 잠깐 뜨는 안내 문구 */
   toast: { text: string; at: number } | null
+  /** CONTACT: 전화가 울리기 시작한 시각(nowSec). CONTACT에 들어올 때마다 새로 정한다 */
+  ringAt: number | null
+  /** CONTACT: 받거나 입력을 시작해서 울림을 멈췄는지 */
+  ringSilenced: boolean
+  /** CONTACT: 수화기를 들고 메시지 카드를 연 상태 */
+  callOpen: boolean
+  /** CONTACT: 마우스를 올린 위치("전화 받기" 안내용) */
+  phoneHover: { x: number; y: number } | null
+  /** 사운드 켜짐(벨소리 등) */
+  soundOn: boolean
   setActiveScene: (id: SceneId) => void
   setOpenDrawer: (i: number | null) => void
   pull: (p: Pulled) => void
@@ -43,6 +73,11 @@ interface WorkspaceState {
   /** 개발용: 열쇠·열린 서랍 초기화 */
   resetEasterEgg: () => void
   showToast: (text: string) => void
+  answerCall: () => void
+  hangUp: () => void
+  silenceRing: () => void
+  setPhoneHover: (p: { x: number; y: number } | null) => void
+  setSoundOn: (on: boolean) => void
 }
 
 /** 주소 뒤 ?cabinet=silver|charcoal 로 시작 마감을 고를 수 있다 */
@@ -61,9 +96,25 @@ export const useWorkspace = create<WorkspaceState>((set) => ({
   cabinetFinish: initialFinish(),
   ...loadEasterEgg(),
   toast: null,
-  // WORK를 벗어나면 열린 서랍은 닫는다
+  ringAt: null,
+  ringSilenced: false,
+  callOpen: false,
+  phoneHover: null,
+  soundOn: loadSound(),
+  // WORK를 벗어나면 열린 서랍은 닫고, CONTACT에 들어오면 전화가 울리기 시작한다(벗어나면 통화를 끊는다)
   setActiveScene: (activeScene) =>
-    set((s) => ({ activeScene, openDrawer: activeScene === 'work' ? s.openDrawer : null })),
+    set((s) => {
+      if (activeScene === s.activeScene) return {}
+      const toContact = activeScene === 'contact'
+      return {
+        activeScene,
+        openDrawer: activeScene === 'work' ? s.openDrawer : null,
+        ringAt: toContact ? nowSec() : null,
+        ringSilenced: false,
+        callOpen: toContact ? s.callOpen : false,
+        phoneHover: null,
+      }
+    }),
   setOpenDrawer: (openDrawer) => set({ openDrawer }),
   pull: (pulled) => set({ pulled, pullClosing: false }),
   requestUnpull: () => set((s) => (s.pulled ? { pullClosing: true } : {})),
@@ -88,10 +139,18 @@ export const useWorkspace = create<WorkspaceState>((set) => ({
     set({ hasKey: false, unlocked: [], openDrawer: null })
   },
   showToast: (text) => set({ toast: { text, at: Date.now() } }),
+  answerCall: () => set({ callOpen: true, ringSilenced: true, phoneHover: null }),
+  hangUp: () => set({ callOpen: false }),
+  silenceRing: () => set({ ringSilenced: true }),
+  setPhoneHover: (phoneHover) => set({ phoneHover }),
+  setSoundOn: (soundOn) => {
+    saveSound(soundOn)
+    set({ soundOn })
+  },
 }))
 
-/** 2D 화면(폴더·그리드·상세)이 하나라도 떠 있으면 3D 서랍 조작을 막는다 */
-export const overlayOpen = (s: WorkspaceState) => !!(s.pulled || s.gridOpen || s.openProject)
+/** 2D 화면(폴더·그리드·상세·메시지 카드)이 하나라도 떠 있으면 3D 서랍 조작을 막는다 */
+export const overlayOpen = (s: WorkspaceState) => !!(s.pulled || s.gridOpen || s.openProject || s.callOpen)
 
 // 개발 중 브라우저 검증용
 if (import.meta.env.DEV) Object.assign(window, { __v2: useWorkspace })

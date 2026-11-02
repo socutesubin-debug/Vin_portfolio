@@ -1,8 +1,9 @@
 import { SCENE_ORDER, SCENES } from '../config/scenes'
 import { scrollToScene } from '../animation/cameraTimeline'
 import { useWorkspace } from '../state/workspaceStore'
+import SoundToggle from './SoundToggle'
 
-/** 상단 중앙 메뉴. 현재 장면에 밑줄 */
+/** 상단 중앙 메뉴. 현재 장면에 밑줄, 오른쪽 끝에 사운드 켜기/끄기 */
 export default function TopNav() {
   const active = useWorkspace((s) => s.activeScene)
 
@@ -23,6 +24,7 @@ export default function TopNav() {
           </li>
         ))}
       </ul>
+      <SoundToggle />
     </nav>
   )
 }

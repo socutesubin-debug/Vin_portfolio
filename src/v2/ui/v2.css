@@ -792,3 +792,366 @@ body {
     animation: none;
   }
 }
+
+/* 포인트 색(코발트 계열). WORK 폴더·CONTACT 강조에 함께 쓴다 */
+:root {
+  --accent: #1e278f;
+  --accent-ink: #ffffff;
+}
+
+/* 사운드 켜기/끄기(메뉴 오른쪽 끝) */
+.v2-sound {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-left: -8px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.v2-sound[aria-pressed='true'] {
+  color: var(--accent);
+}
+
+.v2-sound:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* CONTACT: 전화기에 마우스를 올렸을 때 안내 */
+.v2-phone-tip {
+  position: fixed;
+  z-index: var(--z-panel);
+  transform: translate(14px, -34px);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(23, 25, 30, 0.88);
+  color: #fff;
+  font: 500 12px/1 var(--font-sans);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* CONTACT: 부재중 메시지 카드(전화 메모 용지) */
+.v2-call {
+  position: fixed;
+  inset: 0;
+  z-index: 13;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.v2-call.is-open {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.v2-call__backdrop {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(30, 26, 20, 0.28), rgba(30, 26, 20, 0.04) 60%);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-out);
+}
+
+.v2-call.is-open .v2-call__backdrop {
+  opacity: 1;
+}
+
+.v2-memo {
+  position: absolute;
+  left: clamp(16px, 5vw, 72px);
+  top: 50%;
+  width: min(420px, calc(100vw - 32px));
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding: 40px 26px 18px;
+  border-radius: 4px;
+  background: #faf7f0;
+  box-shadow:
+    0 28px 60px rgba(40, 30, 15, 0.28),
+    0 2px 6px rgba(40, 30, 15, 0.12);
+  color: #26221c;
+  transform: translate(-24px, -50%) rotate(-1.2deg);
+  opacity: 0;
+  transition:
+    transform 0.5s var(--ease-out),
+    opacity 0.35s var(--ease-out);
+}
+
+.v2-call.is-open .v2-memo {
+  transform: translate(0, -50%) rotate(-1.2deg);
+  opacity: 1;
+}
+
+/* 위쪽 절취선 */
+.v2-memo::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  right: 14px;
+  border-top: 2px dotted rgba(70, 60, 50, 0.25);
+}
+
+/* 실버 클립 */
+.v2-memo__clip {
+  position: absolute;
+  top: -14px;
+  right: 64px;
+  width: 22px;
+  height: 46px;
+  border: 3px solid #b9bdc4;
+  border-radius: 11px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+.v2-memo__head {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.v2-memo__kicker {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--accent);
+  font: 600 11px/1 var(--font-sans);
+  letter-spacing: 0.18em;
+}
+
+.v2-memo__head h2 {
+  margin: 0 0 6px;
+  font: 400 24px/1.25 var(--font-display);
+}
+
+.v2-memo__head p {
+  margin: 0;
+  color: #5c564d;
+  font: 400 14px/1.55 var(--font-sans);
+}
+
+.v2-memo__close {
+  position: absolute;
+  top: -14px;
+  right: -10px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #5c564d;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.v2-memo__form {
+  display: grid;
+  gap: 12px;
+}
+
+.v2-memo__field {
+  display: grid;
+  gap: 4px;
+  font: 500 12px/1.2 var(--font-sans);
+  letter-spacing: 0.06em;
+  color: #7a6f63;
+}
+
+.v2-memo__field input,
+.v2-memo__field textarea {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  padding: 8px 2px;
+  border: 0;
+  border-bottom: 1.5px solid rgba(70, 60, 50, 0.35);
+  border-radius: 0;
+  background: transparent;
+  color: #26221c;
+  font: 400 16px/1.5 var(--font-sans);
+  letter-spacing: 0;
+  resize: vertical;
+}
+
+.v2-memo__field textarea {
+  min-height: 96px;
+}
+
+.v2-memo__field input:focus,
+.v2-memo__field textarea:focus {
+  outline: none;
+  border-bottom-color: var(--accent);
+  box-shadow: 0 1px 0 0 var(--accent);
+}
+
+.v2-memo__field [aria-invalid='true'] {
+  border-bottom-color: #b3402a;
+}
+
+.v2-memo__field small {
+  color: #8a8175;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.v2-memo__field em,
+.v2-memo__error {
+  color: #b3402a;
+  font: 500 13px/1.4 var(--font-sans);
+  font-style: normal;
+  letter-spacing: 0;
+}
+
+.v2-memo__error,
+.v2-memo__note {
+  margin: 0;
+}
+
+.v2-memo__note {
+  color: #5c564d;
+  font: 400 13px/1.5 var(--font-sans);
+}
+
+.v2-memo__trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.v2-memo__send {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  min-width: 120px;
+  padding: 11px 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: 600 14px/1 var(--font-sans);
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.v2-memo__send:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.v2-memo__send[aria-busy='true'] {
+  opacity: 0.85;
+  cursor: progress;
+}
+
+.v2-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: v2-spin 0.8s linear infinite;
+}
+
+@keyframes v2-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.v2-memo__done {
+  margin: 8px 0 4px;
+  padding: 14px 16px;
+  border-radius: 4px;
+  background: rgba(30, 39, 143, 0.07);
+  color: #26221c;
+  font: 500 15px/1.5 var(--font-sans);
+}
+
+.v2-memo__done span {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.v2-memo__alt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(70, 60, 50, 0.25);
+  font: 500 13px/1.3 var(--font-sans);
+}
+
+.v2-memo__alt button {
+  padding: 6px 10px;
+  border: 1px solid rgba(70, 60, 50, 0.25);
+  border-radius: 999px;
+  background: #fff;
+  color: #26221c;
+  font: inherit;
+  cursor: pointer;
+}
+
+.v2-memo__alt a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+.v2-memo__close:focus-visible,
+.v2-memo__send:focus-visible,
+.v2-memo__alt button:focus-visible,
+.v2-memo__alt a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* 모바일: 아래에서 올라오는 시트 */
+@media (max-width: 640px), (max-aspect-ratio: 17/20) {
+  .v2-call__backdrop {
+    background: linear-gradient(0deg, rgba(30, 26, 20, 0.3), rgba(30, 26, 20, 0.05) 70%);
+  }
+  .v2-memo {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    max-height: 72vh;
+    padding: 28px 18px calc(16px + env(safe-area-inset-bottom));
+    border-radius: 14px 14px 0 0;
+    transform: translateY(100%);
+  }
+  .v2-call.is-open .v2-memo {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-memo,
+  .v2-call.is-open .v2-memo {
+    transition: opacity 0.2s linear;
+  }
+  .v2-memo {
+    transform: translate(0, -50%) rotate(-1.2deg);
+  }
+  .v2-spinner {
+    animation-duration: 2s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and ((max-width: 640px) or (max-aspect-ratio: 17/20)) {
+  .v2-memo,
+  .v2-call.is-open .v2-memo {
+    transform: none;
+  }
+}

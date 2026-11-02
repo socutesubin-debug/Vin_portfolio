@@ -5,3 +5,7 @@ dist
 # 배포물과 무관한 원본/보관 파일
 /*.glb
 /archive/
+# 비밀 키(EmailJS 등). 형식 예시인 .env.example만 올린다
+.env
+.env.*
+!.env.example
