@@ -1,5 +1,7 @@
-import { Canvas } from '@react-three/fiber'
-import { ACESFilmicToneMapping } from 'three'
+import { useEffect } from 'react'
+import { Canvas, useThree } from '@react-three/fiber'
+import { ACESFilmicToneMapping, PMREMGenerator } from 'three'
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { CAMERA, SCENES } from '../config/scenes'
 import { PLACEMENT, ROOM } from '../config/layout'
 import CameraRig from './CameraRig'
@@ -16,6 +18,24 @@ import DrawerCabinet from './objects/DrawerCabinet'
 
 const [winX, winY] = ROOM.window.center
 
+/** 크롬이 크롬답게 보이도록 주변 반사(RoomEnvironment). 다른 물체 밝기는 크게 안 바뀌게 약하게 쓴다 */
+function Reflections() {
+  const gl = useThree((s) => s.gl)
+  const scene = useThree((s) => s.scene)
+  useEffect(() => {
+    const pmrem = new PMREMGenerator(gl)
+    const target = pmrem.fromScene(new RoomEnvironment(), 0.04)
+    scene.environment = target.texture
+    scene.environmentIntensity = 0.35
+    return () => {
+      scene.environment = null
+      target.dispose()
+      pmrem.dispose()
+    }
+  }, [gl, scene])
+  return null
+}
+
 /** 작업실 장면. 오브젝트는 각 컴포넌트를 GLB 버전으로 바꾸면 그대로 교체된다 */
 export default function WorkspaceCanvas() {
   return (
@@ -27,6 +47,7 @@ export default function WorkspaceCanvas() {
     >
       <color attach="background" args={[ROOM.colors.wall]} />
       <CameraRig />
+      <Reflections />
 
       <hemisphereLight args={['#fffaf0', '#b8b0a4', 1.3]} />
       {/* 창문 쪽에서 들어오는 빛 */}

@@ -1,10 +1,15 @@
+import { useEffect } from 'react'
 import { useGSAP } from '../animations/gsap'
 import { SCENE_ORDER, SCENES, SCROLL, SHOW_CAMERA_PANEL } from './config/scenes'
 import { buildCameraTimeline, SCROLL_TRACK_ID, TIMELINE_LENGTH } from './animation/cameraTimeline'
-import { useWorkspace } from './state/workspaceStore'
+import { overlayOpen, useWorkspace } from './state/workspaceStore'
 import WorkspaceCanvas from './scene/WorkspaceCanvas'
 import TopNav from './ui/TopNav'
 import DevCameraPanel from './ui/DevCameraPanel'
+import WorkControls from './ui/WorkControls'
+import ProjectDetail from './ui/ProjectDetail'
+import FolderPreview from './ui/FolderPreview'
+import ProjectGrid from './ui/ProjectGrid'
 import './ui/v2.css'
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -12,6 +17,17 @@ const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)'
 /** V2: 잠시 자리를 비운 디자이너의 작업실 */
 export default function V2App() {
   const setActiveScene = useWorkspace((s) => s.setActiveScene)
+  const covered = useWorkspace(overlayOpen)
+
+  // 폴더·그리드·상세가 떠 있는 동안 배경 스크롤을 잠근다(WORK에서 벗어나지 않게)
+  useEffect(() => {
+    if (!covered) return
+    const html = document.documentElement
+    html.style.overflow = 'hidden'
+    return () => {
+      html.style.overflow = ''
+    }
+  }, [covered])
 
   useGSAP(() => {
     buildCameraTimeline({ reduced: reducedMotion(), onScene: setActiveScene })
@@ -23,6 +39,11 @@ export default function V2App() {
         <WorkspaceCanvas />
       </div>
       <TopNav />
+      <WorkControls />
+      {/* 겹침 순서: 폴더 미리보기 < 전체 보기 < 상세 */}
+      <FolderPreview />
+      <ProjectGrid />
+      <ProjectDetail />
       {SHOW_CAMERA_PANEL && <DevCameraPanel />}
 
       {/* 스크롤 길이를 만드는 영역. 장면 이름은 스크린리더용 */}

@@ -19,19 +19,13 @@ export const DESK = {
   legColor: '#2a2a2e',
 }
 
-export const CABINET = {
-  width: 0.42,
-  height: 0.58,
-  depth: 0.5,
-  caster: 0.03,
-  drawers: 3,
-  color: '#1e278f',
-}
+// 서랍장 치수·서랍 설정은 cabinet.ts
 
 /** 각 오브젝트의 위치(그룹 원점). 책상 위 물건은 y = DESK.height */
 export const PLACEMENT: Record<string, Vec3> = {
   desk: [0, 0, -0.45],
-  cabinet: [0.5, 0, -0.4],
+  // 책상 앞 모서리 가까이 둬서, 열린 서랍 안이 책상 상판에 가리지 않게 한다
+  cabinet: [0.48, 0, -0.26],
   // 자리를 비운 느낌으로 왼쪽으로 빼 둔다(ABOUT 정면 시점을 가리지 않게)
   chair: [-0.62, 0, 0.42],
   monitor: [-0.1, DESK.height, -0.62],
