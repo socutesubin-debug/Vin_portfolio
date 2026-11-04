@@ -308,3 +308,69 @@ body[data-scene='projects'] .v5-nav::before {
 .v5-work .v5-fallback { padding-top: calc(var(--v5-nav-h) + 190px); }
 .v5-fallback-art svg { width: auto; max-width: 100%; height: 100%; max-height: 52vh; }
 @media (max-width: 720px) { .v5-work .v5-fallback { padding-top: calc(var(--v5-nav-h) + 150px); gap: 20px; } .v5-fallback-art { height: 26vh; } }
+
+/* ---------- Contact (레퍼런스 6 → 8) ---------- */
+.v5-contact { background: #d9d3c8; color: var(--v5-ink); }
+body[data-scene='contact'] .v5-nav { color: var(--v5-ink); }
+body[data-scene='contact'] .v5-nav a, body[data-scene='contact'] .v5-nav .v5-logo { text-shadow: none; }
+body[data-scene='contact'] .v5-copy { color: var(--v5-ink-2); }
+.v5-contact-canvas { position: absolute; inset: 0; }
+.v5-contact-head {
+  position: absolute; left: var(--v5-gutter); top: calc(var(--v5-nav-h) + 4px); z-index: 3;
+  display: grid; gap: 8px; justify-items: start; max-width: 320px;
+}
+.v5-contact-head h1 { margin: 0 0 4px; font-size: 26px; font-weight: 300; letter-spacing: -0.01em; }
+.v5-anchor-answer {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 50px; padding: 0 24px;
+  border: 0; border-radius: 26px; background: var(--v5-ink); color: #fff; font-size: 16px; font-weight: 600;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25); translate: 24px -50%;
+}
+.v5-anchor-answer:hover { background: #000; }
+.v5-ring-dot { width: 10px; height: 10px; border-radius: 50%; background: #e2432f; box-shadow: 0 0 0 0 rgba(226, 67, 47, 0.6); animation: v5-ring 1.2s ease-out infinite; }
+@keyframes v5-ring { 0% { box-shadow: 0 0 0 0 rgba(226, 67, 47, 0.6); } 100% { box-shadow: 0 0 0 12px rgba(226, 67, 47, 0); } }
+.v5-contact .v5-fallback { color: var(--v5-ink); padding-top: calc(var(--v5-nav-h) + 120px); }
+
+.v5-contact-form {
+  position: absolute; z-index: 5; right: max(var(--v5-gutter), 8vw); top: 50%; transform: translateY(-50%);
+  width: min(540px, 44vw); max-height: calc(100% - var(--v5-nav-h) - 110px); overflow: auto;
+  background: #fafafa; border-radius: 18px; box-shadow: 0 30px 70px rgba(40, 30, 20, 0.28);
+}
+.v5-msg-head { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid #e6e6e6; }
+.v5-msg-head h2 { margin: 0; font-size: 24px; font-weight: 400; }
+.v5-msg-head h2:focus { outline: none; }
+.v5-msg-head h2:focus-visible { outline: 3px solid var(--v5-focus); }
+.v5-icon-btn { width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; font-size: 20px; cursor: pointer; }
+.v5-icon-btn:hover { background: #ececec; }
+.v5-msg-lead { margin: 16px 22px 0; font-size: 14px; color: var(--v5-ink-2); }
+.v5-msg-form { display: grid; padding: 4px 22px 20px; }
+.v5-msg-to, .v5-field { display: grid; gap: 6px; padding: 14px 0; border-bottom: 1px solid #e6e6e6; }
+.v5-msg-to { grid-template-columns: auto 1fr; gap: 16px; align-items: baseline; }
+.v5-msg-label { font-size: 15px; color: var(--v5-ink); }
+.v5-opt, .v5-req { margin-left: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: var(--v5-ink-2); }
+.v5-req { color: var(--v5-accent); }
+.v5-field input, .v5-field textarea {
+  width: 100%; padding: 8px 0; border: 0; border-bottom: 1px solid transparent; background: transparent; font-size: 16px; resize: vertical;
+}
+.v5-field input:focus, .v5-field textarea:focus { outline: none; border-bottom-color: var(--v5-ink); }
+.v5-field textarea::placeholder { color: #9a9a9a; }
+.v5-field [aria-invalid='true'] { border-bottom-color: var(--v5-accent); }
+.v5-err { font-size: 13px; color: #b0321f; }
+.v5-field-grow { border-bottom: 0; }
+.v5-msg-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 8px; }
+.v5-msg-status { margin: 0; font-size: 13px; line-height: 1.5; color: var(--v5-ink-2); }
+.v5-msg-status[data-state='not-configured'], .v5-msg-status[data-state='failed'] { color: #8a3a12; }
+.v5-msg-status[data-state='sent'] { color: #1f6b3a; }
+.v5-msg-foot .v5-btn { flex: none; min-width: 110px; justify-content: center; }
+
+@media (max-width: 720px) {
+  .v5-contact-head { right: var(--v5-gutter); max-width: none; }
+  .v5-contact-head h1 { font-size: 22px; }
+  .v5-anchor-answer { translate: -50% 120px; }
+  /* 수화기 아래에 양식 */
+  .v5-contact[data-form='true'] .v5-contact-head { display: none; }
+  .v5-contact-form {
+    left: 12px; right: 12px; top: auto; bottom: 72px; transform: none; width: auto;
+    max-height: 58dvh; border-radius: 16px;
+  }
+  .v5-msg-foot { flex-direction: column; align-items: stretch; }
+}
