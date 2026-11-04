@@ -369,3 +369,17 @@ body[data-scene='contact'] .v5-copy { color: var(--v5-ink-2); }
   }
   .v5-msg-foot { flex-direction: column; align-items: stretch; }
 }
+
+/* ---------- Home 3D 겹침 ---------- */
+.v5-home-canvas { position: absolute; inset: 0; }
+.v5-home-stage[data-mode='layout'] .v5-home-bg { visibility: hidden; }
+.v5-home .v5-loading { color: var(--v5-ink); top: auto; bottom: 120px; }
+.v5-home .v5-loading-bar { background: rgba(0, 0, 0, 0.12); }
+.v5-home .v5-loading-bar span { background: var(--v5-ink); }
+/* 사물 위 라벨(시그니파이어) */
+.v5-anchor-label {
+  min-height: 40px; padding: 0 16px; border: 0; border-radius: 20px;
+  background: rgba(28, 29, 31, 0.88); color: #fff; font-size: 14px; font-weight: 600;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); translate: -50% -100%;
+}
+.v5-anchor-label:hover { background: #000; }

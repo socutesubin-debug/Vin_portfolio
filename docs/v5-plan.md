@@ -96,4 +96,6 @@ npm run dev            # http://localhost:5173
 
 | 날짜 | 내용 |
 | --- | --- |
+| 2026-11-05 | Home 2단계: 그림자만 받는 책상 윗면(ShadowMaterial) + iMac(imac.obj, 임시 재질·화면 판) + 사진에 맞춘 카메라(화각 38°, 책상 깊이 0.95m → 높이 0.24m·벽에서 1.69m)·왼쪽 창 햇빛. iMac → 앞으로 0.8s → 이력서. 3D 배치 보기(table.obj). 확인용 ?dev=models |
+| 2026-11-05 | Home 1단계: V6 배경(output/visuals/v5-home-desk-background-v6 → public/images/home/ PNG·WebP), coverRect 배치 |
 | 2026-11-05 | 1단계 뼈대(라우터·메뉴·페이드·패널·Home 자리표시·서랍 확인), 2단계 Work·Projects, 3단계 Contact, 4단계 검증·기록 |

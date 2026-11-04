@@ -13,6 +13,8 @@ const dev = new URLSearchParams(location.search).get('dev')
 
 if (import.meta.env.DEV && dev === 'drawers') {
   import('./v5/dev/drawerCheck').then((m) => m.mountDrawerCheck(root))
+} else if (import.meta.env.DEV && dev === 'models') {
+  import('./v5/dev/modelCheck').then((m) => m.mountModelCheck(root))
 } else {
   createRoot(root).render(
     <StrictMode>
