@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { gsap } from 'gsap'
 import { prefersReducedMotion } from '../prefs'
@@ -19,7 +19,7 @@ interface PanelProps {
  */
 export function Panel({ title, eyebrow, onClose, children, placement = 'side' }: PanelProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const titleId = useRef(`panel-${Math.random().toString(36).slice(2, 8)}`).current
+  const titleId = useId()
 
   useLayoutEffect(() => {
     const el = ref.current!
