@@ -2,19 +2,21 @@ import {
   ACESFilmicToneMapping, Box3, BoxGeometry, BufferGeometry, CanvasTexture, Color, DirectionalLight, DoubleSide, GridHelper,
   Group, HemisphereLight, Mesh, MeshBasicMaterial, MeshDepthMaterial, MeshStandardMaterial, Object3D, PCFShadowMap,
   PerspectiveCamera, PlaneGeometry, PMREMGenerator, Raycaster, RGBADepthPacking, Scene, ShadowMaterial, SpotLight, SRGBColorSpace,
-  TextureLoader, Vector2, Vector3, WebGLRenderer, SphereGeometry, type Material,
+  TextureLoader, Vector2, Vector3, WebGLRenderer, SphereGeometry, ShaderMaterial, Matrix4, MathUtils, type Material, type Texture,
 } from 'three'
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { gsap } from 'gsap'
-import { coverRect, HOME_LIGHT, IMAC_FOCUS, MUG, photoCamera, PROPS, TABLE, type Placement, type PropId } from './config'
+import { coverRect, HOME_BG, HOME_LIGHT, HOME_POINTER, IMAC_FOCUS, MUG, photoCamera, PROPS, TABLE, type Placement, type PropId } from './config'
 
 /**
  * Home 3D 장면 — 사진(V6 배경, HTML img) 위에 투명 캔버스로 겹친다.
  *
- * 'composite'(기본): 책상 모델은 보이지 않고 책상 윗면만 ShadowMaterial 평면으로 남아 소품 그림자를 사진 위에 떨어뜨린다.
- *   카메라는 photoCamera()로 사진에 맞추고, 화면 자르기는 HTML 배경과 같은 coverRect를 setViewOffset으로 적용한다.
+ * 'composite'(기본): 사진을 '사진을 찍은 카메라'(photoCam, 고정)에서 벽 면(z = 0)·책상 면(y = 0)에 투사한다(셰이더).
+ *   화면을 그리는 카메라는 같은 자리에서 시작해 포인터를 따라 조금 움직이므로(V4 HOME과 같은 값)
+ *   책상·사물·블라인드 벽 사이에 실제 시차가 생긴다. 구도(확대·자르기)는 HTML 배경과 같은 coverRect를 setViewOffset으로.
+ *   책상 윗면에는 ShadowMaterial 평면을 겹쳐 소품 그림자를 떨어뜨린다.
  * 'layout'(?view=layout): 배경을 빼고 table.obj를 보이게 한 뒤 비스듬히 내려다본다.
  *
  * 좌표: 책상 윗면 y = 0, 뒤 모서리(벽 쪽) z = 0, 앞으로 +z, 가운데 x = 0. 단위 m.
@@ -69,6 +71,14 @@ export class HomeScene {
   private mode: HomeMode = 'composite'
   private focused = false
   private hovered: PropId | null = null
+  private photoCam: PerspectiveCamera
+  private photoPlanes = new Group()
+  /** 포인터 카메라: 기준 위치·주시점, 감쇠된 포인터 값 */
+  private base = { pos: new Vector3(), look: new Vector3() }
+  private offset = { x: 0, y: 0 }
+  private pointer = { x: 0, y: 0, inside: false }
+  private canHover = window.matchMedia('(hover: hover) and (pointer: fine)')
+  private last = performance.now()
   private loader = new OBJLoader()
   private container: HTMLElement
   private opts: Options
@@ -88,6 +98,12 @@ export class HomeScene {
     container.appendChild(r.domElement)
 
     this.camera = new PerspectiveCamera(this.photo.fov, this.photo.aspect, 0.02, 30)
+    this.photoCam = new PerspectiveCamera(this.photo.fov, this.photo.aspect, 0.02, 30)
+    this.photoCam.position.set(0, this.photo.height, this.photo.z)
+    this.photoCam.lookAt(0, this.photo.height, 0)
+    this.photoCam.updateMatrixWorld()
+    this.base.pos.copy(this.photoCam.position)
+    this.base.look.set(0, this.photo.height, 0)
     // 금속(iMac·스탠드)이 비칠 밝은 실내 환경
     const pm = new PMREMGenerator(r)
     this.scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture
@@ -109,7 +125,7 @@ export class HomeScene {
     // 책상 윗면: 그림자만 받는 투명 평면
     this.shadowPlane = new Mesh(new PlaneGeometry(4, 2), new ShadowMaterial({ color: new Color('#3d3f44'), opacity: HOME_LIGHT.shadowOpacity }))
     this.shadowPlane.rotation.x = -Math.PI / 2
-    this.shadowPlane.position.set(0, 0, 0.5)
+    this.shadowPlane.position.set(0, 0.0015, 0.5)
     this.shadowPlane.receiveShadow = true
     this.scene.add(this.shadowPlane)
     this.buildLayoutExtras()
@@ -120,7 +136,11 @@ export class HomeScene {
     r.domElement.addEventListener('pointermove', this.onMove)
     r.domElement.addEventListener('pointerleave', this.onLeave)
     r.domElement.addEventListener('click', this.onClick)
+    window.addEventListener('pointermove', this.onWindowPointer, { passive: true })
+    document.documentElement.addEventListener('mouseleave', this.onWindowLeave)
+    window.addEventListener('blur', this.onWindowLeave)
     r.setAnimationLoop(this.frame)
+    const photo = this.buildPhotoPlanes()
 
     // 소품은 따로따로 불러와 준비되는 대로 놓는다(하나가 실패해도 나머지는 보인다). iMac이 핵심이라 실패하면 장면 실패
     const progress = new Map<string, number>()
@@ -135,7 +155,7 @@ export class HomeScene {
       this.buildPen(report('pen')),
       this.buildPhone(report('phone')),
     ]).then((rs) => rs.forEach((x) => x.status === 'rejected' && console.warn('[Home] 소품을 불러오지 못했습니다', x.reason)))
-    this.ready = this.buildImac(report('imac')).then(() => void others)
+    this.ready = Promise.all([photo, this.buildImac(report('imac'))]).then(() => void others)
   }
 
   // ---------- 공통 ----------
@@ -206,6 +226,44 @@ export class HomeScene {
     g.visible = !p.hidden
   }
 
+  // ---------- 사진 투사 ----------
+  /** 사진을 벽 면(z = 0, 세로)·책상 면(y = 0)에 투사한다. 각 픽셀을 photoCam으로 다시 찍은 위치에서 사진 색을 읽는다 */
+  private async buildPhotoPlanes() {
+    const load = (u: string) => new TextureLoader().loadAsync(u)
+    const tex: Texture = await load(HOME_BG.webp).catch(() => load(HOME_BG.png))
+    tex.colorSpace = SRGBColorSpace
+    tex.anisotropy = 8
+    const vp = new Matrix4().multiplyMatrices(this.photoCam.projectionMatrix, this.photoCam.matrixWorldInverse)
+    const mat = new ShaderMaterial({
+      uniforms: { map: { value: tex }, photoVP: { value: vp } },
+      vertexShader: /* glsl */ `
+        varying vec3 vWorld;
+        void main() {
+          vec4 w = modelMatrix * vec4(position, 1.0);
+          vWorld = w.xyz;
+          gl_Position = projectionMatrix * viewMatrix * w;
+        }`,
+      fragmentShader: /* glsl */ `
+        uniform sampler2D map;
+        uniform mat4 photoVP;
+        varying vec3 vWorld;
+        void main() {
+          vec4 c = photoVP * vec4(vWorld, 1.0);
+          vec2 uv = clamp(c.xy / c.w * 0.5 + 0.5, 0.0005, 0.9995);
+          gl_FragColor = texture2D(map, uv);
+          #include <colorspace_fragment>
+        }`,
+    })
+    const wall = new Mesh(new PlaneGeometry(8, 5), mat)
+    wall.position.set(0, 2.5, 0)
+    const desk = new Mesh(new PlaneGeometry(8, 4), mat)
+    desk.rotation.x = -Math.PI / 2
+    desk.position.set(0, 0, 2)
+    this.photoPlanes.add(wall, desk)
+    this.scene.add(this.photoPlanes)
+    this.photoPlanes.visible = this.mode === 'composite'
+  }
+
   // ---------- 소품 ----------
   private async buildImac(onProgress: (v: number) => void) {
     const obj = await this.loadObj(PROPS.imac.url!, onProgress)
@@ -270,7 +328,7 @@ export class HomeScene {
     bulbMesh.position.copy(bulb)
     const pool = new Mesh(new PlaneGeometry(1.3, 1.0), new MeshBasicMaterial({ map: glowTexture(), transparent: true, opacity: 0, depthWrite: false, toneMapped: false }))
     pool.rotation.x = -Math.PI / 2
-    pool.position.set(bulb.x + 0.3, 0.0012, 0.2)
+    pool.position.set(bulb.x + 0.3, 0.003, 0.2)
     pool.raycast = bulbMesh.raycast = () => {}
     inner.add(bulbMesh, pool)
     this.lampGlow = [bulbMesh, pool]
@@ -372,6 +430,7 @@ export class HomeScene {
     const layout = mode === 'layout'
     this.layoutExtras.visible = layout
     this.shadowPlane.visible = !layout
+    this.photoPlanes.visible = !layout
     if (layout) void this.loadTable().then(() => this.table && (this.table.visible = true))
     else if (this.table) this.table.visible = false
     this.renderer.setClearColor(layout ? 0xdedfe0 : 0x000000, layout ? 1 : 0)
@@ -477,8 +536,7 @@ export class HomeScene {
     } else {
       c.fov = this.photo.fov
       c.aspect = this.photo.aspect
-      c.position.set(0, this.photo.height, this.photo.z)
-      c.lookAt(0, this.photo.height, 0)
+      this.aimCamera()
       const r = coverRect(w, h)
       c.setViewOffset(r.width, r.height, -r.x, -r.y, w, h)
     }
@@ -487,7 +545,26 @@ export class HomeScene {
   }
 
   private tmp = new Vector3()
+  /** 기준 구도 + 포인터 이동(카메라는 많이, 주시점은 조금) */
+  private aimCamera() {
+    const P = HOME_POINTER
+    const o = this.offset
+    this.camera.position.set(this.base.pos.x + o.x * P.position.x, this.base.pos.y + o.y * P.position.y, this.base.pos.z)
+    this.camera.lookAt(this.base.look.x + o.x * P.target.x, this.base.look.y + o.y * P.target.y, this.base.look.z)
+  }
+
   private frame = () => {
+    const now = performance.now()
+    const dt = Math.min(0.1, (now - this.last) / 1000)
+    this.last = now
+    if (this.mode === 'composite') {
+      const on = this.pointer.inside && this.canHover.matches && !this.opts.reducedMotion
+      const lambda = on ? HOME_POINTER.damping : HOME_POINTER.returnDamping
+      const o = this.offset
+      o.x = MathUtils.damp(o.x, on ? this.pointer.x : 0, lambda, dt)
+      o.y = MathUtils.damp(o.y, on ? this.pointer.y : 0, lambda, dt)
+      this.aimCamera()
+    }
     this.renderer.render(this.scene, this.camera)
     const w = this.container.clientWidth
     const h = this.container.clientHeight
@@ -503,6 +580,16 @@ export class HomeScene {
   }
 
   // ---------- 입력 ----------
+  private onWindowPointer = (e: PointerEvent) => {
+    if (e.pointerType === 'touch') return
+    this.pointer.x = (e.clientX / window.innerWidth) * 2 - 1
+    this.pointer.y = -((e.clientY / window.innerHeight) * 2 - 1)
+    this.pointer.inside = true
+  }
+  private onWindowLeave = () => {
+    this.pointer.inside = false
+  }
+
   private hit(e: MouseEvent): PropId | null {
     const rect = this.renderer.domElement.getBoundingClientRect()
     this.ndc.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1)
@@ -536,6 +623,9 @@ export class HomeScene {
     this.renderer.domElement.removeEventListener('pointermove', this.onMove)
     this.renderer.domElement.removeEventListener('pointerleave', this.onLeave)
     this.renderer.domElement.removeEventListener('click', this.onClick)
+    window.removeEventListener('pointermove', this.onWindowPointer)
+    document.documentElement.removeEventListener('mouseleave', this.onWindowLeave)
+    window.removeEventListener('blur', this.onWindowLeave)
     this.scene.traverse((o) => {
       if (o instanceof Mesh) {
         o.geometry.dispose()
@@ -568,7 +658,7 @@ function contactShadow(w: number, d: number) {
   const m = new Mesh(new PlaneGeometry(1, 1), new MeshBasicMaterial({ map: new CanvasTexture(c), transparent: true, opacity: HOME_LIGHT.contactOpacity, depthWrite: false }))
   m.rotation.x = -Math.PI / 2
   m.scale.set(w, d, 1)
-  m.position.y = 0.0008
+  m.position.y = 0.0025
   m.raycast = () => {}
   return m
 }

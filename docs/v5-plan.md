@@ -96,6 +96,7 @@ npm run dev            # http://localhost:5173
 
 | 날짜 | 내용 |
 | --- | --- |
+| 2026-11-05 | Home 포인터 카메라·구도(V4처럼): 사진을 벽·책상 면에 투사(셰이더)해 실제 시차, 포인터 범위·감쇠는 V4 값(카메라 ±0.10/0.04m, 주시점 ±0.02/0.01m, 2.6/1.6), 마우스만·움직임 줄이기 고정. 구도는 사진 아래쪽 66% 확대(책상이 화면 아래쪽). 끝까지 옮기면 앞 사물 약 26px · 뒤 사물 약 20px · 블라인드 약 14px |
 | 2026-11-05 | Home 1번 시안: 블라인드 배경(output/visuals/v5-home-desk-background-v6.png), 글자 요소 제거(메뉴·소리·©만, 사물 라벨은 마우스 올림·포커스 때만), 소품 6개 — iMac Pro(→이력서), 서류더미(종이 도형 →자기소개서), 전화기(→Contact), 스탠드(켜기/끄기·빛 번짐), 머그(사진 컷아웃·흔들림), 만년필(구르기). PEN1·스탠드·전화기는 meshoptimizer로 줄인 web/ 사본. 3D 배치는 ?view=layout |
 | 2026-11-05 | Home 2단계: 그림자만 받는 책상 윗면(ShadowMaterial) + iMac(imac.obj, 임시 재질·화면 판) + 사진에 맞춘 카메라(화각 38°, 책상 깊이 0.95m → 높이 0.24m·벽에서 1.69m)·왼쪽 창 햇빛. iMac → 앞으로 0.8s → 이력서. 3D 배치 보기(table.obj). 확인용 ?dev=models |
 | 2026-11-05 | Home 1단계: V6 배경(output/visuals/v5-home-desk-background-v6 → public/images/home/ PNG·WebP), coverRect 배치 |
