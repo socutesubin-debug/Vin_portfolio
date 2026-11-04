@@ -12,8 +12,10 @@ const SIDE_FRONT_Z = 4
  * 바닥(밝은 우드), 뒷벽, 왼쪽 측면 벽과 큰 창(흰 창틀·창턱·창밖 벽돌과 나무), 흰 걸레받이.
  * 측면 벽과 창틀은 그림자를 만들어, 햇살이 창 모양으로만 방 안에 들어온다.
  */
-export default function Room(props: ThreeElements['group']) {
-  const { wallZ, sideX, wallThickness: T, height: RH, floorSize, window: win, colors } = ROOM
+export default function Room({ floorColor, ...props }: ThreeElements['group'] & { floorColor?: string }) {
+  const { wallZ, sideX, wallThickness: T, height: RH, floorSize, window: win } = ROOM
+  // floorColor를 넘기면 마루 색을 바꾼다(V4는 따뜻한 갈색 원목)
+  const colors = { ...ROOM.colors, floor: floorColor ?? ROOM.colors.floor }
   const [wz, wy] = win.center
   const [ww, wh] = win.size
   const z0 = wz - ww / 2

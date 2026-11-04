@@ -4,13 +4,11 @@ import '@fontsource/inter/400.css'
 import '@fontsource/inter/500.css'
 import '@fontsource/bodoni-moda/400.css'
 import './styles/tokens.css'
-import V3App from './v3/V3App'
+import V4App from './v4/V4App'
 
-// V1(서랍장 사이트)은 src/app/App.tsx(main 브랜치), V2 작업실은 src/v2/. V3는 INTRO 영상 + V2 작업실 재사용(src/v3/)
-if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
-
+// V1(서랍장 사이트)은 main 브랜치, V2 작업실은 src/v2/, V3 INTRO는 src/v3/. V4는 HOME을 3D 인터랙티브 작업실로(src/v4/)
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <V3App />
+    <V4App />
   </StrictMode>,
 )

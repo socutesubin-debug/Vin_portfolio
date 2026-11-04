@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useThree } from '@react-three/fiber'
 import { Environment, Lightformer } from '@react-three/drei'
 import type { DirectionalLight } from 'three'
-import { ACTIVE_LIGHTING, LIGHTING } from '../config/lighting'
+import { ACTIVE_LIGHTING, LIGHTING, type LightingPreset } from '../config/lighting'
 
 /** 휴대폰·태블릿은 그림자 맵을 줄여 부드럽게 돌린다 */
 const isSmallDevice = () => window.matchMedia('(max-width: 768px), (pointer: coarse)').matches
@@ -11,9 +11,10 @@ const isSmallDevice = () => window.matchMedia('(max-width: 768px), (pointer: coa
  * 조명: config/lighting.ts의 프리셋을 그대로 배치한다.
  * - 창밖 햇살(그림자를 만드는 유일한 빛) + 하늘 환경광 + 그림자 없는 보조광
  * - 금속 반사용 환경맵: 창 모양 밝은 면과 천장 반사를 한 번만 렌더한다
+ * preset을 넘기면 그 값을 쓴다(V4 HOME은 자체 프리셋).
  */
-export default function Lighting() {
-  const p = LIGHTING[ACTIVE_LIGHTING]
+export default function Lighting({ preset }: { preset?: LightingPreset }) {
+  const p = preset ?? LIGHTING[ACTIVE_LIGHTING]
   const sun = useRef<DirectionalLight>(null)
   const gl = useThree((s) => s.gl)
   const scene = useThree((s) => s.scene)
