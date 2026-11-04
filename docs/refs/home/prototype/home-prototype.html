@@ -1,0 +1,181 @@
+<title>VIN 홈 책상</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&family=Yellowtail&family=Noto+Sans+KR:wght@400;500&display=swap">
+<style>
+/* layout: 수빈 님이 올린 모델(테이블·iMac·스탠드·전화기)로 만든 코발트 듀오톤 책상. 3D는 이 한 장면, 글자는 HTML */
+:root{
+  --cobalt:#1f4bd0;
+  --paper:#e9e4d8;
+  --display:"Jost","Noto Sans KR",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0;background:var(--cobalt);color:var(--paper);overflow:hidden;font-family:"Noto Sans KR",system-ui,sans-serif}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+header{position:fixed;top:0;left:0;right:0;z-index:3;display:flex;justify-content:space-between;align-items:center;pointer-events:none;
+ padding:calc(20px + env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) 0 max(24px,env(safe-area-inset-left,0px));font-family:var(--display);color:#fff}
+.logo{font-weight:500;font-size:17px;letter-spacing:.02em}
+nav{display:flex;gap:clamp(14px,3vw,30px);font:500 clamp(12px,1.3vw,15px) var(--display);letter-spacing:.04em;pointer-events:auto}
+nav a{color:#fff;text-decoration:none;padding-bottom:2px;border-bottom:2px solid transparent;cursor:pointer}
+nav a:hover,nav a:focus-visible,nav a.on{border-bottom-color:#fff;outline:none}
+#label{position:fixed;z-index:6;left:0;top:0;pointer-events:none;font:500 11px var(--display);letter-spacing:.1em;background:var(--paper);color:var(--cobalt);padding:5px 10px;border-radius:999px;opacity:0;transition:opacity .15s;white-space:nowrap}
+#hint{position:fixed;z-index:3;left:max(24px,env(safe-area-inset-left,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));font:13px var(--display);color:#fff;max-width:calc(100vw - 48px)}
+#back{all:unset;cursor:pointer;box-sizing:border-box;position:fixed;z-index:7;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+ font:500 13px var(--display);letter-spacing:.04em;padding:10px 18px;background:var(--cobalt);color:#fff;box-shadow:0 0 0 2px var(--paper),3px 4px 0 2px rgba(0,0,0,.25)}
+#back:hover,#back:focus-visible{background:#1639a8;outline:2px solid var(--paper);outline-offset:4px}
+#cap{position:fixed;z-index:5;left:50%;top:calc(76px + env(safe-area-inset-top,0px));transform:translateX(-50%);max-width:calc(100vw - 32px);text-align:center;font:500 14px var(--display);letter-spacing:.06em;color:#fff;background:rgba(10,30,110,.55);padding:8px 14px;border-radius:999px;opacity:0;transition:opacity .3s;pointer-events:none}
+#cap.on{opacity:1}
+#pal{position:fixed;z-index:4;right:max(20px,env(safe-area-inset-right,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));display:flex;gap:8px}
+#pal button{all:unset;cursor:pointer;width:34px;height:22px;border-radius:5px;overflow:hidden;display:flex;box-shadow:0 0 0 2px transparent}
+#pal button i{flex:1}
+#pal button[aria-pressed="true"]{box-shadow:0 0 0 2px #fff}
+#pal button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+#tune{position:fixed;z-index:4;right:max(20px,env(safe-area-inset-right,0px));bottom:calc(58px + env(safe-area-inset-bottom,0px));display:grid;gap:6px;font:500 11px var(--display);letter-spacing:.08em;color:#fff}
+#tune label{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#tune input{width:96px;accent-color:#fff}
+#load{position:fixed;inset:0;z-index:9;display:grid;place-items:center;background:var(--cobalt);color:var(--paper);font:500 12px var(--display);letter-spacing:.2em;transition:opacity .6s}
+[hidden]{display:none!important}
+@media (max-width:640px){#hint{display:none}#pal{top:calc(60px + env(safe-area-inset-top,0px));bottom:auto}#tune{bottom:calc(18px + env(safe-area-inset-bottom,0px));right:auto;left:max(16px,env(safe-area-inset-left,0px))}}
+</style>
+<canvas id="c" aria-label="두 가지 색으로 그린 책상 3D. 스탠드, 컴퓨터, 전화기, 명함, 컵, 서랍이 놓여 있어요. 사물을 누르면 가까이 봐요."></canvas>
+<header><div class="logo">Vision INside</div><nav aria-label="주 메뉴"><a class="on" href="#home">HOME</a><a href="#about">ABOUT</a><a href="#work">WORK</a><a href="#contact">CONTACT</a></nav></header>
+<div id="label"></div>
+<div id="hint">마우스를 움직여 둘러보고, 사물을 눌러 보세요</div>
+<div id="cap"></div>
+<button id="back" hidden>Back to desk</button>
+<div id="tune"><label>질감<input id="g1" type="range" min="0" max="100" value="35"></label><label>외곽선<input id="g2" type="range" min="0" max="100" value="55"></label></div>
+<div id="pal"></div>
+<div id="load">LOADING</div>
+<script src="models.js"></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {toCreasedNormals} from 'three/addons/utils/BufferGeometryUtils.js';
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const PALS=[['코발트','#1f4bd0','#e9e4d8'],['올리브','#55613f','#ece6d6'],['버건디','#6e1f2b','#efe6d8'],['차콜','#2a2a2a','#efeae0']];
+const cv=document.getElementById('c'),R=new THREE.WebGLRenderer({canvas:cv,antialias:false});R.setPixelRatio(Math.min(devicePixelRatio,2));
+R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;R.outputColorSpace=THREE.LinearSRGBColorSpace;R.toneMapping=THREE.NoToneMapping;
+const S=new THREE.Scene();S.background=new THREE.Color(0x000000);
+const cam=new THREE.PerspectiveCamera(40,1,10,5000);
+const W=new THREE.MeshLambertMaterial({color:0xffffff}),G=new THREE.MeshLambertMaterial({color:0xc8c8c8}),Dk=new THREE.MeshLambertMaterial({color:0x555555});
+const BLACK=new THREE.MeshBasicMaterial({color:0x000000});
+const fx=[];                                    // 외곽선 계산에서 빼는 것 (빛 원뿔, 글자 스티커)
+const add=(g,m,p,r=[0,0,0],par=S)=>{const o=new THREE.Mesh(g,m);o.position.set(...p);o.rotation.set(...r);o.castShadow=o.receiveShadow=true;par.add(o);return o};
+const RB=(w,h,d,r=.8)=>new THREE.BoxGeometry(w,h,d);
+// 모델 읽기 (models.js 안의 base64)
+const b64=s=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u.buffer};
+const loader=new GLTFLoader();
+const load=k=>new Promise((res,rej)=>loader.parse(b64(window.VIN_MODELS[k]),'',g=>{const root=g.scene;
+ root.traverse(o=>{if(o.isMesh){let geo=o.geometry;geo.deleteAttribute('normal');geo=toCreasedNormals(geo,Math.PI/4);o.geometry=geo;o.material=W;o.castShadow=o.receiveShadow=true}});res(root)},rej));
+const [mStand,mImac,mPhone,mTable]=await Promise.all(['stand','imac','phone','table'].map(load));
+const TOP=75;                                   // 테이블 윗면 높이(cm)
+// 테이블 (접이식, 1.5m)
+const table=new THREE.Group();table.add(mTable);table.scale.setScalar(100);S.add(table);
+// 서랍 캐비닛 (FileCabinet01.obj가 비어 있어 코드로 만든 것. 나중에 모델로 교체)
+const cab=new THREE.Group();cab.position.set(40,0,0);S.add(cab);
+const CH=TOP-6,drawers=[];
+add(RB(38,CH,48),W,[0,CH/2,0],[0,0,0],cab);
+for(let i=0;i<3;i++){const d=new THREE.Group();d.position.set(0,CH-11-i*20,24.4);cab.add(d);d.userData.z0=24.4;
+ add(RB(34,18,1.6),W,[0,0,0],[0,0,0],d);add(RB(11,4.4,.6),Dk,[0,3,1.1],[0,0,0],d);add(RB(8,1.6,1.6),G,[0,-3.5,1.4],[0,0,0],d);drawers.push(d)}
+// iMac (Z가 위쪽인 모델 → 세워서 앞이 +z로 오게). 키보드·마우스가 같이 들어 있음
+const imac=new THREE.Group();imac.position.set(0,TOP,-6);S.add(imac);
+const im=new THREE.Group();im.add(mImac);im.scale.setScalar(90);im.rotation.x=-Math.PI/2;imac.add(im);
+const scr=new THREE.Mesh(new THREE.PlaneGeometry(.598,.336),BLACK);scr.position.set(0,.106,.335);scr.rotation.x=Math.atan2(1,.176);mImac.add(scr);fx.push(scr);
+// 스탠드 램프 (Y가 위, 갓이 +z 쪽 → 갓이 오른쪽(+x)으로 오게 돌림)
+const lamp=new THREE.Group();lamp.position.set(-47,TOP+.949*26,2);lamp.rotation.y=Math.PI/2;lamp.scale.setScalar(26);S.add(lamp);lamp.add(mStand);
+const coneM=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.4,depthWrite:false,blending:THREE.AdditiveBlending});
+const cone=new THREE.Mesh(new THREE.ConeGeometry(.52,1.25,40,1,true),coneM);cone.position.set(.01,-.325,.78);lamp.add(cone);fx.push(cone);
+const spot=new THREE.SpotLight(0xffffff,0,120,.55,.6,1);spot.position.set(.01,.3,.78);lamp.add(spot);const spt=new THREE.Object3D();spt.position.set(.01,-.9,.78);lamp.add(spt);spot.target=spt;
+// 전화기 (cm 단위, 다이얼이 -z라 뒤집어서 앞을 +z로)
+const phone=new THREE.Group();phone.position.set(52,TOP+5.8*1.2,8);phone.rotation.y=Math.PI-.3;phone.scale.setScalar(1.2);S.add(phone);phone.add(mPhone);
+// 명함 (스케치의 기울어진 사각형)
+const card=new THREE.Group();card.position.set(-26,TOP,20);card.rotation.y=-.6;S.add(card);add(new THREE.BoxGeometry(9.4,.3,5.6),W,[0,.15,0],[0,0,0],card);
+// 컵: vin 머그 (받침이 있는 스택 머그 + 사각 손잡이 + 필기체 글자)
+const mug=new THREE.Group();mug.position.set(38,TOP,-16);mug.rotation.y=-.25;S.add(mug);
+const prof=[[0,0],[3.4,0],[3.5,2.3],[4.3,2.7],[4.3,9],[4,9],[4,1.2],[0,1.2]].map(([r,y])=>new THREE.Vector2(r,y));
+add(new THREE.LatheGeometry(prof,40),new THREE.MeshLambertMaterial({color:0xffffff,side:THREE.DoubleSide}),[0,0,0],[0,0,0],mug);
+const hp=[[4.1,8],[7.4,8],[8.5,3.6],[4.2,3.4]].map(([x,y])=>new THREE.Vector3(x,y,0));
+add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(hp,false,'catmullrom',.02),30,.75,8),W,[0,0,0],[0,0,0],mug);
+await document.fonts.load('100px Yellowtail').catch(()=>{});
+const cvs=document.createElement('canvas');cvs.width=512;cvs.height=256;const cx=cvs.getContext('2d');cx.clearRect(0,0,512,256);cx.fillStyle='#000';cx.font='170px Yellowtail, cursive';cx.textAlign='center';cx.textBaseline='middle';cx.fillText('vin',256,140);
+const tex=new THREE.CanvasTexture(cvs);tex.anisotropy=4;
+const decal=new THREE.Mesh(new THREE.CylinderGeometry(4.34,4.34,3.6,32,1,true,-.72,1.44),new THREE.MeshBasicMaterial({map:tex,transparent:true,alphaTest:.4,side:THREE.FrontSide}));decal.position.y=5.8;mug.add(decal);fx.push(decal);
+// 빛: 강한 햇빛 한 방향 + 주변광. 블라인드 그림자는 보이지 않는 막대로
+const bm=new THREE.MeshBasicMaterial({colorWrite:false,depthWrite:false});
+for(let i=0;i<7;i++){const o=new THREE.Mesh(new THREE.BoxGeometry(2,3.2,150),bm);o.position.set(-150,85+i*18,20);o.castShadow=true;S.add(o);fx.push(o)}
+const sun=new THREE.DirectionalLight(0xffffff,3);sun.position.set(-300,250,260);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-150,right:150,top:150,bottom:-150,near:10,far:1000});sun.shadow.bias=-.0005;sun.shadow.radius=2;S.add(sun);
+S.add(new THREE.HemisphereLight(0xffffff,0xaaaaaa,1.15));
+// 후처리: 밝기→두 색, 외곽선, 종이 질감
+const dt=new THREE.DepthTexture();const rtC=new THREE.WebGLRenderTarget(1,1,{depthTexture:dt});const rtN=new THREE.WebGLRenderTarget(1,1);const nMat=new THREE.MeshNormalMaterial();
+const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:rtN.texture},tD:{value:dt},res:{value:new THREE.Vector2()},cDark:{value:new THREE.Color()},cLight:{value:new THREE.Color()},near:{value:10},far:{value:5000},time:{value:0},gAmt:{value:.35},eThr:{value:.7}},
+ vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=vec4(position.xy,0.,1.);}',
+ fragmentShader:`precision highp float;varying vec2 v;uniform sampler2D tC,tN,tD;uniform vec2 res;uniform vec3 cDark,cLight;uniform float near,far,time,gAmt,eThr;
+ float ld(vec2 p){float z=texture2D(tD,p).r*2.-1.;return 2.*near*far/(far+near-z*(far-near));}
+ float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
+ void main(){vec3 c=texture2D(tC,v).rgb;float l=dot(c,vec3(.299,.587,.114));
+  float t=smoothstep(.12,.78,l);t=floor(t*5.+.5)/5.*.35+t*.65;
+  vec3 col=mix(cDark,cLight,t);
+  vec2 px=2./res;float d0=ld(v);vec3 n0=texture2D(tN,v).rgb;float e=0.;
+  for(int i=0;i<4;i++){vec2 o=i==0?vec2(px.x,0.):i==1?vec2(-px.x,0.):i==2?vec2(0.,px.y):vec2(0.,-px.y);
+   e+=step(eThr,length(texture2D(tN,v+o).rgb-n0));e+=step(.04*d0,abs(ld(v+o)-d0));}
+  col=mix(col,cDark,clamp(e*.4,0.,.8));
+  col+=(h(floor(v*res/2.5))-.5)*.09*gAmt;col+=(h(floor(v*res/9.))-.5)*.05*gAmt;
+  gl_FragColor=vec4(col,1.);}`});
+const qS=new THREE.Scene();qS.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),post));const qC=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+const pal=document.getElementById('pal'),rs=document.documentElement.style;
+function setPal(i){const [,d,l]=PALS[i];post.uniforms.cDark.value.set(d).convertLinearToSRGB();post.uniforms.cLight.value.set(l).convertLinearToSRGB();rs.setProperty('--cobalt',d);rs.setProperty('--paper',l);[...pal.children].forEach((b,k)=>b.setAttribute('aria-pressed',k===i))}
+PALS.forEach(([nm,d,l],i)=>{const b=document.createElement('button');b.setAttribute('aria-label',nm);b.title=nm;b.innerHTML=`<i style="background:${d}"></i><i style="background:${l}"></i>`;b.onclick=()=>setPal(i);pal.appendChild(b)});setPal(0);
+document.getElementById('g1').oninput=e=>post.uniforms.gAmt.value=e.target.value/100;
+// 외곽선 슬라이더: 오른쪽으로 갈수록 선이 많아짐 (법선 차이 기준 1.0→0.3)
+document.getElementById('g2').oninput=e=>post.uniforms.eThr.value=1.0-e.target.value/100*0.7;
+// 카메라
+const portrait=()=>innerWidth/innerHeight<.9;
+const HOME=()=>({pos:new THREE.Vector3(0,98,portrait()?250:196),look:new THREE.Vector3(0,76,-4)});
+const h0=HOME();const cpos=h0.pos.clone(),clook=h0.look.clone(),tpos=h0.pos.clone(),tlook=h0.look.clone();const sm=new THREE.Vector2();
+function fit(){const w=innerWidth,h=innerHeight,pr=R.getPixelRatio();R.setSize(w,h,false);rtC.setSize(w*pr,h*pr);rtN.setSize(w*pr,h*pr);post.uniforms.res.value.set(w*pr,h*pr);cam.aspect=w/h;cam.fov=portrait()?66:40;cam.updateProjectionMatrix();if(state==='home'){const t=HOME();tpos.copy(t.pos);tlook.copy(t.look);cpos.copy(tpos);clook.copy(tlook)}}
+// 선택 가능한 사물과 이동 값(카메라까지 거리, 높이)
+const bbox=g=>{const p=new THREE.Vector3();new THREE.Box3().setFromObject(g).getCenter(p);return p};
+const PICK=[
+ {g:lamp,t:'스탠드 · 불 켜고 끄기',act:'lamp'},
+ {g:imac,t:'모니터 · 소개와 프로젝트',hash:'screen',d:78,y:6,focus:()=>new THREE.Vector3(0,TOP+30,-6)},
+ {g:phone,t:'전화기 · 연락하기',hash:'contact',d:50,y:16},
+ {g:card,t:'명함 · 소개',hash:'about',d:44,y:30},
+ {g:cab,t:'서랍 · 프로젝트',hash:'work',d:96,y:30,focus:()=>new THREE.Vector3(40,TOP-14,10)},
+ {g:mug,t:'컵',act:'bump'}];
+PICK.forEach(p=>p.g.traverse(o=>{if(o.isMesh)o.userData.pick=p}));
+let state='home',cur=null,hover=null,lampOn=true,lampV=1,moved=false;
+const hint=document.getElementById('hint'),back=document.getElementById('back'),cap=document.getElementById('cap'),lbl=document.getElementById('label');
+const CAPS={screen:'여기에 이력서와 프로젝트 창이 떠요 (HTML)',contact:'전화를 받으면 메시지 폼이 열려요',about:'명함 → 자기소개서 (HTML)',work:'서랍을 열면 분류별 프로젝트 폴더가 나와요'};
+function go(h,instant){const p=PICK.find(k=>k.hash===h);state=p?'focus':'home';cur=p||null;
+ if(p){const c=(p.focus?p.focus():bbox(p.g));tlook.copy(c);tpos.set(c.x*.8,c.y+p.y,c.z+p.d)}else{const t=HOME();tpos.copy(t.pos);tlook.copy(t.look)}
+ if(instant||RM){cpos.copy(tpos);clook.copy(tlook)}
+ back.hidden=!p;cap.textContent=p?CAPS[h]:'';cap.classList.toggle('on',!!p);hint.textContent=p?'':'마우스를 움직여 둘러보고, 사물을 눌러 보세요';
+ document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+(h==='screen'?'work':h||'home')));
+ cur&&cur.hash==='work'&&drawers.forEach((d,i)=>d.userData.open=i===0);if(!p)drawers.forEach(d=>d.userData.open=false)}
+function fromHash(){const h=location.hash.slice(1);go(h==='home'?'':h)}
+function setHash(h){try{history.pushState(null,'',h?'#'+h:location.pathname+location.search);go(h)}catch(e){location.hash=h}}
+back.onclick=()=>setHash('');addEventListener('keydown',e=>{if(e.key==='Escape'&&state!=='home')setHash('')});addEventListener('hashchange',fromHash);addEventListener('popstate',fromHash);
+const mouse=new THREE.Vector2(0,0),ray=new THREE.Raycaster();
+cv.addEventListener('pointermove',e=>{moved=true;mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);lbl.style.transform=`translate(${e.clientX+14}px,${e.clientY+14}px)`});
+cv.addEventListener('pointerleave',()=>mouse.set(0,0));
+cv.addEventListener('click',()=>{if(state==='focus'){setHash('');return}
+ if(!hover)return;if(hover.hash)setHash(hover.hash);else if(hover.act==='lamp')lampOn=!lampOn;else hover.g.userData.bump=1});
+addEventListener('resize',fit);
+const clock=new THREE.Clock(),bumpBase=new Map();
+const vis=[];
+function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
+ sm.lerp(mouse,RM?0:.05);cpos.lerp(tpos,RM?1:.06);clook.lerp(tlook,RM?1:.06);
+ const k=state==='home'?1:.25;cam.position.copy(cpos);cam.position.x+=sm.x*8*k;cam.position.y+=sm.y*4*k;cam.lookAt(clook.x+sm.x*22*k,clook.y+sm.y*9*k,clook.z);
+ if(state==='home'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObjects(PICK.map(p=>p.g),true).find(h=>h.object.userData.pick);const p=hit?hit.object.userData.pick:null;
+  if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?p.t:'';lbl.style.opacity=p&&moved?1:0}}
+ else if(hover){hover=null;cv.style.cursor=state==='focus'?'zoom-out':'default';lbl.style.opacity=0}
+ lampV+=((lampOn?1:0)-lampV)*.15;coneM.opacity=.4*lampV;spot.intensity=lampV*2200;
+ drawers.forEach((d,i)=>{d.position.z+=((d.userData.z0+(d.userData.open?30:0))-d.position.z)*.1});
+ PICK.forEach(p=>{const g=p.g;if(g.userData.bump>0){if(!bumpBase.has(g))bumpBase.set(g,g.position.y);g.userData.bump=Math.max(0,g.userData.bump-dt2*2.5);g.position.y=bumpBase.get(g)+Math.sin(g.userData.bump*Math.PI)*3}});
+ post.uniforms.time.value=Math.floor(t*12)/12;
+ R.setRenderTarget(rtC);R.render(S,cam);
+ vis.length=0;fx.forEach(o=>{if(o.visible){o.visible=false;vis.push(o)}});S.overrideMaterial=nMat;R.setRenderTarget(rtN);R.render(S,cam);S.overrideMaterial=null;vis.forEach(o=>o.visible=true);
+ R.setRenderTarget(null);R.render(qS,qC);requestAnimationFrame(loop)}
+fit();fromHash();if(state==='home'){const t=HOME();cpos.copy(t.pos);clook.copy(t.look)}loop();
+const ld=document.getElementById('load');ld.style.opacity=0;setTimeout(()=>ld.hidden=true,600);
+</script>

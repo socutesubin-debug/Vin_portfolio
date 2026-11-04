@@ -1,0 +1,190 @@
+<title>VIN 서랍장 시험판</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@400;500&display=swap">
+<style>
+/* layout: 듀오톤 3D 서랍장 한 장면. 위에 HTML 라벨·종이 카드. 한 가지 코발트 세계로 고정 */
+:root{
+  --cobalt:#1750d6;      /* 진한 색 (그림자·배경·글자) */
+  --paper:#ece6da;       /* 연한 색 (밝은 면·종이) */
+  --ink:#1750d6;
+  --display:"Jost","Noto Sans KR",system-ui,sans-serif;
+  --hand:"Gaegu","Noto Sans KR",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0;background:var(--cobalt);color:var(--paper);overflow:hidden;font-family:"Noto Sans KR",system-ui,sans-serif}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+header{position:fixed;top:0;left:0;right:0;z-index:3;display:flex;justify-content:space-between;align-items:center;pointer-events:none;
+ padding:calc(20px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) 0 max(20px,env(safe-area-inset-left,0px));font-family:var(--display);color:var(--paper)}
+.logo{font-weight:600;font-size:17px;letter-spacing:.02em}
+nav{display:flex;gap:clamp(14px,3vw,30px);font:500 clamp(11px,1.2vw,13px) var(--display);letter-spacing:.12em}
+nav .on{border-bottom:2px solid var(--paper)}
+#label{position:fixed;z-index:6;left:0;top:0;pointer-events:none;font:500 11px var(--display);letter-spacing:.1em;background:var(--paper);color:var(--cobalt);padding:5px 10px;border-radius:999px;opacity:0;transition:opacity .15s;white-space:nowrap}
+#hint{position:fixed;z-index:3;left:max(20px,env(safe-area-inset-left,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));font:13px var(--display);color:var(--paper);max-width:calc(100vw - 40px)}
+/* 3D 폴더 탭 위에 뜨는 분류 버튼 */
+.tab{position:fixed;z-index:5;left:0;top:0;all:unset;box-sizing:border-box;cursor:pointer;font:600 12px var(--display);letter-spacing:.12em;padding:7px 13px;border-radius:3px 3px 0 0;background:var(--paper);color:var(--cobalt);box-shadow:0 0 0 2px var(--cobalt),0 0 0 3px var(--paper);
+ transform:translate(-50%,-100%);transition:opacity .25s,background .15s;position:fixed;left:0;top:0;will-change:transform}
+.tab:hover,.tab:focus-visible{background:#fff;outline:2px solid var(--paper);outline-offset:3px}
+.tab[hidden]{display:none!important}
+/* Back 버튼: 레퍼런스처럼 가운데 아래 */
+#back{position:fixed;z-index:7;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));all:unset;cursor:pointer;box-sizing:border-box;
+ position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font:500 13px var(--display);letter-spacing:.04em;padding:10px 18px;background:var(--cobalt);color:var(--paper);box-shadow:0 0 0 2px var(--paper),3px 4px 0 2px rgba(0,0,0,.25)}
+#back:hover,#back:focus-visible{background:#0f3fb5;outline:2px solid var(--paper);outline-offset:4px}
+/* 종이 카드: 프로젝트 목록 */
+#sheet{position:fixed;z-index:6;left:50%;top:50%;width:min(560px,calc(100vw - 32px));max-height:calc(100% - 150px);overflow:auto;transform:translate(-50%,-46%) rotate(-.8deg);opacity:0;pointer-events:none;
+ background:#fbfaf6;color:var(--ink);padding:clamp(22px,4vw,38px) clamp(22px,4vw,40px);box-shadow:0 0 0 3px var(--cobalt),10px 14px 0 0 rgba(10,30,100,.35);transition:opacity .35s,transform .45s cubic-bezier(.2,.7,.2,1);font-family:var(--hand)}
+#sheet.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) rotate(-.8deg)}
+#sheet h2{margin:0 0 4px;font:700 clamp(26px,5vw,34px) var(--hand);letter-spacing:.02em}
+#sheet .sub{font:400 17px var(--hand);opacity:.75;margin:0 0 16px}
+#sheet ul{list-style:none;margin:0;padding:0;display:grid;gap:0}
+#sheet li{border-top:2px solid var(--ink);padding:14px 2px;display:grid;grid-template-columns:1fr auto;gap:2px 14px;font-size:21px;line-height:1.25;cursor:pointer}
+#sheet li:last-child{border-bottom:2px solid var(--ink)}
+#sheet li b{font-weight:700}
+#sheet li span{font-size:17px;opacity:.8;align-self:center;text-align:right}
+#sheet li p{grid-column:1/-1;margin:0;font-size:18px;opacity:.85}
+#sheet li:hover,#sheet li:focus-visible{background:rgba(23,80,214,.07);outline:none}
+#sheet .note{margin:14px 0 0;font:400 15px var(--hand);opacity:.6}
+#pal{position:fixed;z-index:4;right:max(20px,env(safe-area-inset-right,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));display:flex;gap:8px}
+#pal button{all:unset;cursor:pointer;width:34px;height:22px;border-radius:5px;overflow:hidden;display:flex;box-shadow:0 0 0 2px transparent}
+#pal button i{flex:1}
+#pal button[aria-pressed="true"]{box-shadow:0 0 0 2px #fff}
+#pal button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media (max-width:640px){#hint{display:none}#pal{top:calc(56px + env(safe-area-inset-top,0px));bottom:auto}}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){#sheet{transition:opacity .1s}}
+</style>
+<canvas id="c" aria-label="두 가지 색으로 그린 서랍장 3D. 맨 위 서랍을 누르면 프로젝트 폴더가 나와요."></canvas>
+<header><div class="logo">Vision INside</div><nav><span>HOME</span><span>ABOUT</span><span class="on">WORK</span><span>CONTACT</span></nav></header>
+<div id="label"></div>
+<div id="hint">맨 위 서랍을 눌러 열어 보세요</div>
+<button class="tab" data-cat="ux" hidden>UX/UI</button>
+<button class="tab" data-cat="branding" hidden>BRANDING</button>
+<button class="tab" data-cat="fashion" hidden>FASHION</button>
+<section id="sheet" role="dialog" aria-labelledby="st" tabindex="-1"><h2 id="st"></h2><p class="sub" id="ss"></p><ul id="sl"></ul><p class="note">예시 내용이에요. 실제 프로젝트로 바꿀 자리입니다.</p></section>
+<button id="back" hidden>Back to drawer</button>
+<div id="pal"></div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const PALS=[['코발트','#1750d6','#ece6da'],['올리브','#55613f','#ece6d6'],['버건디','#6e1f2b','#efe6d8'],['차콜','#2a2a2a','#efeae0']];
+const DATA={
+ ux:{t:'UX/UI',s:'앱·웹 화면을 설계한 프로젝트',items:[['Tunee','감정 기반 음악 일기 앱','2026'],['프로젝트 이름 (예시)','리서치부터 화면 설계까지','2025'],['프로젝트 이름 (예시)','개선 전·후 비교','2025']]},
+ branding:{t:'Branding',s:'이름·로고·그래픽을 만든 프로젝트',items:[['프로젝트 이름 (예시)','브랜드 정체성 설계','2025'],['프로젝트 이름 (예시)','패키지·인쇄물','2025']]},
+ fashion:{t:'Fashion',s:'옷과 그래픽에서 시작한 작업',items:[['[혁명]','졸업작품 5벌','패션스쿨'],['프로젝트 이름 (예시)','메타버스 패션','KMA']]}};
+const cv=document.getElementById('c'),R=new THREE.WebGLRenderer({canvas:cv,antialias:false});R.setPixelRatio(Math.min(devicePixelRatio,2));
+R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;R.outputColorSpace=THREE.LinearSRGBColorSpace;R.toneMapping=THREE.NoToneMapping;
+const S=new THREE.Scene();S.background=new THREE.Color(0x000000);
+const cam=new THREE.PerspectiveCamera(40,1,10,5000);
+const W=new THREE.MeshLambertMaterial({color:0xffffff}),G=new THREE.MeshLambertMaterial({color:0xc8c8c8}),Dk=new THREE.MeshLambertMaterial({color:0x5a5a5a});
+const add=(g,m,p,r=[0,0,0],par=S)=>{const o=new THREE.Mesh(g,m);o.position.set(...p);o.rotation.set(...r);o.castShadow=o.receiveShadow=true;par.add(o);return o};
+const RB=(w,h,d,r=1)=>new RoundedBoxGeometry(w,h,d,3,r);
+// 무대: 연한 색 바닥 원판 하나. 배경은 진한 색 그대로 둔다 (레퍼런스처럼)
+add(new THREE.CircleGeometry(150,64),W,[0,0,0],[-Math.PI/2,0,0]).castShadow=false;
+// 창 블라인드 그림자: 보이지 않고 그림자만 만드는 막대
+const bm=new THREE.MeshBasicMaterial({colorWrite:false,depthWrite:false});
+for(let i=0;i<6;i++){const o=new THREE.Mesh(new THREE.BoxGeometry(2,3.4,170),bm);o.position.set(-130,110+i*22,40);o.castShadow=true;S.add(o)}
+// 서랍장 본체: 속이 빈 상자(옆·뒤·위·밑 판 + 칸막이)
+const CAB=new THREE.Group();CAB.position.set(0,0,-8);S.add(CAB);
+const BW=50,BH=124,BD=60;
+add(RB(1.6,BH,BD,.4),W,[-BW/2+.8,BH/2,0],[0,0,0],CAB);add(RB(1.6,BH,BD,.4),W,[BW/2-.8,BH/2,0],[0,0,0],CAB);
+add(RB(BW,1.6,BD,.4),W,[0,BH-.8,0],[0,0,0],CAB);add(RB(BW,2,BD,.4),W,[0,3,0],[0,0,0],CAB);add(new THREE.BoxGeometry(BW,BH,1),W,[0,BH/2,-BD/2+.5],[0,0,0],CAB);
+[32,62,92].forEach(y=>add(RB(BW-3,1.4,BD-2,.3),W,[0,y,0],[0,0,0],CAB));
+add(RB(BW+1,3,BD+1,.6),Dk,[0,1.5,0],[0,0,0],CAB);
+// 서랍 4개 (맨 위가 프로젝트 서랍)
+const FRONT=BD/2+.5,drawers=[];
+const tabs=[];
+for(let i=0;i<4;i++){const d=new THREE.Group();d.position.set(0,107-i*30,FRONT);CAB.add(d);d.userData.closed=FRONT;d.userData.idx=i;
+ add(RB(BW-3,27,2.2,.5),W,[0,0,0],[0,0,0],d);
+ add(RB(15,6.4,.7,.3),Dk,[0,3.5,1.4],[0,0,0],d);add(new THREE.BoxGeometry(12,3.4,.5),W,[0,3.5,1.9],[0,0,0],d);
+ add(RB(11,1.8,2.2,.6),G,[0,-5.5,1.7],[0,0,0],d);
+ d.userData.label=i===0?'WORK · 프로젝트':'보관함';drawers.push(d)}
+// 맨 위 서랍 안: 트레이 + 폴더
+const top=drawers[0];
+add(RB(BW-5,1.2,BD-6,.3),W,[0,-12.6,-(BD-6)/2],[0,0,0],top);
+[-1,1].forEach(s=>add(RB(1.2,22,BD-6,.3),W,[s*(BW-5)/2,-2,-(BD-6)/2],[0,0,0],top));
+add(RB(BW-5,22,1.2,.3),W,[0,-2,-(BD-6)],[0,0,0],top);
+const CATS=[['ux',-15,2],['branding',0,5],['fashion',15,8]];
+for(let i=0;i<12;i++){const z=-5-i*3.8,c=CATS.find(k=>k[2]===i);
+ const f=new THREE.Group();f.position.set(0,-12,z);f.rotation.x=-.07+(i%2)*.03;top.add(f);
+ const up=c?4:0;add(new THREE.BoxGeometry(BW-8,20+up,.6),W,[0,10+up/2,0],[0,0,0],f);
+ const tx=c?c[1]:((i*7)%3-1)*14+((i%2)?5:-5);
+ const tb=add(new THREE.BoxGeometry(11,3.4,.6),W,[tx,20+up+1.7,0],[0,0,0],f);
+ if(c){tb.userData.cat=c[0];tabs.push({mesh:tb,cat:c[0]})}}
+// 서랍장 위 소품: 화분, 책 더미, 머그
+const plant=new THREE.Group();plant.position.set(-12,BH,-14);CAB.add(plant);add(new THREE.CylinderGeometry(6.2,4.8,10.5,24),W,[0,5.2,0],[0,0,0],plant);add(new THREE.CylinderGeometry(.4,.5,22,6),W,[0,20,0],[0,0,0],plant);
+for(let i=0;i<9;i++){const a=i*2.3,h=13+i*1.6;const l=add(new THREE.SphereGeometry(3,12,8),W,[Math.cos(a)*3,h,Math.sin(a)*3],[0,a,.7],plant);l.scale.set(1,.25,.5)}
+const books=new THREE.Group();books.position.set(13,BH,-4);books.rotation.y=.2;CAB.add(books);
+[[22,3.2,15,0],[19,2.6,14,.12],[20,2.2,13,-.08]].forEach(([w,h,d,r],i)=>add(RB(w,h,d,.5),i===1?G:W,[0,3.2/2+[0,3.2,5.8][i],0],[0,r,0],books));
+const mug=new THREE.Group();mug.position.set(17,BH+8.2,3);CAB.add(mug);add(new THREE.CylinderGeometry(3.4,3.2,7.5,24),W,[0,3.8,0],[0,0,0],mug);add(new THREE.CylinderGeometry(3,3,.2,24),Dk,[0,7.4,0],[0,0,0],mug);add(new THREE.TorusGeometry(2,.5,10,18,Math.PI*1.2),W,[3.5,3.9,0],[0,0,-1.95],mug);
+// 빛
+const sun=new THREE.DirectionalLight(0xffffff,3);sun.position.set(-230,250,300);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-220,right:220,top:220,bottom:-220,near:10,far:1200});sun.shadow.bias=-.0005;sun.shadow.radius=2;S.add(sun);
+S.add(new THREE.HemisphereLight(0xffffff,0xaaaaaa,1.2));
+// 후처리: 밝기→두 색, 외곽선, 종이 질감
+const dt=new THREE.DepthTexture();const rtC=new THREE.WebGLRenderTarget(1,1,{depthTexture:dt});const rtN=new THREE.WebGLRenderTarget(1,1);const nMat=new THREE.MeshNormalMaterial();
+const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:rtN.texture},tD:{value:dt},res:{value:new THREE.Vector2()},cDark:{value:new THREE.Color()},cLight:{value:new THREE.Color()},near:{value:10},far:{value:5000},time:{value:0}},
+ vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=vec4(position.xy,0.,1.);}',
+ fragmentShader:`precision highp float;varying vec2 v;uniform sampler2D tC,tN,tD;uniform vec2 res;uniform vec3 cDark,cLight;uniform float near,far,time;
+ float ld(vec2 p){float z=texture2D(tD,p).r*2.-1.;return 2.*near*far/(far+near-z*(far-near));}
+ float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
+ void main(){vec3 c=texture2D(tC,v).rgb;float l=dot(c,vec3(.299,.587,.114));
+  float t=smoothstep(.12,.78,l);t=floor(t*5.+.5)/5.*.35+t*.65;
+  vec3 col=mix(cDark,cLight,t);
+  vec2 px=1.5/res;float d0=ld(v);vec3 n0=texture2D(tN,v).rgb;float e=0.;
+  for(int i=0;i<4;i++){vec2 o=i==0?vec2(px.x,0.):i==1?vec2(-px.x,0.):i==2?vec2(0.,px.y):vec2(0.,-px.y);
+   e+=step(.35,length(texture2D(tN,v+o).rgb-n0));e+=step(.025*d0,abs(ld(v+o)-d0));}
+  col=mix(col,cDark,clamp(e*.35,0.,.85));
+  col+=(h(floor(v*res/1.6)+fract(time)*7.)-.5)*.09;col+=(h(floor(v*res/5.))-.5)*.04;
+  gl_FragColor=vec4(col,1.);}`});
+const qS=new THREE.Scene();qS.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),post));const qC=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+const pal=document.getElementById('pal'),root=document.documentElement.style;
+function setPal(i){const [,d,l]=PALS[i];post.uniforms.cDark.value.set(d).convertLinearToSRGB();post.uniforms.cLight.value.set(l).convertLinearToSRGB();
+ root.setProperty('--cobalt',d);root.setProperty('--paper',l);root.setProperty('--ink',d);[...pal.children].forEach((b,k)=>b.setAttribute('aria-pressed',k===i))}
+PALS.forEach(([nm,d,l],i)=>{const b=document.createElement('button');b.setAttribute('aria-label',nm);b.title=nm;b.innerHTML=`<i style="background:${d}"></i><i style="background:${l}"></i>`;b.onclick=()=>setPal(i);pal.appendChild(b)});setPal(0);
+// 카메라
+const portrait=()=>innerWidth/innerHeight<.9;
+const HOME=()=>({pos:new THREE.Vector3(0,96,portrait()?330:290),look:new THREE.Vector3(0,74,0)});
+const OPEN=()=>({pos:new THREE.Vector3(0,portrait()?250:222,portrait()?170:150),look:new THREE.Vector3(0,108,34)});
+let h0=HOME();const cpos=h0.pos.clone(),clook=h0.look.clone(),tpos=h0.pos.clone(),tlook=h0.look.clone();const sm=new THREE.Vector2();
+function fit(){const w=innerWidth,h=innerHeight,pr=R.getPixelRatio();R.setSize(w,h,false);rtC.setSize(w*pr,h*pr);rtN.setSize(w*pr,h*pr);post.uniforms.res.value.set(w*pr,h*pr);cam.aspect=w/h;cam.fov=portrait()?66:40;cam.updateProjectionMatrix();go(state,true)}
+// 상태: home → open(서랍 열림, 폴더 탭 보임) → cat(종이 카드)
+let state='home',cat=null;
+const hint=document.getElementById('hint'),back=document.getElementById('back'),sheet=document.getElementById('sheet'),tabEls=[...document.querySelectorAll('.tab')];
+function go(s,instant){state=s;const t=s==='home'?HOME():OPEN();tpos.copy(t.pos);tlook.copy(t.look);if(instant||RM){cpos.copy(tpos);clook.copy(tlook)}
+ drawers[0].userData.open=s!=='home';back.hidden=s==='home';back.textContent=s==='cat'?'Back to folders':'Back to cabinet';
+ hint.textContent=s==='home'?'맨 위 서랍을 눌러 열어 보세요':s==='open'?'폴더 탭을 눌러 분류를 골라요':'';
+ sheet.classList.toggle('on',s==='cat');
+ if(s==='cat'){const d=DATA[cat];document.getElementById('st').textContent=d.t;document.getElementById('ss').textContent=d.s;
+  document.getElementById('sl').innerHTML=d.items.map(([a,b,c])=>`<li tabindex="0"><b>${a}</b><span>${c}</span><p>${b}</p></li>`).join('');}
+ const hh=s==='home'?'':s==='open'?'#work':'#work-'+cat;if(location.hash!==hh&&!(hh===''&&location.hash==='')){try{history.replaceState(null,'',hh||location.pathname+location.search)}catch(e){location.hash=hh}}}
+function fromHash(){const h=location.hash.slice(1);if(h==='work')go('open');else if(h.startsWith('work-')&&DATA[h.slice(5)]){cat=h.slice(5);go('cat')}else go('home')}
+back.onclick=()=>{state==='cat'?go('open'):go('home')};
+tabEls.forEach(b=>b.onclick=()=>{cat=b.dataset.cat;go('cat')});
+addEventListener('keydown',e=>{if(e.key==='Escape')back.onclick()});
+addEventListener('hashchange',fromHash);
+// 선택
+const mouse=new THREE.Vector2(0,0),ray=new THREE.Raycaster(),lbl=document.getElementById('label');let hover=null,moved=false;
+drawers.forEach(d=>d.traverse(o=>{if(o.isMesh)o.userData.root=d}));
+cv.addEventListener('pointermove',e=>{moved=true;mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);lbl.style.transform=`translate(${e.clientX+14}px,${e.clientY+14}px)`});
+cv.addEventListener('pointerleave',()=>mouse.set(0,0));
+cv.addEventListener('click',()=>{
+ if(state==='home'){if(hover===drawers[0])go('open');else if(hover)hover.userData.bump=1}
+ else if(state==='open'&&!hover)go('home');else if(state==='cat')go('open')});
+addEventListener('resize',fit);
+const clock=new THREE.Clock(),v3=new THREE.Vector3();
+function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
+ sm.lerp(mouse,RM?0:.05);cpos.lerp(tpos,RM?1:.06);clook.lerp(tlook,RM?1:.06);
+ const k=state==='home'?1:.3;cam.position.copy(cpos);cam.position.x+=sm.x*8*k;cam.position.y+=sm.y*4*k;cam.lookAt(clook.x+sm.x*20*k,clook.y+sm.y*8*k,clook.z);
+ if(state==='home'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObjects(drawers,true)[0];const g=hit?hit.object.userData.root:null;
+  if(g!==hover){hover=g;cv.style.cursor=g?'pointer':'default';lbl.textContent=g?g.userData.label:'';lbl.style.opacity=g&&moved?1:0}}
+ else if(hover){hover=null;cv.style.cursor='default';lbl.style.opacity=0}
+ drawers.forEach(d=>{const o=d.userData.open?50:0,b=d.userData.bump>0?(d.userData.bump=Math.max(0,d.userData.bump-dt2*2.5),Math.sin(d.userData.bump*Math.PI)*4):0;d.position.z+=(d.userData.closed+o+b-d.position.z)*.1});
+ // 폴더 탭 버튼을 3D 위치에 맞춰 띄움
+ cam.updateMatrixWorld();
+ tabEls.forEach(el=>{const tb=tabs.find(x=>x.cat===el.dataset.cat).mesh;const show=state==='open'&&drawers[0].position.z>FRONT+34;el.hidden=!show;
+  if(show){tb.getWorldPosition(v3);v3.y+=2;v3.project(cam);el.style.transform=`translate(${(v3.x*.5+.5)*innerWidth}px,${(-v3.y*.5+.5)*innerHeight}px) translate(-50%,-100%)`}});
+ post.uniforms.time.value=Math.floor(t*12)/12;
+ R.setRenderTarget(rtC);R.render(S,cam);S.overrideMaterial=nMat;R.setRenderTarget(rtN);R.render(S,cam);S.overrideMaterial=null;
+ R.setRenderTarget(null);R.render(qS,qC);requestAnimationFrame(loop)}
+fit();fromHash();loop();
+</script>
