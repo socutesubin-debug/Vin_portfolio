@@ -9,6 +9,8 @@ const playing = new Set<OscillatorNode>()
 
 export function ringOnce() {
   if (!isSoundOn()) return
+  // 자동 재생 정책: 페이지에서 사용자 조작이 한 번도 없었으면(새로고침 직후 등) 소리를 내지 않는다
+  if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return
   ctx ??= new AudioContext()
   if (ctx.state === 'suspended') void ctx.resume()
   const t0 = ctx.currentTime
