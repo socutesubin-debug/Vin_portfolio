@@ -18,8 +18,9 @@ export interface CameraShot {
 export const SCENE_ORDER: SceneId[] = ['home', 'about', 'work', 'contact']
 
 export const SCENES: Record<SceneId, CameraShot> = {
-  // 작업실 전체를 정면에서, 약간 위에서 내려다본다
-  home: { label: 'HOME', position: [0, 2.1, 3.6], target: [0, 0.75, -0.35] },
+  // V3 S04 HOME: INTRO 마지막 프레임(public/media/intro/k5_desk.png)과 같은 책상 정면 클로즈업.
+  // 개발 모드에서 K로 k5를 겹쳐 보며 맞췄다(모니터·키보드·전화기 기준)
+  home: { label: 'HOME', position: [-0.13, 1.17, 0.73], target: [-0.13, 0.975, -0.6] },
   // 모니터 정면(눈높이), 아래로 키보드·마우스까지
   about: { label: 'ABOUT', position: [-0.1, 1.05, 0.75], target: [-0.1, 1.0, -0.62] },
   // 서랍장 정면, 위에서 아래로 내려다보는 근접 구도(서랍 속 프로젝트가 잘 보이게)

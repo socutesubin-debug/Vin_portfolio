@@ -9,3 +9,9 @@ dist
 .env
 .env.*
 !.env.example
+# INTRO 원본 영상(용량). 시퀀스는 npm run build:intro로 만든다
+/public/media/intro/raw/
+# 480p 테스트 시퀀스와 그 manifest는 올리지 않는다. 720p 최종 시퀀스가 나오면 두 줄을 지우고 함께 올린다
+# (manifest만 올라가고 시퀀스가 없으면 배포된 INTRO가 빈 화면이 된다)
+/public/media/intro/seq/
+/public/media/intro/manifest.json

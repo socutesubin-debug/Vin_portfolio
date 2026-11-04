@@ -3,6 +3,7 @@ import { ACESFilmicToneMapping } from 'three'
 import { CAMERA, SCENES } from '../config/scenes'
 import { PLACEMENT } from '../config/layout'
 import CameraRig from './CameraRig'
+import { SceneReadySignal } from './sceneReady'
 import Lighting from './Lighting'
 import Room from './objects/Room'
 import Desk from './objects/Desk'
@@ -32,6 +33,7 @@ export default function WorkspaceCanvas() {
       camera={{ fov: CAMERA.fov, near: CAMERA.near, far: CAMERA.far, position: SCENES.home.position }}
     >
       <CameraRig />
+      <SceneReadySignal />
       <Lighting />
 
       <Room />

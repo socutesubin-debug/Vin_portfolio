@@ -1,0 +1,274 @@
+/* V3: INTRO 스크롤 영상 · 빛 전환 · 다시 보기 */
+
+/* ── INTRO 무대(ScrollTrigger가 고정한다) ── */
+.v3-intro-stage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: #f1ece3;
+  z-index: var(--z-intro);
+}
+
+.v3-intro-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 키네틱 타이포: 한 줄씩 마스크 안에서 올라온다 */
+.v3-type {
+  position: absolute;
+  margin: 0;
+  pointer-events: none;
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+}
+
+.v3-type-item {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: max-content;
+  margin: 0;
+}
+
+.v3-type[style*='right'] .v3-type-item {
+  inset: 0 0 auto auto;
+}
+
+.v3-type[style*='text-align: center'] .v3-type-item {
+  inset: 0 0 auto 0;
+  width: auto;
+}
+
+.v3-type-mask {
+  display: block;
+  overflow: hidden;
+  /* 글자 아래쪽 획이 잘리지 않게 */
+  padding-bottom: 0.06em;
+}
+
+.v3-type-line {
+  display: block;
+  visibility: hidden;
+  will-change: transform;
+}
+
+/* S01 하단 중앙 Scroll 힌트 */
+.v3-scroll-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(43, 45, 49, 0.7);
+  pointer-events: none;
+}
+
+.v3-scroll-hint::after {
+  content: '';
+  display: block;
+  width: 1px;
+  height: 28px;
+  margin: 8px auto 0;
+  background: currentColor;
+  transform-origin: top;
+  animation: v3-hint 1.8s ease-in-out infinite;
+}
+
+@keyframes v3-hint {
+  0% {
+    transform: scaleY(0);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
+
+/* 건너뛰기: 시작 2~3초 뒤 구석에 낮은 대비로 */
+.v3-skip {
+  position: absolute;
+  right: 20px;
+  bottom: 18px;
+  padding: 8px 6px;
+  border: 0;
+  background: none;
+  font: 500 12px/1 var(--font-sans);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(43, 45, 49, 0.42);
+  cursor: pointer;
+  opacity: 0;
+  animation: v3-fade-in 0.8s ease forwards;
+}
+
+.v3-skip:hover,
+.v3-skip:focus-visible {
+  color: rgba(43, 45, 49, 0.85);
+}
+
+.v3-skip:focus-visible {
+  outline: 2px solid var(--focus, #2b2d31);
+  outline-offset: 2px;
+}
+
+@keyframes v3-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+/* 개발용: 프레임 번호·클립·진행률 */
+.v3-intro-hud {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font: 11px/1.4 ui-monospace, Consolas, monospace;
+  pointer-events: none;
+}
+
+.v3-intro-error {
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  min-height: 100vh;
+  padding: 16px;
+  text-align: center;
+  color: #8f5400;
+}
+
+/* ── HOME 전환 빛 ── */
+.v3-light {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-detail) + 5);
+  pointer-events: none;
+  visibility: hidden;
+  --light-glow: 0;
+  --light-spread: 25%;
+  --light-wash: 0;
+  --light-bloom: 0px;
+  --light-bright: 1;
+}
+
+.v3-light > div {
+  position: absolute;
+  inset: 0;
+}
+
+/* 블룸 느낌: 뒤 화면을 살짝 흐리고 밝게 */
+.v3-light-bloom {
+  backdrop-filter: blur(var(--light-bloom)) brightness(var(--light-bright));
+  -webkit-backdrop-filter: blur(var(--light-bloom)) brightness(var(--light-bright));
+}
+
+/* 창문 쪽에서 번지는 따뜻한 빛 */
+.v3-light-glow {
+  opacity: var(--light-glow);
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    circle at var(--light-x) var(--light-y),
+    var(--light-core) 0%,
+    var(--light-warm) calc(var(--light-spread) * 0.45),
+    rgba(255, 213, 154, 0) var(--light-spread)
+  );
+}
+
+/* 화면 전체가 하얗게(웜톤) 밝아짐 */
+.v3-light-wash {
+  opacity: var(--light-wash);
+  background: var(--light-wash-color);
+}
+
+/* 움직임 줄이기: 마지막 장면 정지 이미지 */
+.v3-intro-still {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-detail) + 4);
+  background: #f1ece3;
+  transition: opacity 0.8s ease;
+}
+
+.v3-intro-still img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.v3-intro-still.is-fading {
+  opacity: 0;
+}
+
+/* ── S04: 인트로 다시 보기 ── */
+.v3-replay {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: var(--z-header);
+  padding: 6px 10px;
+  border: 1px solid rgba(43, 45, 49, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(6px);
+  font: 500 11px/1 var(--font-sans);
+  color: rgba(43, 45, 49, 0.7);
+  cursor: pointer;
+}
+
+.v3-replay:hover,
+.v3-replay:focus-visible {
+  color: #2b2d31;
+  border-color: rgba(43, 45, 49, 0.45);
+}
+
+.v3-replay:focus-visible {
+  outline: 2px solid var(--focus, #2b2d31);
+  outline-offset: 2px;
+}
+
+/* ── 개발용: k5 겹쳐 보기 ── */
+.v3-k5 {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: var(--z-overlay);
+  pointer-events: none;
+}
+
+.v3-devbar {
+  position: fixed;
+  left: 12px;
+  bottom: 72px;
+  z-index: var(--z-overlay);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font: 11px/1.3 ui-monospace, Consolas, monospace;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v3-scroll-hint::after {
+    animation: none;
+  }
+}
