@@ -158,41 +158,36 @@ body[data-scene='home'] .v5-copy { color: var(--v5-ink-2); }
 .v5-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .v5-tags li { padding: 4px 12px; border: 1px solid #cfc9bb; border-radius: 14px; font-size: 13px; }
 
-/* ---------- Home (자리표시) ---------- */
-.v5-home { background: linear-gradient(180deg, #ece8df 0%, #e4dfd3 58%, #d8d1c2 58.2%, #cfc7b6 100%); color: var(--v5-ink); }
-.v5-home-stage { position: absolute; inset: 0; }
-.v5-home-placeholder { position: absolute; inset: 0; }
-.v5-home-cabinet {
-  position: absolute; right: 9%; bottom: 42%; width: 26%; height: 44%;
-  background: repeating-linear-gradient(180deg, #9c9f94 0 calc(25% - 4px), #868a7e calc(25% - 4px) 25%);
-  border-radius: 3px; opacity: 0.55;
-}
-.v5-home-desk {
-  position: absolute; left: 8%; right: 8%; bottom: 18%; height: 26%;
-  background: linear-gradient(180deg, #faf9f6, #ecebe6); border-radius: 4px;
-  box-shadow: 0 30px 50px rgba(60, 50, 30, 0.18); opacity: 0.9;
-}
+/* ---------- Home · 책상(V6 배경) ---------- */
+.v5-home { background: #e7e1d6; color: var(--v5-ink); }
+.v5-home-stage, .v5-home-bg { position: absolute; inset: 0; overflow: hidden; }
+.v5-home-bg img { position: absolute; max-width: none; user-select: none; }
+/* 사진 위 글: 반투명 종이 카드(창틀·빛 무늬 위에서도 읽히도록) */
 .v5-home-copy {
-  position: absolute; left: var(--v5-gutter); top: 50%; transform: translateY(-58%);
-  display: grid; gap: 18px; max-width: 560px;
+  position: absolute; left: var(--v5-gutter); top: calc(var(--v5-nav-h) + 8px);
+  display: grid; gap: 14px; max-width: 420px; padding: 22px 24px 20px;
+  border-radius: 8px; background: rgba(250, 247, 241, 0.82); backdrop-filter: blur(10px);
+  box-shadow: 0 12px 40px rgba(60, 50, 30, 0.12);
 }
-.v5-home-copy h1 { margin: 0; font-size: clamp(34px, 4.2vw, 60px); font-weight: 300; letter-spacing: -0.03em; line-height: 1.1; }
-.v5-home-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
-.v5-quicklinks { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 4px 0 0; padding: 0; list-style: none; font-size: 15px; font-weight: 500; }
+.v5-home-copy .v5-eyebrow { margin: 0; }
+.v5-home-copy h1 { margin: 0; font-size: clamp(26px, 2.4vw, 34px); font-weight: 300; letter-spacing: -0.02em; line-height: 1.2; }
+.v5-home-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.v5-quicklinks { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0; padding: 0; list-style: none; font-size: 14px; font-weight: 500; }
+/* 메뉴: 창 위에서도 읽히게 옅은 빛 번짐 */
+body[data-scene='home'] .v5-nav a, body[data-scene='home'] .v5-nav .v5-logo { text-shadow: 0 0 10px rgba(255, 252, 245, 0.9), 0 0 2px rgba(255, 252, 245, 0.9); }
 .v5-home-modes {
   position: absolute; right: var(--v5-gutter); bottom: 72px; display: flex; gap: 4px; padding: 4px;
-  border-radius: 22px; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(6px);
+  border-radius: 22px; background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(6px);
 }
 .v5-home-modes button { min-height: 36px; padding: 0 14px; border: 0; border-radius: 18px; background: transparent; cursor: pointer; font-size: 13px; }
 .v5-home-modes button[aria-pressed='true'] { background: var(--v5-ink); color: #fff; }
 .v5-home-modes button[disabled] { cursor: not-allowed; opacity: 0.45; }
+body[data-scene='home'] .v5-sound { background: rgba(255, 255, 255, 0.6); }
 @media (max-width: 720px) {
-  .v5-home-copy { top: calc(var(--v5-nav-h) + 12px); transform: none; right: var(--v5-gutter); }
-  .v5-home-copy h1 { font-size: 34px; }
+  .v5-home-copy { right: var(--v5-gutter); max-width: none; padding: 18px; gap: 12px; }
+  .v5-home-copy h1 { font-size: 24px; }
   .v5-home-actions .v5-btn { flex: 1 1 100%; justify-content: center; }
-  .v5-home-modes { left: var(--v5-gutter); right: auto; bottom: 70px; }
-  .v5-home-cabinet { right: 6%; width: 40%; bottom: 30%; height: 22%; }
-  .v5-home-desk { bottom: 14%; height: 16%; left: 4%; right: 4%; }
+  .v5-home-modes { left: auto; right: var(--v5-gutter); bottom: 72px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

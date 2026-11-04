@@ -4,6 +4,7 @@ import { navigate, type Route } from '../router'
 import { Panel } from './Panel'
 import { CoverLetter } from './CoverLetter'
 import { Resume } from './Resume'
+import { HomeBackground } from './HomeBackground'
 
 type HomeMode = 'composite' | 'layout' | 'plan'
 
@@ -14,9 +15,9 @@ const MODES: { id: HomeMode; label: string }[] = [
 ]
 
 /**
- * Home · 책상 (자리표시)
- * V6 배경(v5-home-desk-background-v6.png)·iMac/table OBJ·평면도 SVG가 들어오면 home/HomeScene.ts를 채워
- * 이 자리의 .v5-home-stage에 붙인다. 지금은 같은 동선(자기소개서·이력서 패널, 보기 전환)만 동작한다.
+ * Home · 책상
+ * 1단계: V6 배경 사진만(home/config.ts의 cover 배치). 3D 사물(iMac·서류더미·스탠드)은 2단계부터 home/HomeScene.ts로
+ * 같은 cover 영역에 맞춰 올린다. 지금은 버튼으로 같은 동선(이력서·자기소개서 패널)이 동작한다.
  */
 export function HomeView({ route }: { route: Route }) {
   const [mode, setMode] = useState<HomeMode>('composite')
@@ -37,11 +38,8 @@ export function HomeView({ route }: { route: Route }) {
 
   return (
     <section className="v5-screen v5-home" aria-labelledby="home-title">
-      <div className="v5-home-stage" data-mode={mode} aria-hidden="true">
-        <div className="v5-home-placeholder">
-          <span className="v5-home-desk" />
-          <span className="v5-home-cabinet" />
-        </div>
+      <div className="v5-home-stage" data-mode={mode}>
+        <HomeBackground />
       </div>
 
       <div className="v5-home-copy">
@@ -49,9 +47,6 @@ export function HomeView({ route }: { route: Route }) {
         <h1 id="home-title" tabIndex={-1} data-screen-title>
           책상 위에서 저를 소개할게요
         </h1>
-        <p className="v5-note" role="note">
-          책상 장면은 준비 중이에요. V6 배경 이미지와 iMac 모델이 들어오면 이 자리에 3D 장면이 붙습니다.
-        </p>
         <div className="v5-home-actions">
           <button type="button" className="v5-btn v5-btn-primary" onClick={open('#resume')}>
             이력서 보기 <span className="v5-sub">iMac</span>
@@ -78,7 +73,7 @@ export function HomeView({ route }: { route: Route }) {
             aria-pressed={mode === m.id}
             onClick={() => setMode(m.id)}
             disabled={m.id !== 'composite'}
-            title={m.id !== 'composite' ? 'output/home-prototype 자료가 들어오면 열립니다' : undefined}
+            title={m.id !== 'composite' ? '다음 단계에서 열립니다' : undefined}
           >
             {m.label}
           </button>
