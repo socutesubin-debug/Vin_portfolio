@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "build:intro": "node scripts/build-intro.mjs"
+    "build:intro": "node scripts/build-intro.mjs intro",
+    "build:home": "node scripts/build-intro.mjs home"
   },
   "dependencies": {
     "@emailjs/browser": "^5.0.3",

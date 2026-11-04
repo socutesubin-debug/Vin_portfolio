@@ -5,6 +5,8 @@ import { useWorkspace } from '../state/workspaceStore'
 
 const PROJECT_DRAWER = DRAWER_SLOTS.findIndex((s) => s.contents === 'projects')
 type Filter = 'all' | CategoryId
+/** 프로젝트가 이보다 적으면 필터 칩을 숨기고 전부 보여준다 */
+const FILTER_MIN_PROJECTS = 5
 
 /** 전체 보기: 카테고리 필터 칩 + 2열 프로젝트 그리드(모바일 1열) */
 export default function ProjectGrid() {
@@ -26,11 +28,13 @@ export default function ProjectGrid() {
     setGridOpen(false)
     setOpenDrawer(PROJECT_DRAWER)
   }
+  // 개수는 projects 데이터에서 센다. 프로젝트가 없는 카테고리는 칩을 숨긴다
   const chips: { id: Filter; label: string; count: number }[] = [
-    { id: 'all', label: 'All', count: PROJECTS.length },
+    { id: 'all' as Filter, label: 'All', count: PROJECTS.length },
     ...CATEGORIES.map((c) => ({ id: c.id, label: c.label, count: PROJECTS.filter((p) => p.category === c.id).length })),
-  ]
-  const shown = filter === 'all' ? PROJECTS : PROJECTS.filter((p) => p.category === filter)
+  ].filter((c) => c.count > 0)
+  const showFilters = PROJECTS.length >= FILTER_MIN_PROJECTS
+  const shown = !showFilters || filter === 'all' ? PROJECTS : PROJECTS.filter((p) => p.category === filter)
 
   return (
     <div className="v2-grid" role="dialog" aria-modal="true" aria-labelledby="v2-grid-title">
@@ -44,20 +48,22 @@ export default function ProjectGrid() {
         Selected Projects
       </h2>
 
-      <div className="v2-grid__chips" role="group" aria-label="카테고리">
-        {chips.map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            className="v2-chip"
-            aria-pressed={filter === c.id}
-            onClick={() => setFilter(c.id)}
-          >
-            {c.label}
-            <sup>{c.count}</sup>
-          </button>
-        ))}
-      </div>
+      {showFilters && (
+        <div className="v2-grid__chips" role="group" aria-label="카테고리">
+          {chips.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              className="v2-chip"
+              aria-pressed={filter === c.id}
+              onClick={() => setFilter(c.id)}
+            >
+              {c.label}
+              <sup>{c.count}</sup>
+            </button>
+          ))}
+        </div>
+      )}
 
       <ul className="v2-grid__list">
         {shown.map((p) => (

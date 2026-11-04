@@ -1,12 +1,12 @@
 /**
- * INTRO 영상 → 스크롤 재생용 WebP 이미지 시퀀스.
+ * 영상 → 스크롤 재생용 WebP 이미지 시퀀스.
  *
- *   npm run build:intro
+ *   npm run build:intro   INTRO(S01~S03): public/media/intro/raw/ 의 c1~c4 mp4를 크로스페이드로 이어 붙인다
+ *   npm run build:home    S04 진입(방 전체 → 모니터 클로즈업): public/media/home/raw/ 의 c5 mp4
+ *   (직접 실행: node scripts/build-intro.mjs intro|home)
  *
- * 입력: public/media/intro/raw/ 의 c1~c4 mp4 (파일 이름이 c1, c2, c3, c4로 시작하면 된다)
- * 출력: public/media/intro/seq/desktop/0001.webp …, seq/mobile/0001.webp …, public/media/intro/manifest.json
- *
- * 영상만 같은 이름(또는 같은 c1~c4 앞머리)으로 바꿔 넣고 다시 돌리면 시퀀스와 manifest가 새로 만들어진다.
+ * 출력: public/media/<대상>/seq/desktop/0001.webp …, seq/mobile/0001.webp …, public/media/<대상>/manifest.json
+ * 파일 이름이 c1, c2 …로 시작하면 된다. 영상만 바꿔 넣고 다시 돌리면 시퀀스와 manifest가 새로 만들어진다.
  * 해상도는 원본보다 키우지 않는다(480p 테스트 → 가로 864, 720p 최종 → 가로 1280).
  */
 import { spawnSync } from 'node:child_process'
@@ -16,8 +16,13 @@ import { fileURLToPath } from 'node:url'
 import ffmpegPath from 'ffmpeg-static'
 
 // ── 설정 ──────────────────────────────────────────────
+/** 대상별 폴더와 클립 순서 */
+const TARGETS = {
+  intro: { dir: 'public/media/intro', clips: ['c1', 'c2', 'c3', 'c4'] },
+  home: { dir: 'public/media/home', clips: ['c5'] },
+}
+
 const OPTIONS = {
-  clips: ['c1', 'c2', 'c3', 'c4'],
   fps: 24,
   /** 클립 사이 크로스페이드 길이(초). 24fps에서 0.3초 → 7프레임 */
   crossfade: 0.3,
@@ -30,8 +35,12 @@ const OPTIONS = {
   mobileAspect: 9 / 16,
 }
 
+const targetName = process.argv[2] ?? 'intro'
+const TARGET = TARGETS[targetName]
+if (!TARGET) throw new Error(`대상은 ${Object.keys(TARGETS).join(' | ')} 중 하나예요: ${targetName}`)
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const INTRO = join(ROOT, 'public/media/intro')
+const INTRO = join(ROOT, TARGET.dir)
 const RAW = join(INTRO, 'raw')
 const SEQ = join(INTRO, 'seq')
 const rel = (p) => relative(ROOT, p).replaceAll('\\', '/')
@@ -61,9 +70,13 @@ function probe(file) {
 // ── 1. 입력 찾기 ──────────────────────────────────────
 if (!existsSync(RAW)) throw new Error(`${rel(RAW)} 폴더가 없어요`)
 const rawFiles = readdirSync(RAW).filter((f) => f.toLowerCase().endsWith('.mp4'))
-const inputs = OPTIONS.clips.map((id) => {
+const missing = TARGET.clips.filter((id) => !rawFiles.some((f) => f.toLowerCase().startsWith(id)))
+if (missing.length) {
+  console.error(`${rel(RAW)}에 ${missing.join(', ')}로 시작하는 mp4가 없어요. 영상을 넣고 다시 실행하세요.`)
+  process.exit(1)
+}
+const inputs = TARGET.clips.map((id) => {
   const name = rawFiles.filter((f) => f.toLowerCase().startsWith(id)).sort()[0]
-  if (!name) throw new Error(`${rel(RAW)}에서 ${id}로 시작하는 mp4를 찾지 못했어요`)
   const file = join(RAW, name)
   return { id, name, file, ...probe(file) }
 })
@@ -102,11 +115,11 @@ let last = 'v0'
 let offset = 0
 for (let i = 1; i < inputs.length; i++) {
   offset += (inputs[i - 1].frames - overlap) / OPTIONS.fps
-  const out = i === inputs.length - 1 ? 'joined' : `x${i}`
+  const out = `x${i}`
   chains.push(`[${last}][v${i}]xfade=transition=fade:duration=${xf.toFixed(6)}:offset=${offset.toFixed(6)}[${out}]`)
   last = out
 }
-chains.push(`[joined]split=2[d0][m0]`)
+chains.push(`[${last}]split=2[d0][m0]`)
 chains.push(`[d0]scale=${desktopW}:${desktopH}:flags=lanczos[desk]`)
 chains.push(`[m0]crop=${cropW}:${cropH}:(iw-${cropW})/2:(ih-${cropH})/2,scale=${mobileW}:${mobileH}:flags=lanczos[mob]`)
 
@@ -136,7 +149,7 @@ const manifest = {
   ...manifestClips,
   total,
   fps: OPTIONS.fps,
-  crossfadeFrames: overlap,
+  crossfadeFrames: inputs.length > 1 ? overlap : 0,
   desktop: { width: desktopW, height: desktopH, path: 'seq/desktop/' },
   mobile: { width: mobileW, height: mobileH, path: 'seq/mobile/' },
   source: { width: srcW, height: srcH, files: inputs.map((c) => c.name) },
