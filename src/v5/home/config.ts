@@ -1,28 +1,23 @@
 /**
- * Home 배경(V6) 설정. 원본: output/visuals/v5-home-desk-background-v6 (확장자 없는 PNG, 1672×941)
- * → public/images/home/v5-home-desk-background-v6.png(복사본) · .webp(화면용, 118kB)
- *
- * 구도: 정면 빈 책상(화면 아래 약 30%) · 뒤 원목 선반·화분·책 · 왼쪽 격자 창(빛이 왼쪽에서 들어와 그림자가 오른쪽 아래로) ·
- * 오른쪽 끝 회색 철제 수납장 일부.
+ * Home 설정 — 1번 시안: 블라인드 벽 + 흰 책상 정면, 글자는 메뉴·소리·©만.
+ * 배경 원본: output/visuals/v5-home-desk-background-v6.png (1432×713) → public/images/home/ PNG 복사본·WebP(58kB)
  */
 export const HOME_BG = {
   webp: '/images/home/v5-home-desk-background-v6.webp',
   png: '/images/home/v5-home-desk-background-v6.png',
-  width: 1672,
-  height: 941,
-  /** 화면이 사진보다 좁거나 낮을 때 남길 기준점(0–1). 데스크톱·세로 화면 */
+  width: 1432,
+  height: 713,
+  /** 화면이 사진보다 좁거나 낮을 때 남길 기준점(0–1) */
   focus: {
     wide: { x: 0.5, y: 0.5 },
-    // 세로 화면: 책상 가운데와 선반 위 책이 함께 보이도록 살짝 왼쪽
-    tall: { x: 0.46, y: 0.5 },
+    tall: { x: 0.5, y: 0.5 },
   },
-  /** 사진 속 책상 앞 모서리·뒤 모서리의 세로 위치(사진 높이 비율). 3D 책상 윗면을 맞출 때 쓴다 */
-  deskFrontY: 0.97,
-  deskBackY: 0.705,
+  /** 사진 속 책상 뒤 모서리(블라인드와 만나는 선)·앞 모서리의 세로 위치(사진 높이 비율) */
+  deskBackY: 0.813,
+  deskFrontY: 0.972,
 }
 
 export interface CoverRect {
-  /** 화면 기준 사진의 왼쪽 위(px) — 음수면 잘려 나간 부분 */
   x: number
   y: number
   width: number
@@ -30,61 +25,73 @@ export interface CoverRect {
   scale: number
 }
 
-/**
- * object-fit: cover와 같은 배치를 직접 계산한다. 3D 카메라(2단계)도 같은 값을 써서 사진과 원근을 맞춘다.
- */
+/** object-fit: cover와 같은 배치. 3D 카메라도 같은 값으로 setViewOffset 한다 */
 export function coverRect(viewW: number, viewH: number, focus = viewW / viewH < 0.8 ? HOME_BG.focus.tall : HOME_BG.focus.wide): CoverRect {
   const scale = Math.max(viewW / HOME_BG.width, viewH / HOME_BG.height)
   const width = HOME_BG.width * scale
   const height = HOME_BG.height * scale
-  // 기준점이 화면 같은 비율 위치에 오도록 하되, 사진 밖(빈 곳)이 보이지 않게 자른다
-  const x = Math.min(0, Math.max(viewW - width, viewW * focus.x - width * focus.x))
-  const y = Math.min(0, Math.max(viewH - height, viewH * focus.y - height * focus.y))
+  const x = Math.min(0, Math.max(viewW - width, (viewW - width) * focus.x))
+  const y = Math.min(0, Math.max(viewH - height, (viewH - height) * focus.y))
   return { x, y, width, height, scale }
 }
 
 /**
- * 사진과 맞춘 카메라(2단계). 사진은 정면·수평(기울기 0)으로 찍은 것으로 보고,
- * 사진 속 책상 뒤 모서리(deskBackY)와 앞 모서리(deskFrontY)가 3D 책상 윗면(y = 0)의 뒤(z = 0)·앞(z = deskDepth)에
- * 오도록 카메라 높이와 거리를 거꾸로 계산한다. 화각·깊이만 바꾸면 나머지가 따라온다.
+ * 사진과 맞춘 카메라: 정면·수평 카메라로 보고, 사진 속 책상 뒤·앞 모서리가 3D 책상 윗면(y = 0)의
+ * 뒤(z = 0)·앞(z = deskDepth)에 오도록 높이·거리를 거꾸로 계산한다.
  */
-export const HOME_CAMERA = {
-  /** 사진 전체 세로 화각(도) — 사진 비율 1672:941 기준 */
-  vfov: 38,
-  /** 사진 속 책상 깊이(m). 클수록 카메라가 멀어지고 사물이 작게 보인다 */
-  deskDepth: 0.95,
-}
+export const HOME_CAMERA = { vfov: 34, deskDepth: 1.05 }
 
 export function photoCamera() {
   const t = Math.tan((HOME_CAMERA.vfov * Math.PI) / 360)
-  // 수평 카메라: 화면 가운데(0.5)가 눈높이. 아래로 내려간 비율 → 내려다보는 각도의 tan
   const tb = (HOME_BG.deskBackY - 0.5) * 2 * t
   const tf = (HOME_BG.deskFrontY - 0.5) * 2 * t
   const height = HOME_CAMERA.deskDepth / (1 / tb - 1 / tf)
-  const backDist = height / tb
-  return { height, z: backDist, fov: HOME_CAMERA.vfov, aspect: HOME_BG.width / HOME_BG.height }
+  return { height, z: height / tb, fov: HOME_CAMERA.vfov, aspect: HOME_BG.width / HOME_BG.height }
 }
 
-/** 빛: 사진의 왼쪽 창에서 들어오는 햇빛(벽 그림자가 왼쪽 위 → 오른쪽 아래) */
+/** 빛: 사진처럼 왼쪽에서 들어오는 햇빛(책상 왼쪽 앞 빛 무늬) + 밝은 회색 실내 */
 export const HOME_LIGHT = {
-  sun: { color: '#fff0da', intensity: 2.6, position: [-2.4, 2.1, 1.4] as const },
-  sky: { color: '#fbf6ee', ground: '#cdbfa9', intensity: 1.0 },
-  /** 사진 위에 떨어지는 그림자 진하기(ShadowMaterial) */
-  shadowOpacity: 0.26,
-  contactOpacity: 0.38,
+  sun: { color: '#fff6ea', intensity: 2.4, position: [-2.6, 2.4, 1.6] as const },
+  sky: { color: '#f4f5f7', ground: '#c9c9c6', intensity: 1.15 },
+  shadowOpacity: 0.22,
+  contactOpacity: 0.32,
 }
 
-/** iMac 배치(책상 좌표: x 가운데 0, z 0 = 벽쪽 뒤 모서리, 앞으로 +). 세로 화면은 화면 폭이 좁아 가운데로 */
-export const IMAC = {
-  url: '/models/home/imac.obj',
-  /** OBJ는 Z가 위, 단위가 커서(폭 6.5) 실제 24인치 폭 0.547m로 줄인다 */
-  rotX: -Math.PI / 2,
-  scale: 0.547 / 6.5,
-  wide: { x: 0.2, z: 0.3, rotY: -0.14, scale: 1 },
-  // 세로 화면은 사진 가운데 약 26%만 보여 실제 크기면 화면을 꽉 채운다 → 뒤로 물리고 줄인다(작은 화면처럼)
-  tall: { x: -0.05, z: 0.12, rotY: -0.06, scale: 0.62 },
-  /** 선택하면 화면 앞으로(데스크톱은 왼쪽 패널 옆, 세로 화면은 위쪽). ndc = 화면 위치, dist = 카메라에서 거리(m) */
-  focus: { wide: { ndcX: -0.42, ndcY: -0.05, dist: 0.95 }, tall: { ndcX: 0, ndcY: 0.45, dist: 1.25 }, duration: 0.8 },
+export type PropId = 'imac' | 'papers' | 'lamp' | 'mug' | 'pen' | 'phone'
+
+export interface Placement {
+  x: number
+  z: number
+  rotY: number
+  /** 세로 화면 등에서 줄일 때(1 = 실제 크기) */
+  scale?: number
+  /** 이 화면에서 숨김 */
+  hidden?: boolean
 }
+
+/**
+ * 소품(책상 좌표: x 가운데 0, z 0 = 뒤 모서리, 앞으로 +, 단위 m).
+ * wide = 가로 화면, tall = 세로 화면(사진 가운데 약 25%만 보여 iMac·서류더미를 앞쪽에 둔다).
+ * 모델에는 재질 파일(.mtl)이 없어 HomeScene의 임시 재질을 쓴다.
+ */
+export const PROPS: Record<PropId, { url?: string; scale?: number; fit?: number; rot?: [number, number, number]; wide: Placement; tall: Placement }> = {
+  // iMac Pro(3ds Max, mm 단위 → 0.001). 패널 폭 약 65cm, 키보드·마우스·선 포함
+  imac: { url: '/models/home/imac.obj', scale: 0.001, wide: { x: 0.12, z: 0.16, rotY: -0.08 }, tall: { x: 0.0, z: 0.12, rotY: 0, scale: 0.85 } },
+  // 서류더미(모델 없음 — 종이 도형)
+  papers: { wide: { x: -0.42, z: 0.4, rotY: 0.18 }, tall: { x: -0.1, z: 0.62, rotY: 0.12, scale: 0.9 } },
+  // 스탠드(m 단위, 갓이 +x) — 왼쪽 끝에서 책상 가운데를 비춘다. 웹용 사본(면 30%)
+  lamp: { url: '/models/home/web/lamp-web.obj', scale: 1, wide: { x: -0.86, z: 0.14, rotY: -0.25 }, tall: { x: -0.6, z: 0.1, rotY: 0, hidden: true } },
+  // 머그(사진 컷아웃)
+  mug: { wide: { x: -0.66, z: 0.42, rotY: 0 }, tall: { x: 0.17, z: 0.6, rotY: 0, scale: 1 } },
+  // 만년필(111MB 원본 → 면 1.5% 웹용 사본). 길이 14cm로 맞춰 눕힌다
+  pen: { url: '/models/home/web/pen-web.obj', fit: 0.14, rot: [0, 0, Math.PI / 2], wide: { x: 0.52, z: 0.48, rotY: 0.5 }, tall: { x: 0.12, z: 0.55, rotY: 0.4, hidden: true } },
+  // 탁상 전화기(cm 단위 → 0.01). 웹용 사본(면 35%) → Contact로
+  phone: { url: '/models/home/web/phone-web.obj', scale: 0.01, wide: { x: 0.74, z: 0.3, rotY: -0.3 }, tall: { x: 0.3, z: 0.3, rotY: 0, hidden: true } },
+}
+
+/** 선택했을 때 iMac이 나오는 위치(화면 ndc · 카메라에서 거리 m) */
+export const IMAC_FOCUS = { wide: { ndcX: -0.4, ndcY: -0.1, dist: 1.05 }, tall: { ndcX: 0, ndcY: 0.35, dist: 1.3 }, duration: 0.8 }
+
+export const MUG = { webp: '/images/home/vin-mug.webp', png: '/images/home/vin-mug.png', height: 0.095, imageTop: 0.18, imageBottom: 0.86 }
 
 export const TABLE = { url: '/models/home/table.obj', height: 0.75 }

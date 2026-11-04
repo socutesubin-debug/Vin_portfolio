@@ -8,11 +8,15 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
  * 개발용: public/models/home/의 OBJ 방향·크기 확인 (?dev=models[&view=front|side|top])
  * 빌드에는 들어가지 않는다.
  */
-const FILES = [
-  { url: '/models/home/imac.obj', rotX: -Math.PI / 2, scale: 0.547 / 6.5 },
-  { url: '/models/home/table.obj', rotX: 0, scale: 1 },
-  { url: '/models/home/desk_lamp.obj', rotX: 0, scale: 1 },
+// fit = 가장 긴 변을 이 길이(m)로. rotX = 세우기 보정. ?only=이름 으로 하나만
+const ALL = [
+  { url: '/models/home/imac.obj', rotX: 0, fit: 0.65 },
+  { url: '/models/home/telefono.obj', rotX: 0, fit: 0.24 },
+  { url: '/models/home/desk_lamp.obj', rotX: 0, fit: 0.67 },
+  { url: '/models/home/PEN1.obj', rotX: 0, fit: 0.15 },
 ]
+const only = new URLSearchParams(location.search).get('only')
+const FILES = ALL.filter((f) => !only || f.url.includes(only))
 
 export async function mountModelCheck(root: HTMLElement) {
   root.innerHTML = ''
@@ -31,7 +35,7 @@ export async function mountModelCheck(root: HTMLElement) {
 
   const info: string[] = []
   const loader = new OBJLoader()
-  let x = -1.1
+  let x = -0.9
   for (const f of FILES) {
     const obj = await loader.loadAsync(f.url)
     obj.traverse((m) => {
@@ -39,20 +43,21 @@ export async function mountModelCheck(root: HTMLElement) {
     })
     const g = new Group()
     obj.rotation.x = f.rotX
-    obj.scale.setScalar(f.scale)
+    const raw = new Box3().setFromObject(obj).getSize(new Vector3())
+    obj.scale.setScalar(f.fit / Math.max(raw.x, raw.y, raw.z))
     g.add(obj)
     const b = new Box3().setFromObject(g)
     g.position.set(x - b.getCenter(new Vector3()).x, -b.min.y, 0)
     scene.add(g)
     const s = b.getSize(new Vector3())
     info.push(`${f.url.split('/').pop()}: 크기 ${s.toArray().map((v) => v.toFixed(3)).join(' × ')} m, 중심 z ${b.getCenter(new Vector3()).z.toFixed(3)}`)
-    x += 1.1
+    x += 0.6
   }
   const view = new URLSearchParams(location.search).get('view') ?? 'front'
   const cam = new PerspectiveCamera(35, innerWidth / innerHeight, 0.01, 50)
-  const pos = { front: [0, 0.6, 3.6], side: [3.6, 0.6, 0], top: [0, 4, 0.01] }[view] as [number, number, number]
+  const pos = { front: [0, 0.5, 2.6], side: [2.6, 0.5, 0], top: [0, 3, 0.01] }[view] as [number, number, number]
   cam.position.set(...pos)
-  cam.lookAt(0, 0.35, 0)
+  cam.lookAt(0, 0.2, 0)
   r.render(scene, cam)
   const pre = document.createElement('pre')
   pre.id = 'model-info'

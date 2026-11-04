@@ -383,3 +383,19 @@ body[data-scene='contact'] .v5-copy { color: var(--v5-ink-2); }
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); translate: -50% -100%;
 }
 .v5-anchor-label:hover { background: #000; }
+
+/* ---------- Home · 1번 시안(글자는 메뉴·소리·©만) ---------- */
+body[data-scene='home'] .v5-nav { color: #fff; }
+body[data-scene='home'] .v5-nav a, body[data-scene='home'] .v5-nav .v5-logo { text-shadow: 0 1px 3px rgba(60, 64, 72, 0.45), 0 0 14px rgba(60, 64, 72, 0.25); }
+body[data-scene='home'] .v5-copy { color: rgba(255, 255, 255, 0.9); text-shadow: 0 1px 3px rgba(60, 64, 72, 0.4); }
+/* 소리: 아이콘만 있는 원형 버튼(시안 1·7·8) */
+.v5-sound { width: 44px; padding: 0; justify-content: center; border-radius: 50%; border-color: rgba(255, 255, 255, 0.85); background: rgba(255, 255, 255, 0.18); }
+.v5-sound-label { display: none; }
+body[data-scene='home'] .v5-sound { color: #fff; background: rgba(120, 124, 130, 0.25); }
+body[data-scene='contact'] .v5-sound { border-color: currentColor; }
+.v5-home .v5-loading { bottom: 40px; }
+/* 사물 라벨: 평소엔 숨김 → 마우스를 올리거나(data-hover) 키보드 포커스 때 보인다 */
+.v5-home .v5-anchor-label { opacity: 0; transition: opacity 0.18s; }
+.v5-home .v5-anchor-label[data-hover='true'], .v5-home .v5-anchor-label:focus-visible { opacity: 1; }
+.v5-home .v5-anchor-label[data-ready='false'], .v5-home .v5-anchor-label:not([data-ready]), .v5-home .v5-anchor-label[data-visible='false'] { visibility: hidden; }
+.v5-home-fallback { position: absolute; left: 50%; bottom: 24%; transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }

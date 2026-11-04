@@ -3,6 +3,7 @@ import { focusArrival, rememberOpener } from '../focus'
 import { prefersReducedMotion } from '../prefs'
 import { navigate, type Route } from '../router'
 import { hasWebGL } from '../three/webgl'
+import type { PropId } from '../home/config'
 import type { HomeMode, HomeScene } from '../home/HomeScene'
 import { Panel } from './Panel'
 import { CoverLetter } from './CoverLetter'
@@ -12,41 +13,50 @@ import { Loading } from './SceneStatus'
 
 type Status = 'loading' | 'ready' | 'error' | 'nowebgl'
 
-const MODES: { id: HomeMode; label: string; needs?: string }[] = [
-  { id: 'composite', label: 'Home 시안' },
-  { id: 'layout', label: '3D 배치' },
-  { id: 'plan', label: '평면도', needs: '평면도 SVG(v5-home-floor-plan.svg)가 들어오면 열립니다' },
-]
+/** 사물 위 라벨. 평소엔 보이지 않고 마우스를 올리거나 키보드로 포커스하면 나타난다 */
+const LABELS: Record<PropId, (lampOn: boolean) => string> = {
+  imac: () => '이력서 보기',
+  papers: () => '자기소개서 보기',
+  phone: () => '연락하기',
+  lamp: (on) => (on ? '스탠드 끄기' : '스탠드 켜기'),
+  mug: () => '커피',
+  pen: () => '만년필',
+}
+const ORDER: PropId[] = ['imac', 'papers', 'phone', 'lamp', 'mug', 'pen']
 
 /**
- * Home · 책상
- * V6 배경 사진(HTML) 위에 투명 3D 캔버스(home/HomeScene.ts): 그림자만 받는 책상 윗면 + iMac.
- * iMac(또는 위에 붙은 '이력서 보기' 버튼) → iMac이 화면 앞으로(GSAP Timeline) → 이력서 패널.
- * 3D가 안 되거나 모델을 못 불러오면 사진 + 카드의 버튼으로 같은 내용에 도착한다.
+ * Home · 책상 (1번 시안: 사진 + 3D 사물, 글자는 메뉴·소리·©만)
+ * iMac → 화면 앞으로 → 이력서 · 서류더미 → 맨 위 종이가 밀림 → 자기소개서 · 전화기 → Contact
+ * 스탠드 켜기/끄기 · 머그·만년필은 짧게 반응. 3D가 안 되면 사진 위에 텍스트 버튼(대체 화면).
+ * 확인용 보기: ?view=layout (3D 배치 — 사진 없이 책상 모델과 사물 배치)
  */
 export function HomeView({ route }: { route: Route }) {
   const host = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<HomeScene | null>(null)
   const busy = useRef(false)
-  const [mode, setMode] = useState<HomeMode>('composite')
+  const btns = useRef(new Map<PropId, HTMLButtonElement>())
+  const [mode] = useState<HomeMode>(() => (new URLSearchParams(location.search).get('view') === 'layout' ? 'layout' : 'composite'))
   const [status, setStatus] = useState<Status>(() => (hasWebGL() ? 'loading' : 'nowebgl'))
   const [progress, setProgress] = useState<number | null>(null)
+  const [hovered, setHovered] = useState<PropId | null>(null)
+  const [lampOn, setLampOn] = useState(false)
   const panel = route.name === 'about' || route.name === 'resume' ? route.name : null
 
-  /** 이력서: iMac이 앞으로 나온 뒤 패널. 3D가 없으면 바로 패널 */
-  const openResume = useCallback((opener: Element | null) => {
-    rememberOpener(opener)
+  const activate = useCallback((id: PropId, opener: Element | null) => {
     const s = sceneRef.current
-    if (!s || busy.current) return navigate('#resume')
+    const go = { imac: '#resume', papers: '#about', phone: '#contact' }[id as 'imac']
+    if (go) rememberOpener(opener)
+    if (!s) return go && navigate(go)
+    if (busy.current) return
     busy.current = true
-    s.focusImac(() => {
+    s.activate(id, () => {
       busy.current = false
-      navigate('#resume')
+      if (id === 'lamp') setLampOn(s.isLampOn)
+      if (go) navigate(go)
     })
   }, [])
-  const imacBtn = useRef<HTMLButtonElement>(null)
-  const pickRef = useRef(() => openResume(imacBtn.current))
-  pickRef.current = () => openResume(imacBtn.current)
+  const pickRef = useRef(activate)
+  pickRef.current = activate
 
   // 장면은 Home에 들어올 때만 불러온다
   useEffect(() => {
@@ -59,9 +69,12 @@ export function HomeView({ route }: { route: Route }) {
         scene = new HomeScene(host.current!, {
           reducedMotion: prefersReducedMotion(),
           onProgress: setProgress,
-          onPick: () => pickRef.current(),
+          onHover: setHovered,
+          onPick: (id) => pickRef.current(id, btns.current.get(id) ?? null),
         })
         sceneRef.current = scene
+        scene.setMode(mode)
+        btns.current.forEach((el, id) => scene!.bindAnchor(id, el))
         return scene.ready
       })
       .then(() => !cancelled && setStatus('ready'))
@@ -74,11 +87,9 @@ export function HomeView({ route }: { route: Route }) {
       scene?.dispose()
       sceneRef.current = null
     }
-  }, [status === 'nowebgl'])
+  }, [status === 'nowebgl', mode])
 
-  useEffect(() => sceneRef.current?.setMode(mode), [mode, status])
-
-  // 패널이 닫혀 책상으로 돌아오면 iMac을 제자리로, 포커스는 열었던 버튼으로
+  // 패널이 닫혀 책상으로 돌아오면 사물을 제자리로, 포커스는 열었던 버튼으로
   const prevPanel = useRef(panel)
   useEffect(() => {
     if (prevPanel.current && !panel) {
@@ -89,79 +100,56 @@ export function HomeView({ route }: { route: Route }) {
   }, [panel])
 
   const close = () => navigate('#home')
-  const ready = status === 'ready'
+  const fallback = status === 'error' || status === 'nowebgl'
 
   return (
-    <section className="v5-screen v5-home" aria-labelledby="home-title">
+    <section className="v5-screen v5-home" aria-labelledby="home-title" data-mode={mode}>
+      <h1 id="home-title" className="v5-sr" tabIndex={-1} data-screen-title>
+        Home · 책상
+      </h1>
       <div className="v5-home-stage" data-mode={mode}>
         <HomeBackground />
         <div className="v5-home-canvas" ref={host} aria-hidden="true" />
       </div>
 
-      {status === 'loading' && <Loading label="책상을 준비하는 중…" progress={progress} />}
+      {status === 'loading' && <Loading label="" progress={progress} />}
 
-      {ready && mode !== 'plan' && (
-        <div className="v5-anchors">
-          <button
-            ref={(el) => {
-              imacBtn.current = el
-              sceneRef.current?.bindAnchor('imac', el)
-            }}
-            type="button"
-            className="v5-anchor v5-anchor-label"
-            onClick={(e) => openResume(e.currentTarget)}
-          >
-            이력서 보기
-          </button>
+      {!fallback && (
+        <div className="v5-anchors" role="group" aria-label="책상 위 사물">
+          {ORDER.map((id) => (
+            <button
+              key={id}
+              ref={(el) => {
+                if (el) btns.current.set(id, el)
+                else btns.current.delete(id)
+                sceneRef.current?.bindAnchor(id, el)
+              }}
+              type="button"
+              className="v5-anchor v5-anchor-label"
+              data-hover={hovered === id}
+              aria-pressed={id === 'lamp' ? lampOn : undefined}
+              onClick={(e) => activate(id, e.currentTarget)}
+            >
+              {LABELS[id](lampOn)}
+            </button>
+          ))}
         </div>
       )}
 
-      <div className="v5-home-copy">
-        <p className="v5-eyebrow">Home · 책상</p>
-        <h1 id="home-title" tabIndex={-1} data-screen-title>
-          책상 위에서 저를 소개할게요
-        </h1>
-        <div className="v5-home-actions">
-          {!ready && (
-            <button type="button" className="v5-btn v5-btn-primary" onClick={(e) => openResume(e.currentTarget)}>
-              이력서 보기 <span className="v5-sub">iMac</span>
-            </button>
-          )}
-          <button
-            type="button"
-            className="v5-btn"
-            onClick={(e) => {
-              rememberOpener(e.currentTarget)
-              navigate('#about')
-            }}
-          >
-            자기소개서 보기 <span className="v5-sub">서류더미</span>
-          </button>
-        </div>
-        <ul className="v5-quicklinks" aria-label="바로가기">
-          <li>
-            <a href="#projects">프로젝트 목록 바로 보기 →</a>
-          </li>
-          <li>
-            <a href="#message">메시지 바로 남기기 →</a>
-          </li>
-        </ul>
-      </div>
-
-      <div className="v5-home-modes" role="group" aria-label="Home 보기">
-        {MODES.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            aria-pressed={mode === m.id}
-            onClick={() => setMode(m.id)}
-            disabled={!!m.needs || (m.id === 'layout' && !ready)}
-            title={m.needs}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
+      {fallback && (
+        <nav className="v5-home-fallback" aria-label="책상 바로가기">
+          <p className="v5-sr">3D 장면을 표시할 수 없어 텍스트 버튼으로 보여드려요.</p>
+          <a className="v5-btn v5-btn-light" href="#resume" onClick={(e) => rememberOpener(e.currentTarget)}>
+            이력서
+          </a>
+          <a className="v5-btn v5-btn-light" href="#about" onClick={(e) => rememberOpener(e.currentTarget)}>
+            자기소개서
+          </a>
+          <a className="v5-btn v5-btn-light" href="#contact">
+            연락하기
+          </a>
+        </nav>
+      )}
 
       {panel === 'about' && (
         <Panel eyebrow="ABOUT" title="자기소개서" onClose={close}>

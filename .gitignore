@@ -19,3 +19,6 @@ dist
 /public/media/intro/manifest.json
 /public/media/home/seq/
 /public/media/home/manifest.json
+
+# 111MB 원본(GitHub 100MB 제한 초과). 화면에서는 public/models/home/web/pen-web.obj(웹용 사본)를 쓴다
+/public/models/home/PEN1.obj
