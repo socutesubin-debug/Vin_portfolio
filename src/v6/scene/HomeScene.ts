@@ -1,18 +1,17 @@
 import {
-  Box3, BoxGeometry, CanvasTexture, CatmullRomCurve3, Color, ConeGeometry, CylinderGeometry, DirectionalLight, DoubleSide,
-  FrontSide, Group, HemisphereLight, LatheGeometry, Mesh, MeshBasicMaterial, MeshLambertMaterial, Object3D,
-  PCFShadowMap, PerspectiveCamera, PlaneGeometry, Raycaster, Scene, SpotLight, TubeGeometry, Vector2, Vector3,
+  Box3, BoxGeometry, CanvasTexture, CatmullRomCurve3, ConeGeometry, CylinderGeometry, DoubleSide,
+  FrontSide, Group, LatheGeometry, Mesh, MeshBasicMaterial, MeshLambertMaterial, Object3D,
+  PerspectiveCamera, PlaneGeometry, Raycaster, Scene, SpotLight, TubeGeometry, Vector2, Vector3,
   WebGLRenderer, AdditiveBlending, type BufferGeometry, type Material,
 } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
-import { createDuotone } from '../three/duotoneStyle'
-import { THEME } from '../theme'
+import { addCleanLights, applyCleanMaterials, createCleanStyle, markFx, prepareModel } from '../three/cleanStyle'
+import { THEME, type CleanPalette } from '../theme'
 import { createCabinet, type Cabinet } from './cabinet'
 
 /**
  * VIN Home 책상 — docs/refs/home/prototype/home-prototype.html 을 그대로 옮긴 장면(값이 명세와 다르면 시험판 기준).
- * 단위 cm, 테이블 윗면 TOP = 75. 모든 사물은 흰 Lambert(밝기만 계산) → duotoneStyle 후처리로 진한 색·연한 색 두 가지.
+ * 단위 cm, 테이블 윗면 TOP = 75. 모든 사물은 흰 Lambert(밝기만 계산) → cleanStyle 후처리로 "깔끔한 일러스트"(3톤 + 검은 선 + 단색 배경).
  *
  * 1단계 범위: 마우스 둘러보기, 스탠드 켜고 끄기, 사물 호버 라벨, 컵 살짝 튀기.
  * 모니터·전화기·명함·서랍으로 다가가는 카메라 이동(#screen #contact #about #work)은 2단계.
@@ -56,7 +55,7 @@ export class HomeScene {
   private renderer: WebGLRenderer
   private scene = new Scene()
   private camera = new PerspectiveCamera(40, 1, 10, 5000)
-  private duo: ReturnType<typeof createDuotone>
+  private style: ReturnType<typeof createCleanStyle>
   private container: HTMLElement
   private opts: Options
   private picks: { id: PickId; g: Object3D }[] = []
@@ -76,20 +75,16 @@ export class HomeScene {
   private hover: PickId | null = null
   private ro: ResizeObserver
   private last = performance.now()
-  private start = performance.now()
   private disposed = false
 
   constructor(container: HTMLElement, opts: Options) {
     this.container = container
     this.opts = opts
     const r = (this.renderer = new WebGLRenderer({ antialias: false }))
-    r.setPixelRatio(Math.min(devicePixelRatio, 2))
-    r.shadowMap.enabled = true
-    r.shadowMap.type = PCFShadowMap
     r.domElement.className = 'v6-canvas'
     container.appendChild(r.domElement)
-    this.scene.background = new Color(0x000000) // 검정 → 진한 색
-    this.duo = createDuotone(r, this.scene, this.camera, { dark: THEME.dark, light: THEME.light, edgeThreshold: 0.62, grainAmt: 0.35 })
+    // 렌더러 설정(Linear 출력·톤매핑 없음·pixelRatio 2·그림자)과 scene.background(검정)는 createCleanStyle 이 정한다
+    this.style = createCleanStyle(r, this.scene, this.camera, THEME)
 
     this.ro = new ResizeObserver(() => this.fit())
     this.ro.observe(container)
@@ -125,15 +120,7 @@ export class HomeScene {
     const [mStand, mImac, mPhone, mTable] = await Promise.all(
       MODELS.map((k) =>
         loader.loadAsync(MODEL_URL(k)).then((gltf) => {
-          gltf.scene.traverse((o) => {
-            if (o instanceof Mesh) {
-              const geo = o.geometry as BufferGeometry
-              geo.deleteAttribute('normal')
-              o.geometry = toCreasedNormals(geo, Math.PI / 4)
-              o.material = W
-              o.castShadow = o.receiveShadow = true
-            }
-          })
+          prepareModel(gltf.scene) // 법선 다시 계산 + 흰 재질
           return gltf.scene
         }),
       ),
@@ -163,7 +150,7 @@ export class HomeScene {
     const scr = new Mesh(new PlaneGeometry(0.598, 0.336), BLACK)
     scr.position.set(0, 0.106, 0.335)
     scr.rotation.x = Math.atan2(1, 0.176)
-    scr.userData.noOutline = true
+    markFx(scr) // 재질·선 계산에서 제외
     scr.name = 'monitor-screen'
     mImac.add(scr)
 
@@ -177,7 +164,7 @@ export class HomeScene {
     const coneMat = new MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4, depthWrite: false, blending: AdditiveBlending })
     const cone = new Mesh(new ConeGeometry(0.52, 1.25, 40, 1, true), coneMat)
     cone.position.set(0.01, -0.325, 0.78)
-    cone.userData.noOutline = true
+    markFx(cone)
     lamp.add(cone)
     const spot = new SpotLight(0xffffff, 0, 120, 0.55, 0.6, 1)
     spot.position.set(0.01, 0.3, 0.78)
@@ -229,7 +216,7 @@ export class HomeScene {
       new MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.4, side: FrontSide }),
     )
     decal.position.y = 5.8
-    decal.userData.noOutline = true
+    markFx(decal)
     mug.add(decal)
 
     // 빛: 강한 햇빛 한 방향 + 주변광. 창 블라인드 그림자는 보이지 않는 막대 7개
@@ -238,17 +225,11 @@ export class HomeScene {
       const o = new Mesh(new BoxGeometry(2, 3.2, 150), bm)
       o.position.set(-150, 85 + i * 18, 20)
       o.castShadow = true
-      o.userData.noOutline = true
+      markFx(o)
       S.add(o)
     }
-    const sun = new DirectionalLight(0xffffff, 3)
-    sun.position.set(-300, 250, 260)
-    sun.castShadow = true
-    sun.shadow.mapSize.set(2048, 2048)
-    Object.assign(sun.shadow.camera, { left: -150, right: 150, top: 150, bottom: -150, near: 10, far: 1000 })
-    sun.shadow.bias = -0.0005
-    sun.shadow.radius = 2
-    S.add(sun, new HemisphereLight(0xffffff, 0xaaaaaa, 1.15))
+    addCleanLights(S) // 햇빛 세기 3 (-300,250,260) 그림자 2048 ±150 + 주변광 1.15
+    applyCleanMaterials(S) // 코드로 만든 사물(서랍·명함·머그)까지 모든 재질을 흰 Lambert 로(keepMaterial 제외)
 
     const map: [PickId, Object3D][] = [['lamp', lamp], ['imac', imac], ['phone', phone], ['card', card], ['cabinet', cab.group], ['mug', mug]]
     for (const [id, g] of map) {
@@ -265,7 +246,7 @@ export class HomeScene {
   private fit() {
     const w = this.container.clientWidth || 1
     const h = this.container.clientHeight || 1
-    this.duo.resize(w, h)
+    this.style.resize(w, h)
     this.camera.aspect = w / h
     const v = this.portrait() ? HOME_CAMERA.tall : HOME_CAMERA.wide
     this.camera.fov = v.fov
@@ -336,7 +317,7 @@ export class HomeScene {
       g.position.y = b.y0 + Math.sin(b.t * Math.PI) * 3
       if (b.t === 0) this.bump.delete(g)
     }
-    this.duo.render((now - this.start) / 1000)
+    this.style.render()
   }
 
   /** 사물 중심의 화면 좌표(px). 2단계 HTML 정렬·테스트용 */
@@ -347,16 +328,12 @@ export class HomeScene {
     return { x: ((c.x + 1) / 2) * this.container.clientWidth, y: ((1 - c.y) / 2) * this.container.clientHeight }
   }
 
-  /** ?tune 화면용 */
-  setPalette(dark: string, light: string) {
-    this.duo.setPalette(dark, light)
+  /** 개발용 ?tune: 팔레트 · 선 기준(0.3~1.0, 작을수록 선이 많아짐) */
+  setPalette(p: CleanPalette) {
+    this.style.setPalette(p)
   }
-  setGrain(v: number) {
-    this.duo.setOptions({ grainAmt: v })
-  }
-  /** 외곽선 슬라이더 0~1: 오른쪽으로 갈수록 선이 많아짐(법선 차이 기준 1.0 → 0.3) */
-  setOutline(v: number) {
-    this.duo.setOptions({ edgeThreshold: 1 - v * 0.7 })
+  setEdge(threshold: number) {
+    this.style.setEdge(threshold)
   }
 
   // ---------- 입력 ----------
@@ -384,7 +361,7 @@ export class HomeScene {
         ;(Array.isArray(o.material) ? o.material : [o.material]).forEach((m: Material) => m.dispose())
       }
     })
-    this.duo.dispose()
+    this.style.dispose()
     this.renderer.dispose()
     this.renderer.domElement.remove()
   }

@@ -39,6 +39,24 @@ npm run dev     # http://localhost:5173/#home
 
 스크린샷: `docs/v6-shots/` (compare-* = 왼쪽 목표, 오른쪽 결과)
 
+## 스타일 (v6-clean-style 브랜치)
+
+듀오톤 대신 '깔끔한 일러스트' 후처리(`three/cleanStyle.ts`): 흰 면 + 연한 중간톤 + 새까만 그림자 + 가는 검은 선 + 단색 배경, 질감 없음.
+값은 `cleanStyle.ts`의 `CLEAN`, 색은 `theme.ts`(청보라 기본·크림) 한 곳에만 있다. 개발 서버에서 `?tune`으로 선 기준(eThr)·팔레트를 바꿔 볼 수 있다.
+`duotoneStyle.ts`는 남겨 두었지만 쓰지 않는다. 스크린샷: `docs/v6-shots/clean-*.png`
+
+## 다른 컴퓨터에서 이어서 하기
+
+```bash
+git clone https://github.com/socutesubin-debug/Vin_portfolio.git   # 처음 한 번
+git fetch origin && git switch v6-clean-style                       # 이미 받아 둔 경우
+npm install
+npm run dev
+```
+
+- GitHub에 **없는 것**: `output/`·`sources/`(원본 자료, 필요하면 직접 복사), `.env.local`(키), PEN1 원본 obj(111MB). 화면 작업에는 필요 없다.
+- 모델은 `public/models/home/*.glb`(줄인 것)만 쓴다.
+
 ## 다음(2단계)
 
 - 사물 클릭·메뉴 → 다가가기(#screen #contact #about #work, lerp .06, Back to desk·Esc·뒤로가기)
@@ -48,4 +66,5 @@ npm run dev     # http://localhost:5173/#home
 
 | 날짜 | 내용 |
 | --- | --- |
+| 2026-11-05 | 스타일: 듀오톤 → 깔끔한 일러스트(cleanStyle.ts), theme 한 곳(청보라·크림), ?tune 은 개발 서버에서만 |
 | 2026-11-05 | 1단계: 시험판 Home 장면을 React/Vite로(HomeScene), 듀오톤·theme 한 곳·임시 캐비닛 분리, 마우스 둘러보기·스탠드·호버 라벨, 대체 화면 |

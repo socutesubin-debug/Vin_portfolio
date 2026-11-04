@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { applyThemeVars, PALETTES } from './theme'
+import { applyThemeVars, PALETTES, THEME } from './theme'
+import { CLEAN } from './three/cleanStyle'
 import type { HomeScene, PickId } from './scene/HomeScene'
 import './v6.css'
 
@@ -28,7 +29,7 @@ const LABELS: Record<PickId, string> = {
 /**
  * V6 Home 책상(1단계). 3D는 scene/HomeScene.ts 한 장면, 글자는 HTML.
  * 1단계 범위: 마우스 둘러보기 · 스탠드 켜고 끄기 · 사물 호버 라벨. 메뉴·사물 클릭 이동은 2단계.
- * ?tune: 질감·외곽선 슬라이더와 팔레트 버튼(시험판과 같은 조정 화면)
+ * ?tune(개발 서버에서만): 선 기준(eThr) 슬라이더와 팔레트 버튼
  */
 export default function V6App() {
   const host = useRef<HTMLDivElement>(null)
@@ -39,9 +40,10 @@ export default function V6App() {
   const [moved, setMoved] = useState(false)
   const [lampOn, setLampOn] = useState(true)
   const [pal, setPal] = useState(0)
-  const tune = new URLSearchParams(location.search).has('tune')
+  const [edge, setEdge] = useState(CLEAN.edge.threshold)
+  const tune = import.meta.env.DEV && new URLSearchParams(location.search).has('tune')
 
-  useEffect(() => applyThemeVars(), [])
+  useEffect(() => applyThemeVars(THEME), [])
 
   useEffect(() => {
     if (status === 'fallback') return
@@ -83,8 +85,8 @@ export default function V6App() {
   const choosePal = (i: number) => {
     setPal(i)
     const p = PALETTES[i]
-    sceneRef.current?.setPalette(p.dark, p.light)
-    applyThemeVars(p.dark, p.light)
+    sceneRef.current?.setPalette(p)
+    applyThemeVars(p)
   }
 
   return (
@@ -123,19 +125,26 @@ export default function V6App() {
         <>
           <div className="v6-tune">
             <label>
-              질감
-              <input type="range" min={0} max={100} defaultValue={35} onChange={(e) => sceneRef.current?.setGrain(+e.target.value / 100)} />
-            </label>
-            <label>
-              외곽선
-              <input type="range" min={0} max={100} defaultValue={55} onChange={(e) => sceneRef.current?.setOutline(+e.target.value / 100)} />
+              선 eThr {edge.toFixed(2)}
+              <input
+                type="range"
+                min={CLEAN.edge.min}
+                max={CLEAN.edge.max}
+                step={CLEAN.edge.step}
+                value={edge}
+                onChange={(e) => {
+                  setEdge(+e.target.value)
+                  sceneRef.current?.setEdge(+e.target.value)
+                }}
+              />
             </label>
           </div>
           <div className="v6-pal">
             {PALETTES.map((p, i) => (
               <button key={p.name} type="button" aria-label={p.name} title={p.name} aria-pressed={pal === i} onClick={() => choosePal(i)}>
-                <i style={{ background: p.dark }} />
+                <i style={{ background: p.bg }} />
                 <i style={{ background: p.light }} />
+                <i style={{ background: p.dark }} />
               </button>
             ))}
           </div>
