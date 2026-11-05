@@ -1,0 +1,4 @@
+# EmailJS 키 등 비밀 값은 저장소에 올리지 않아요
+.env
+.env.*
+!.env.example
