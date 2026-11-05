@@ -34,14 +34,6 @@ nav a:hover,nav a:focus-visible,nav a.on{border-bottom-color:var(--ink);outline:
 #cur.on svg{opacity:1}
 html.cc,html.cc *{cursor:none!important}
 html.cc input,html.cc textarea{cursor:text!important}
-/* 상단 메뉴 전환: 책 페이지 넘김 */
-#pgw{position:fixed;inset:0;z-index:50;perspective:2200px;display:none;overflow:hidden;pointer-events:auto}
-#pgsh{position:absolute;top:0;bottom:0;opacity:0;pointer-events:none}
-#pg{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform}
-#pg .f{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-#pg .f{display:grid;place-items:center;font:600 clamp(64px,17vw,230px)/1 Jost,var(--display);letter-spacing:.02em}
-#pg .f.b{transform:rotateY(180deg)}
-#pg .sh{position:absolute;inset:0;opacity:0;pointer-events:none}
 #back:hover,#back:focus-visible,#snd:focus-visible{outline:2px solid #fff;outline-offset:4px}
 #snd{left:max(24px,env(safe-area-inset-left,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));width:38px;height:38px;border-radius:50%;background:rgba(15,15,24,.55);display:grid;place-items:center}
 #snd[aria-pressed="true"]{background:#fff;color:var(--ink)}
@@ -447,37 +439,6 @@ function flipPj(show){const g=window.gsap;
 function fromHash(){const h=location.hash.slice(1);const m={'':'home',home:'home',screen:'screen',about:'screen',work:'work','work-open':'open',projects:'pour',contact:'contact',call:'call',thanks:'end'}[h]||'home';
  if(m==='pour'){progT=prog=1}go(m,{instant:true,fromHash:true})}
 addEventListener('hashchange',fromHash);
-
-// ── 상단 메뉴 전환: 종이 한 장이 책등을 축으로 넘어가며 섹션을 바꾼다 ──
-const PG={home:['HOME','#f7f1e3','#0f0f18'],screen:['ABOUT','#3f8fd8','#ffffff'],work:['WORK','#f0b93f','#0f0f18'],contact:['CONTACT','#db4a3e','#ffffff']},PGO=['home','screen','work','contact'];
-const pgw=document.createElement('div');pgw.id='pgw';pgw.setAttribute('aria-hidden','true');
-pgw.innerHTML='<div id="pgsh"></div><div id="pg"><div class="f a"><span></span><div class="sh"></div></div><div class="f b"><span></span><div class="sh"></div></div></div>';document.body.appendChild(pgw);
-let pgBusy=false;
-function pageTurn(to,cur){pgBusy=true;lockUntil=performance.now()+1500;
- const fwd=PGO.indexOf(to)>PGO.indexOf(cur),[name,col,ink]=PG[to],W=innerWidth,Pp=2200,dur=1.2;
- const pg=$('pg'),sh=$('pgsh'),shd=pg.querySelectorAll('.sh');
- pg.querySelectorAll('.f').forEach(f=>{f.style.background=col;f.style.color=ink;f.querySelector('span').textContent=name});pgw.style.perspectiveOrigin=fwd?'0% 50%':'100% 50%';
- pg.style.transformOrigin=fwd?'0 50%':'100% 50%';                                 // 앞으로: 왼쪽 책등 / 뒤로: 오른쪽 책등
- const dk='rgba(0,0,0,.4)';shd[0].style.background=`linear-gradient(to ${fwd?'right':'left'},transparent 35%,${dk})`;
- shd[1].style.background=`linear-gradient(to ${fwd?'left':'right'},transparent 35%,${dk})`;
- sh.style.background=`linear-gradient(to ${fwd?'right':'left'},rgba(0,0,0,.35),transparent 32%)`;
- const o={a:0};
- const upd=()=>{const th=o.a*Math.PI/180,s=Math.sin(th),c=Math.cos(th);
-  pg.style.transform=`rotateY(${fwd?-o.a:o.a}deg)`;shd[0].style.opacity=shd[1].style.opacity=s;
-  const e=th<Math.PI/2?W*c*Pp/(Pp-W*s):1e9;                                       // 넘어가는 모서리가 책등에서 떨어진 거리(원근 반영)
-  if(e<W){sh.style.opacity=s;if(fwd){sh.style.left=e+'px';sh.style.right='0';sh.style.width='auto'}else{sh.style.left='0';sh.style.right='auto';sh.style.width=(W-e)+'px'}}else sh.style.opacity=0};
- upd();pgw.style.display='block';
- gsap.timeline({onComplete:()=>{pgw.style.display='none';pgBusy=false}})
-  .fromTo(pgw,{opacity:0},{opacity:1,duration:.12,ease:'none'},0)
-  .to(o,{a:180,duration:dur,ease:'power2.inOut',onUpdate:upd},0)
-  .call(()=>{                                                                      // 종이가 화면을 아직 다 덮고 있을 때 실제 섹션 이동
-   try{history.replaceState(null,'','#'+to)}catch(e){location.hash=to;return}
-   fromHash()},null,dur*.4)}
-document.querySelector('nav[aria-label="주 메뉴"]').addEventListener('click',e=>{
- const a=e.target.closest('a');if(!a||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button)return;
- const to=(a.getAttribute('href')||'').slice(1);if(!PG[to])return;
- if(RM||!window.gsap)return;                                                       // 움직임 줄이기: 기본 동작(즉시 이동)
- e.preventDefault();if(pgBusy||to===NAV[st])return;pageTurn(to,NAV[st])});
 back.onclick=()=>{if(cardOpen){closeCard();return}if(dOpen){closeDetail();return}if(st==='pour'&&progT>.05){progT=0;go('open');return}go(BACK[st]||'home')};
 addEventListener('keydown',e=>{if(/INPUT|TEXTAREA/.test(e.target.tagName)&&e.key!=='Escape')return;if(e.key==='Escape')back.onclick();else if(e.key==='ArrowDown'||e.key==='PageDown'||e.key===' ')step(120,e);else if(e.key==='ArrowUp'||e.key==='PageUp')step(-120,e)});
 // ── 스크롤 / 터치 ─────────────────────────────────────────────
