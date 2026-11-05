@@ -21,10 +21,19 @@ header{position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-conten
 nav{display:flex;gap:clamp(14px,3vw,30px);font:500 clamp(12px,1.3vw,15px) var(--display);letter-spacing:.04em;pointer-events:auto}
 nav a{color:var(--ink);text-decoration:none;padding-bottom:2px;border-bottom:2px solid transparent;cursor:pointer}
 nav a:hover,nav a:focus-visible,nav a.on{border-bottom-color:var(--ink);outline:none}
-#label{position:fixed;z-index:9;left:0;top:0;pointer-events:none;font:500 11px var(--display);letter-spacing:.1em;background:#fff;color:var(--ink);padding:5px 10px;border-radius:999px;opacity:0;transition:opacity .15s;white-space:nowrap}
+#label{position:fixed;z-index:59;left:0;top:0;pointer-events:none;font:500 12px "Noto Sans KR",var(--display);letter-spacing:.04em;background:var(--ink);color:#fff;box-shadow:0 0 0 1.5px #fff;padding:6px 12px;border-radius:999px;opacity:0;transition:opacity .15s;white-space:nowrap}
 #hint{position:fixed;z-index:5;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom,0px));font:500 13px var(--display);letter-spacing:.04em;color:var(--ink);text-align:center;max-width:calc(100vw - 48px);transition:opacity .3s;text-shadow:0 0 8px #fff,0 0 3px #fff}
 #back,#snd{all:unset;cursor:pointer;box-sizing:border-box;position:fixed;z-index:9;font:500 13px var(--display);letter-spacing:.04em;color:#fff}
-#back{left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:10px 18px;background:var(--ink);box-shadow:0 0 0 2px #fff,3px 4px 0 2px rgba(0,0,0,.25)}
+#back{display:none!important}/* 화면의 Back 버튼은 숨김(Esc·스크롤 위로는 그대로 동작) */
+#dl{all:unset;cursor:pointer;box-sizing:border-box;position:fixed;z-index:9;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));width:38px;height:38px;display:grid;place-items:center;background:var(--ink);box-shadow:0 0 0 2px #fff,3px 4px 0 2px rgba(0,0,0,.25)}
+#dl:focus-visible{outline:2px solid #fff;outline-offset:4px}
+#cur{position:fixed;left:0;top:0;z-index:60;pointer-events:none;opacity:0;will-change:transform}
+#cur::before{content:"";position:absolute;left:-11px;top:-11px;width:22px;height:22px;box-sizing:border-box;border-radius:50%;border:2px solid var(--ink);background:rgba(255,255,255,.55);box-shadow:0 0 0 1.5px #fff;transition:width .18s,height .18s,left .18s,top .18s,background .18s}
+#cur.on::before{left:-22px;top:-22px;width:44px;height:44px;background:var(--ink)}
+#cur svg{position:absolute;left:-10px;top:-10px;width:20px;height:20px;opacity:0;transition:opacity .15s}
+#cur.on svg{opacity:1}
+html.cc,html.cc *{cursor:none!important}
+html.cc input,html.cc textarea{cursor:text!important}
 #back:hover,#back:focus-visible,#snd:focus-visible{outline:2px solid #fff;outline-offset:4px}
 #snd{left:max(24px,env(safe-area-inset-left,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));width:38px;height:38px;border-radius:50%;background:rgba(15,15,24,.55);display:grid;place-items:center}
 #snd[aria-pressed="true"]{background:#fff;color:var(--ink)}
@@ -34,7 +43,7 @@ nav a:hover,nav a:focus-visible,nav a.on{border-bottom-color:var(--ink);outline:
  padding:calc(78px + env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) calc(170px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px))}
 #pj.on{opacity:1;pointer-events:auto}
 #pj{background:rgba(34,26,40,.58);-webkit-backdrop-filter:blur(26px) saturate(.9);backdrop-filter:blur(26px) saturate(.9);color:#fff;backface-visibility:hidden;box-shadow:0 14px 40px rgba(0,0,0,.3)}
-#call{background:rgba(255,255,255,.5)}
+#call{background:none}
 #sheet2{position:fixed;inset:0;z-index:5;display:none;background:rgba(34,26,40,.5);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);backface-visibility:hidden}
 #pj h1{margin:0;text-align:center;font:300 clamp(38px,5vw,56px) var(--display);letter-spacing:.01em;color:#fff}
 #chips{display:flex;gap:8px;justify-content:center;margin:16px 0 26px;flex-wrap:wrap}
@@ -175,7 +184,7 @@ nav a:hover,nav a:focus-visible,nav a.on{border-bottom-color:var(--ink);outline:
 #endmsg{position:fixed;left:50%;bottom:92px;z-index:6;transform:translate(-50%,20px);display:grid;gap:10px;justify-items:center;text-align:center;opacity:0;pointer-events:none;transition:opacity .8s 1.6s,transform .8s 1.6s;width:min(92vw,520px)}
 #endmsg.on{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
 #endmsg p{margin:0;font:400 14px/1.6 "Noto Sans KR";color:var(--ink);background:#fff6e0;padding:8px 14px;border:1.5px solid var(--ink)}
-#endmsg button{all:unset;cursor:pointer;font:500 14px var(--display);padding:11px 22px;background:var(--ink);color:#fff;box-shadow:4px 5px 0 #3f8fd8}
+#endmsg button{all:unset;cursor:pointer;width:44px;height:44px;display:grid;place-items:center;background:var(--ink);box-shadow:4px 5px 0 #3f8fd8}#endmsg button:focus-visible{outline:2px solid #fff;outline-offset:4px}
 #mon{background:transparent!important;animation:none!important;overflow:visible;display:none}#mon.on{display:block;animation:none!important}
 #mon .hit{all:unset;position:absolute;cursor:pointer}#mon .hit:focus-visible{outline:.15em solid #3f8fd8}
 #toast{position:fixed;left:50%;bottom:120px;transform:translate(-50%,16px);z-index:30;max-width:min(92vw,520px);background:var(--ink);color:#fff;font:400 14px/1.5 "Noto Sans KR";padding:12px 18px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;text-align:center}
@@ -189,10 +198,6 @@ nav a:hover,nav a:focus-visible,nav a.on{border-bottom-color:var(--ink);outline:
 #fin p{margin:0;font:400 15px "Noto Sans KR";text-shadow:0 0 10px #f7f1e3}
 #fin button{all:unset;cursor:pointer;font:500 14px var(--display);padding:12px 24px;background:var(--ink);color:#fff;box-shadow:4px 5px 0 #3f8fd8;justify-self:center}
 #fin button:focus-visible{outline:2px solid #3f8fd8;outline-offset:4px}
-#call.up #hs{animation:rise .7s cubic-bezier(.6,0,.8,.3) forwards}
-@keyframes rise{from{transform:translateY(0)}to{transform:translateY(-115%)}}
-#pal{all:unset;cursor:pointer;position:fixed;z-index:9;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));font:500 12px var(--display);letter-spacing:.04em;padding:9px 14px;background:rgba(23,21,31,.85);color:#fff;border-radius:99px;max-width:56vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#pal:focus-visible{outline:2px solid #3f8fd8;outline-offset:3px}
 #cta{all:unset;cursor:pointer;box-sizing:border-box;position:fixed;z-index:9;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translate(-50%,240%);opacity:0;pointer-events:none;font:500 17px var(--display);letter-spacing:.06em;padding:15px 34px;background:var(--ink);color:#fff;box-shadow:5px 6px 0 #3f8fd8;transition:transform .85s cubic-bezier(.2,1.5,.35,1),opacity .35s}
 #cta.show{transform:translate(-50%,0);opacity:1;pointer-events:auto;animation:ctaBob 1.9s 1s ease-in-out infinite}
 @keyframes ctaBob{50%{transform:translate(-50%,-7px)}}
@@ -200,10 +205,6 @@ nav a:hover,nav a:focus-visible,nav a.on{border-bottom-color:var(--ink);outline:
 /* 전화 받기 */
 #call{position:fixed;inset:0;z-index:6;opacity:0;pointer-events:none;transition:opacity .4s}
 #call.on{opacity:1;pointer-events:auto}
-#hs{position:absolute;left:max(6vw,24px);top:0;width:clamp(110px,15vw,170px);height:auto;transform:translateY(-110%);transform-origin:50% 0}
-#call.on #hs{animation:drop .95s cubic-bezier(.2,1.3,.4,1) forwards,sway 3.4s 1s ease-in-out infinite alternate}
-@keyframes drop{to{transform:translateY(0)}}
-@keyframes sway{from{transform:rotate(-2.2deg)}to{transform:rotate(2.2deg)}}
 #form{position:absolute;right:max(6vw,16px);top:50%;transform:translateY(-50%);width:min(380px,calc(100vw - 32px));background:#fff;color:var(--ink);box-shadow:8px 10px 0 var(--ink);border-radius:4px;font:400 14px "Noto Sans KR",sans-serif}
 #form header{all:unset;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1.5px solid var(--ink);font:500 16px var(--display)}
 #form header button{all:unset;cursor:pointer;padding:2px 6px;font-size:18px}
@@ -216,31 +217,29 @@ nav a:hover,nav a:focus-visible,nav a.on{border-bottom-color:var(--ink);outline:
 #send{all:unset;cursor:pointer;background:var(--ink);color:#fff;padding:8px 18px;border-radius:999px;font:500 13px var(--display)}
 #send:focus-visible,#form header button:focus-visible{outline:2px solid var(--bg);outline-offset:2px}
 #load{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:var(--bg);color:#fff;font:500 12px var(--display);letter-spacing:.2em;transition:opacity .6s}
-@media (max-width:700px){#grid{grid-template-columns:1fr}#form{right:50%;transform:translate(50%,-40%)}#hs{left:2vw;width:100px}}
-@media (prefers-reduced-motion:reduce){#mon.on,#bc.on .cd,#rings span{animation:none!important;opacity:1}#mon *{animation:none!important;opacity:1!important}#call.on #hs{animation:none;transform:none}#c{transition:none}}
+@media (max-width:700px){#grid{grid-template-columns:1fr}#form{right:50%;transform:translate(50%,-40%)}}
+@media (prefers-reduced-motion:reduce){#mon.on,#bc.on .cd,#rings span{animation:none!important;opacity:1}#mon *{animation:none!important;opacity:1!important}#c{transition:none}}
 </style>
 <canvas id="c" aria-label="두 가지 색으로 그린 책상 3D. 아래로 스크롤하면 서랍으로 가고, 파일이 쏟아져 프로젝트가 나와요."></canvas>
 <header><div class="logo">Vision INside</div><nav aria-label="주 메뉴"><a href="#home">HOME</a><a href="#screen">ABOUT</a><a href="#work">WORK</a><a href="#contact">CONTACT</a></nav></header>
 <div id="label"></div>
 <div id="hint"></div>
 <button id="back" hidden>Back</button>
+<button id="dl" hidden aria-label="이력서 다운로드" data-tip="이력서 다운로드"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg></button>
+<div id="cur" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3l12 7.2-5.2 1.6L10.6 17z" fill="#fff"/></svg></div>
 <button id="snd" aria-label="소리 켜기" aria-pressed="false">♪</button>
-<button id="pal" aria-label="색 조합 바꾸기">팔레트</button>
 <div id="sheet2"></div>
-<section id="pj" aria-label="프로젝트 목록"><h1>Projects</h1><div id="chips"></div><div id="grid"></div><p id="end">프로젝트를 모두 둘러봤어요</p></section>
+<section id="pj" aria-label="프로젝트 목록"><h1>Projects</h1><div id="chips"></div><div id="grid"></div></section>
 <button id="cta" aria-label="연락하기">연락하기 <span aria-hidden="true">→</span></button>
-<div id="mon" aria-label="모니터 화면: 이력서와 자기소개서"><button class="hit" data-d="cv" style="left:2.5%;top:10%;width:10%;height:5.4%" aria-label="이력서 탭"></button><button class="hit" data-d="cl" style="left:13.4%;top:10%;width:14.5%;height:5.4%" aria-label="자기소개서 탭"></button><button class="hit" id="dlBtn" style="left:78.75%;top:10.2%;width:18.75%;height:4.9%" aria-label="문서 다운로드"></button></div>
-<div id="endmsg"><button id="again">처음으로 돌아가기 ↺</button></div>
+<div id="mon" aria-label="모니터 화면: 이력서와 자기소개서"><button class="hit" data-d="cv" style="left:2.5%;top:10%;width:10%;height:5.4%" aria-label="이력서 탭"></button><button class="hit" data-d="cl" style="left:13.4%;top:10%;width:14.5%;height:5.4%" aria-label="자기소개서 탭"></button></div>
+<div id="endmsg"><button id="again" aria-label="처음으로 돌아가기" data-tip="처음으로 돌아가기"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v5h5"/></svg></button></div>
 <div id="bc" role="dialog" aria-label="명함"><div class="cd"><div class="spin"><div class="f a"><img src="card-front.png" alt="명함 앞면" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'<span>VISION INSIDE</span><b>박수빈</b><span>UX/UI Designer · eilibean01@gmail.com</span>'}))"></div>
- <div class="f b"><img src="card-back.png" alt="명함 뒷면" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'<span></span><b>VIN</b><span>card-back.png 자리</span>'}))"></div></div></div><p class="tip">마우스를 좌우로 움직여 돌려 보세요 · 누르면 닫혀요</p></div>
+ <div class="f b"><img src="card-back.png" alt="명함 뒷면" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'<span></span><b>VIN</b><span>card-back.png 자리</span>'}))"></div></div></div></div>
 <div id="rings" aria-hidden="true"></div>
 
 <section id="detail" aria-label="프로젝트 상세"><div id="dBar"><div class="ty"><span id="dTy"></span><b id="dNm"></b></div><nav id="dChips" aria-label="섹션 이동"></nav><div id="dRight"><span id="dPct" aria-live="off">0%</span><button id="dClose">닫기 ✕</button></div><div id="dProg"></div></div><div id="dBody"></div></section>
 <div id="dusk"></div>
 <section id="call" aria-label="메시지 남기기">
- <svg id="hs" viewBox="0 0 120 380" aria-hidden="true"><path id="cord" fill="none" stroke="#0f0f18" stroke-width="6" stroke-linecap="round"/><path id="cord2" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
-  <g transform="translate(60,196)" stroke="#0f0f18" stroke-width="4" stroke-linejoin="round"><rect x="-17" y="14" width="34" height="132" rx="17" fill="#fff"/><rect x="-33" y="-24" width="66" height="58" rx="18" fill="#fff"/><rect x="-33" y="128" width="66" height="58" rx="18" fill="#fff"/>
-  <g fill="#0f0f18" stroke="none" id="holes"></g></g></svg>
  <form id="form" novalidate><header><span>Contact me!</span><button type="button" id="x" aria-label="닫기">✕</button></header>
   <div class="row"><label>To</label><div>박수빈<br>eilibean01@gmail.com</div></div>
   <div class="row"><label for="from">From</label><input id="from" type="email" placeholder="답장 받을 이메일"></div>
@@ -270,7 +269,7 @@ const b64=s=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;
 const loader=new GLTFLoader();
 const load=(k,mt)=>new Promise((res,rej)=>loader.parse(b64(window.VIN_MODELS[k]),'',g=>{const root=g.scene;
  root.traverse(o=>{if(o.isMesh){let geo=o.geometry;geo.deleteAttribute('normal');geo=toCreasedNormals(geo,Math.PI/4);o.geometry=geo;o.material=mt;o.castShadow=o.receiveShadow=true}});res(root)},rej));
-const [mStand,mImac,mPhone,mTable,mChair]=await Promise.all([['stand',RD],['imac',W],['phone',BL],['table',W],['chair',YL]].map(([k,m])=>load(k,m)));
+const [mStand,mImac,mPhone,mTable,mChair,mHand]=await Promise.all([['stand',RD],['imac',W],['phone',BL],['table',W],['chair',YL],['handset',BL]].map(([k,m])=>load(k,m)));
 mChair.traverse(o=>{if(o.isMesh&&/base/i.test(o.name))o.material=G});
 const TOP=75;
 const texReg=[];const tex=(w,h,draw)=>{const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.save();draw(g,w,h);g.restore();const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;texReg.push({t,g,w,h,draw});return t};
@@ -283,7 +282,7 @@ add(new THREE.PlaneGeometry(900,420),W,[0,210,-40]).castShadow=false;
 const poster=new THREE.Group();poster.position.set(-58,138,-39.4);S.add(poster);add(BX(34,46,.8),W,[0,0,0],[0,0,0],poster);
 add(new THREE.PlaneGeometry(33,45),TM(tex(660,900,(g,w,h)=>{g.fillStyle=CRM;g.fillRect(0,0,w,h);g.fillStyle=BLU;g.beginPath();g.arc(w*.62,h*.36,w*.34,0,7);g.fill();g.fillStyle=YEL;g.fillRect(w*.08,h*.5,w*.42,h*.13);g.fillStyle=RED;g.beginPath();g.moveTo(w*.08,h*.08);g.lineTo(w*.4,h*.08);g.lineTo(w*.08,h*.4);g.fill();
  g.fillStyle=INK;g.font='600 118px Jost, sans-serif';g.fillText('VISION',w*.07,h*.8);g.fillText('INSIDE',w*.07,h*.92);g.font='500 24px Jost, sans-serif';g.fillText('PORTFOLIO — 2026',w*.08,h*.7);g.textAlign='right';g.fillText('UX / UI',w*.92,h*.7)})),[0,0,.45],[0,0,0],poster);
-const cal=new THREE.Group();cal.position.set(78,128,-39.4);S.add(cal);add(BX(30,38,.5),W,[0,0,0],[0,0,0],cal);add(BX(31,1.6,1.2),Dk,[0,18.6,.5],[0,0,0],cal);
+const cal=new THREE.Group();cal.position.set(75,130,-39.4);cal.scale.setScalar(1.3);S.add(cal);add(BX(30,38,.5),W,[0,0,0],[0,0,0],cal);add(BX(31,1.6,1.2),Dk,[0,18.6,.5],[0,0,0],cal);
 add(new THREE.PlaneGeometry(29.4,37.4),TM(tex(600,760,(g,w,h)=>{const now=new Date(),Y=now.getFullYear(),M=now.getMonth(),D=now.getDate();
  g.fillStyle=CRM;g.fillRect(0,0,w,h);for(let i=0;i<9;i++){g.fillStyle=INK;g.beginPath();g.arc(60+i*60,20,7,0,7);g.fill()}
  g.fillStyle=INK;g.font='600 150px Jost, sans-serif';g.textAlign='left';g.fillText(String(M+1).padStart(2,'0'),34,210);
@@ -314,7 +313,7 @@ for(let k=0;k<NF;k++){const f=new THREE.Group();const ci=k%4,isCat=k%5===0,num=S
  add(BX(30,25,.5),FMS[ci],[0,0,0],[0,0,0],f);
  const tm=TM(tex(390,108,(g,w,h)=>{g.fillStyle=[BLU,RED,YEL,CRM][ci];g.fillRect(0,0,w,h);g.fillStyle='#17151f';g.font=(isCat?'700':'500')+' 36px Jost, "Noto Sans KR", sans-serif';g.textBaseline='middle';g.textAlign='left';g.fillText(num,26,h/2+6);g.textAlign='right';g.fillText(nm,w-24,h/2+6)}),{side:THREE.DoubleSide});
  add(tabGeo,tm,[[-8,0,8][k%3],12.5,.16],[0,0,0],f);S.add(f);
- f.userData={k,jit:(Math.random()-.5)*.04,delay:k/NF*.6};files.push(f)}
+ f.userData={k,jit:(Math.random()-.5)*.04,delay:k/NF*.62};files.push(f)}
 // iMac, 스탠드, 전화기, 명함, 컵, 연필꽂이, 의자, 탁상시계
 const imac=new THREE.Group();imac.position.set(0,TOP,-6);S.add(imac);
 const im=new THREE.Group();im.add(mImac);im.scale.setScalar(90);im.rotation.x=-Math.PI/2;imac.add(im);
@@ -322,7 +321,7 @@ const scr=new THREE.Mesh(new THREE.PlaneGeometry(.598,.336),BLACK);scr.position.
 const lamp=new THREE.Group();lamp.position.set(-47,TOP+.949*26,2);lamp.rotation.y=Math.PI/2;lamp.scale.setScalar(26);S.add(lamp);lamp.add(mStand);
 const coneM=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.4,depthWrite:false,blending:THREE.AdditiveBlending});
 const cone=new THREE.Mesh(new THREE.ConeGeometry(.52,1.25,40,1,true),coneM);cone.position.set(.01,-.325,.78);
-const spot=new THREE.SpotLight(0xffd9a0,0,95,.7,1,1.3);spot.castShadow=true;spot.shadow.mapSize.set(1024,1024);spot.shadow.bias=-.001;spot.position.set(.01,.3,.78);lamp.add(spot);const spt=new THREE.Object3D();spt.position.set(.01,-.9,1.5);lamp.add(spt);spot.target=spt;
+const spot=new THREE.SpotLight(0xffcf94,0,120,.6,1,1.15);spot.castShadow=true;spot.shadow.mapSize.set(1024,1024);spot.shadow.bias=-.001;spot.position.set(.01,.3,.78);lamp.add(spot);const spt=new THREE.Object3D();spt.position.set(-.45,-.93,.665);lamp.add(spt);spot.target=spt;
 const phone=new THREE.Group();phone.position.set(52,TOP+5.8*1.2,8);phone.rotation.y=Math.PI-.3;phone.scale.setScalar(1.2);S.add(phone);phone.add(mPhone);const phoneY=phone.position.y;
 const card=new THREE.Group();card.position.set(-26,TOP,20);card.rotation.y=-.6;S.add(card);add(BX(9,.3,5),W,[0,.15,0],[0,0,0],card);
 const cardT=tex(450,250,(g,w,h)=>{g.fillStyle='#f7f1e3';g.fillRect(0,0,w,h);g.fillStyle=INK;g.font='500 20px Jost, sans-serif';g.fillText('VISION INSIDE',34,52);g.font='600 46px Jost, sans-serif';g.fillText('박수빈',34,150);g.font='500 18px Jost, sans-serif';g.fillText('UX/UI Designer',34,205);g.fillStyle=BLU;g.fillRect(w-70,0,70,h)});
@@ -333,19 +332,19 @@ add(new THREE.LatheGeometry([[0,0],[3.4,0],[3.5,2.3],[4.3,2.7],[4.3,9],[4,9],[4,
 add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([[4.1,8],[7.4,8],[8.5,3.6],[4.2,3.4]].map(([x,y])=>new THREE.Vector3(x,y,0)),false,'catmullrom',.02),30,.75,8),W,[0,0,0],[0,0,0],mug);
 const cup=new THREE.Group();cup.position.set(34,TOP,-20);S.add(cup);add(new THREE.CylinderGeometry(4,4,11,24,1,true),new THREE.MeshLambertMaterial({color:0x3f8fd8,side:THREE.DoubleSide}),[0,5.5,0],[0,0,0],cup);
 [[-1.5,.2,-.12],[0,-1.2,.06],[1.4,.5,.12],[.5,1.4,-.04]].forEach(([x,z,r])=>add(new THREE.CylinderGeometry(.45,.45,18,6),RD,[x,11,z],[r,0,r],cup));
-const CLKD={h:'09',m:'35'};const clk=new THREE.Group();clk.position.set(-70,TOP,28);clk.rotation.y=.35;S.add(clk);
+const CLKD={h:'09',m:'35'};const clk=new THREE.Group();clk.position.set(-39,TOP,-8);clk.rotation.y=.2;S.add(clk);
 add(new THREE.CylinderGeometry(4.5,5.5,1.4,24),RD,[0,.7,0],[0,0,0],clk);[-4.6,4.6].forEach((x,i)=>{add(BX(8.6,10,1.6),Dk,[x,10,0],[0,0,0],clk);add(new THREE.PlaneGeometry(8,9.4),TM(tex(160,188,(g,w,h)=>{g.fillStyle=INK;g.fillRect(0,0,w,h);g.fillStyle=CRM;g.font='600 128px Jost, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(i?CLKD.m:CLKD.h,w/2,h/2+6);g.fillStyle=INK;g.fillRect(0,h/2-2,w,4)})),[x,10,.82],[0,0,0],clk)});add(BX(18,.3,1.8),Dk,[0,10,.2],[0,0,0],clk);
 const chair=new THREE.Group();chair.position.set(-22,0,64);chair.rotation.y=.5;S.add(chair);
 mChair.rotation.y=Math.PI;mChair.scale.setScalar(.85);chair.add(mChair);
 // 빛
 const bm=new THREE.MeshBasicMaterial({colorWrite:false,depthWrite:false});
 
-const sun=new THREE.DirectionalLight(0xffffff,2.1);sun.position.set(-160,340,300);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-170,right:170,top:170,bottom:-170,near:10,far:1000});sun.shadow.bias=-.0005;sun.shadow.radius=2;S.add(sun);
-const fill=new THREE.DirectionalLight(0xffffff,.7);fill.position.set(60,120,320);S.add(fill);
-const hemi=new THREE.HemisphereLight(0xffffff,0xb8aab0,1.35);S.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff6e8,2.3);sun.position.set(-310,190,170);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-170,right:170,top:170,bottom:-170,near:10,far:1000});sun.shadow.bias=-.0005;sun.shadow.radius=2;S.add(sun);
+const fill=new THREE.DirectionalLight(0xe6ecff,.3);fill.position.set(160,90,250);S.add(fill);
+const hemi=new THREE.HemisphereLight(0xffffff,0xb8aab0,1.8);S.add(hemi);
 const SCRON=new THREE.MeshBasicMaterial({color:0xe6dcc6});const ENDM=new THREE.MeshBasicMaterial({map:tex(300,170,(g,w,h)=>{g.fillStyle='#fff6e0';g.fillRect(0,0,w,h);g.fillStyle='#14131c';g.font='600 22px Jost, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#3fae6a';g.beginPath();g.arc(w/2,h/2-24,26,0,7);g.fill();g.strokeStyle='#fff';g.lineWidth=6;g.lineCap='round';g.lineJoin='round';g.beginPath();g.moveTo(w/2-12,h/2-24);g.lineTo(w/2-3,h/2-14);g.lineTo(w/2+14,h/2-36);g.stroke();g.fillStyle='#14131c';g.font='600 24px Jost, sans-serif';g.fillText('Message received',w/2,h/2+30);g.font='400 15px Jost, sans-serif';g.fillText('Will reply tomorrow morning',w/2,h/2+56)})});
 let eT=0,eTarget=0,clkTimer=0;const C_SUN0=new THREE.Color(0xffffff),C_SUN1=new THREE.Color(0xff7a3a),C_H0=new THREE.Color(0xffffff),C_H1=new THREE.Color(0xff9e6e),C_BG0=new THREE.Color('#5b4fee'),C_BG1=new THREE.Color('#e9774c'),tmpC=new THREE.Color();
-const SUN_P0=new THREE.Vector3(-160,340,300),SUN_P1=new THREE.Vector3(-330,95,250),tmpV=new THREE.Vector3();
+const SUN_P0=new THREE.Vector3(-310,190,170),SUN_P1=new THREE.Vector3(-330,95,250),tmpV=new THREE.Vector3();
 function setClock(h,m){CLKD.h=String(h).padStart(2,'0');CLKD.m=String(m).padStart(2,'0');texReg.filter(r=>r.draw.toString().includes('CLKD')).forEach(r=>{r.g.setTransform(1,0,0,1,0,0);r.g.save();r.draw(r.g,r.w,r.h);r.g.restore();r.t.needsUpdate=true})}
 function endClock(on){clearInterval(clkTimer);if(!on){setClock(9,35);return}let t=9*60+35;clkTimer=setInterval(()=>{t+=24;if(t>=1080){t=1080;clearInterval(clkTimer)}setClock((t/60)|0,t%60)},45)}
 // 창문 그림자: 햇빛 앞에 창틀(바깥 틀 + 문설주)만 두고 그림자만 드리운다
@@ -359,7 +358,7 @@ const leaves=win,LV=[];
 // ── 깔끔 스타일 후처리 ─────────────────────────────────────
 const toLin=h=>new THREE.Color(h).convertLinearToSRGB();
 const dt=new THREE.DepthTexture();const rtC=new THREE.WebGLRenderTarget(1,1,{depthTexture:dt});const rtN=new THREE.WebGLRenderTarget(1,1),rtA=new THREE.WebGLRenderTarget(1,1);const nMat=new THREE.MeshNormalMaterial();
-const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:rtN.texture},tA:{value:rtA.texture},tD:{value:dt},res:{value:new THREE.Vector2()},cDark:{value:toLin('#0f0f18')},cMid:{value:toLin('#cfd0ee')},cLight:{value:toLin('#ffffff')},cBg:{value:toLin('#5b4fee')},near:{value:10},far:{value:5000},eThr:{value:.62},warmK:{value:0},wLo:{value:1.1},wHi:{value:1.35},dbg:{value:0}},
+const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:rtN.texture},tA:{value:rtA.texture},tD:{value:dt},res:{value:new THREE.Vector2()},cDark:{value:toLin('#0f0f18')},cMid:{value:toLin('#cfd0ee')},cLight:{value:toLin('#ffffff')},cBg:{value:toLin('#5b4fee')},near:{value:10},far:{value:5000},eThr:{value:.62},warmK:{value:0},wLo:{value:1},wHi:{value:1.6},dbg:{value:0}},
  vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=vec4(position.xy,0.,1.);}',
  fragmentShader:`precision highp float;varying vec2 v;uniform sampler2D tC,tN,tD,tA;uniform vec2 res;uniform vec3 cDark,cMid,cLight,cBg;uniform float near,far,eThr,warmK,wLo,wHi,dbg;
  float ld(vec2 p){float z=texture2D(tD,p).r*2.-1.;return 2.*near*far/(far+near-z*(far-near));}
@@ -378,7 +377,7 @@ const qS=new THREE.Scene();qS.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),po
 // ── 카메라 장면(상태) ───────────────────────────────────────
 const portrait=()=>innerWidth/innerHeight<.9;
 const V=(a)=>new THREE.Vector3(...a);
-const CAMS={end:[[-8,114,138],[-8,100,-6]],home:[[0,104,160],[0,98,-6]],screen:[[0,108,72],[0,105,-6]],work:[[40,46,150],[40,38,20]],open:[[40,104,86],[40,22,46]],contact:[[6,98,68],[50,82,4]]};
+const CAMS={end:[[-8,114,138],[-8,100,-6]],home:[[0,104,160],[0,98,-6]],screen:[[0,106,44],[0,105,-6]],work:[[40,46,150],[40,38,20]],open:[[40,104,86],[40,22,46]],contact:[[6,98,68],[50,82,4]]};
 CAMS.pour=CAMS.open;CAMS.call=CAMS.contact;
 const camFor=s=>{let [p,l]=CAMS[s].map(V);if(portrait()){p=l.clone().add(p.clone().sub(l).multiplyScalar(1.5));p.y+=6}return {p,l}};
 let st='home',prog=0,progT=0,lampOn=false,lampV=0,lampT0=0,lampFirst=true;
@@ -395,16 +394,16 @@ files.forEach((f,k)=>{const d=34+((k*37)%11)*3.6,sx=d*.364*1.8*.85,sy=d*.364*.85
  f.userData.endQ=tc.quaternion.clone().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler((((k*7)%5)-2)*.12,(((k*11)%7)-3)*.1,(((k*13)%9)-4)*.16)))});
 // ── 상태 전환 ────────────────────────────────────────────────
 const hint=$('hint'),back=$('back'),pj=$('pj'),callEl=$('call');
-const HINT={home:'아래로 스크롤하면 모니터로 가요',screen:'문서 밖에서 스크롤하면 서랍으로 가요',work:'스크롤하거나 서랍을 눌러 열어 보세요',open:'천천히 살펴보고, 더 스크롤하면 파일이 쏟아져요',end:'',pour:'',contact:'전화기를 눌러 받아 보세요 · 스크롤하면 마무리',call:''};
+const HINT={};
 const HASH={end:'thanks',home:'',screen:'screen',work:'work',open:'work-open',pour:'projects',contact:'contact',call:'call'};
 const BACK={end:'contact',screen:'home',work:'screen',open:'work',pour:'open',contact:'pour',call:'contact'};
 const NAV={end:'contact',home:'home',screen:'screen',work:'work',open:'work',pour:'work',contact:'contact',call:'contact'};
 function retarget(inst){const c=camFor(st);tpos.copy(c.p);tlook.copy(c.l);if(inst||RM){cpos.copy(tpos);clook.copy(tlook)}}
-function go(s,opts={}){const was=st;st=s;lockUntil=performance.now()+(s==='contact'?1800:s==='end'?1200:s==='pour'?1000:900);if(s==='contact'&&was==='pour')progT=0;if(s==='call'||s==='contact'){const fm=$('form');if(fm)fm.style.opacity=''}
+function go(s,opts={}){domEl=null;const was=st;st=s;lockUntil=performance.now()+(s==='contact'?1800:s==='end'?1200:s==='pour'?500:900);if(s==='contact'&&was==='pour')progT=0;if(s==='call'||s==='contact'){const fm=$('form');if(fm)fm.style.opacity=''}
  if(s==='pour'&&opts.full){progT=1}else if(s==='pour'&&was!=='pour'&&progT<.02){progT=.0}
  if(s==='open'||s==='work'||s==='home'||s==='screen'){if(s!=='pour')progT=Math.min(progT,0)}
  retarget(opts.instant);
- back.hidden=s==='home';back.textContent=s==='call'?'Back':'Back';hint.textContent=HINT[s]||'';
+ back.hidden=s==='home';$('dl').hidden=s!=='screen';back.textContent=s==='call'?'Back':'Back';hint.textContent=HINT[s]||'';
  document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+(NAV[s]==='home'?'home':NAV[s])));
  const h=HASH[s];if(!opts.fromHash&&('#'+h)!==location.hash){try{history.replaceState(null,'',h?'#'+h:location.pathname+location.search)}catch(e){}}
  callEl.classList.toggle('on',s==='call');callEl.classList.remove('up');$('dusk').classList.toggle('on',s==='end');$('endmsg').classList.toggle('on',s==='end');setLamp(true);eTarget=s==='end'?1:0;scr.material=s==='end'?ENDM:BLACK;if(s==='end'){setTimeout(()=>{if(st==='end')endClock(true)},900)}else if(was==='end')endClock(false);if(s==='open')openT=performance.now();if(s!=='pour')autoP=false;
@@ -413,12 +412,12 @@ function go(s,opts={}){const was=st;st=s;lockUntil=performance.now()+(s==='conta
 let pjShown=false;const sheet2=$('sheet2'),ctaEl=$('cta');let ctaT=0;
 function updCta(){const on=pjShown&&pj.classList.contains('on')&&pj.scrollTop+pj.clientHeight>=pj.scrollHeight-6&&!dOpen;if(on!==ctaEl.classList.contains('show')){ctaEl.classList.toggle('show',on);if(on)ctaT=performance.now()}}
 pj.addEventListener('scroll',updCta,{passive:true});
-function syncOverlay(){const show=st==='pour'&&prog>.9;if(show!==pjShown){pjShown=show;document.body.classList.toggle('pjOn',show);flipPj(show);if(show)setTimeout(updCta,1500);else updCta()}cv.classList.toggle('b',st==='call'||cardOpen);if(!show)hint.style.opacity=1}
+function syncOverlay(){const show=st==='pour'&&prog>.9;if(show!==pjShown){pjShown=show;document.body.classList.toggle('pjOn',show);flipPj(show);if(show)setTimeout(updCta,1500);else updCta()}cv.classList.toggle('b',cardOpen);if(!show)hint.style.opacity=1}
 function flipPj(show){const g=window.gsap;
  if(show){pj.classList.add('on');pj.scrollTop=0;
   if(g&&!RM){g.killTweensOf([pj,sheet2]);sheet2.style.display='block';
-   g.fromTo(sheet2,{yPercent:-104},{yPercent:0,duration:1.2,ease:'power3.out',onComplete:()=>{sheet2.style.display='none';g.set(sheet2,{clearProps:'transform'})}});
-   g.fromTo(pj,{yPercent:-104},{yPercent:0,duration:1.35,delay:.12,ease:'power3.out',clearProps:'transform'})}}
+   g.fromTo(sheet2,{yPercent:-104},{yPercent:0,duration:.6,ease:'power3.out',onComplete:()=>{sheet2.style.display='none';g.set(sheet2,{clearProps:'transform'})}});
+   g.fromTo(pj,{yPercent:-104},{yPercent:0,duration:.7,delay:.06,ease:'power3.out',clearProps:'transform'})}}
  else{if(g&&!RM&&pj.classList.contains('on')){g.killTweensOf(pj);g.to(pj,{yPercent:-104,duration:.75,ease:'power2.inOut',onComplete:()=>{pj.classList.remove('on');g.set(pj,{clearProps:'transform'})}})}else pj.classList.remove('on')}}
 function fromHash(){const h=location.hash.slice(1);const m={'':'home',home:'home',screen:'screen',about:'screen',work:'work','work-open':'open',projects:'pour',contact:'contact',call:'call',thanks:'end'}[h]||'home';
  if(m==='pour'){progT=prog=1}go(m,{instant:true,fromHash:true})}
@@ -437,7 +436,7 @@ function step(dy,e){
  const now=performance.now();if(now-accT>300)acc=0;accT=now;acc+=dy;
  if(st==='pour'){autoP=false;progT=Math.max(0,Math.min(1,progT+dy*.0008));if(progT<=0&&dy<0){go('open')}return}
  if(Math.abs(acc)<90)return;const d=acc>0?1:-1;acc=0;
- if(st==='home'&&d>0)go('screen');else if(st==='screen')go(d>0?'work':'home');else if(st==='work'){go(d>0?'open':'screen')}else if(st==='open'){if(d>0){if(performance.now()-openT>1400)go('pour')}else go('work')}else if(st==='contact'){d>0?go('end'):(progT=prog=1,go('pour'))}else if(st==='end'&&d<0)go('contact')}
+ if(st==='home'&&d>0)go('screen');else if(st==='screen')go(d>0?'work':'home');else if(st==='work'){go(d>0?'open':'screen')}else if(st==='open'){if(d>0){if(performance.now()-openT>1000){go('pour');autoP=true}}else go('work')}else if(st==='contact'){d>0?go('end'):(progT=prog=1,go('pour'))}else if(st==='end'&&d<0)go('contact')}
 addEventListener('wheel',e=>{if(e.target.closest&&e.target.closest('#form'))return;step(e.deltaY,e)},{passive:false});
 let ty=null;addEventListener('touchstart',e=>{ty=e.touches[0].clientY},{passive:true});
 addEventListener('touchmove',e=>{if(ty==null||e.target.closest('#form'))return;const y=e.touches[0].clientY,dy=(ty-y)*2.2;ty=y;step(dy,e)},{passive:false});
@@ -445,7 +444,18 @@ addEventListener('touchmove',e=>{if(ty==null||e.target.closest('#form'))return;c
 const lbl=$('label'),mouse=new THREE.Vector2(0,0),ray=new THREE.Raycaster();let hover=null,moved=false;
 const PICK=[{g:lamp,t:'스탠드 · 불 켜고 끄기',act:'lamp'},{g:imac,t:'모니터 · 소개',to:'screen',from:['home']},{g:phone,t:'전화기 · 연락하기',to:'contact',from:['home','contact']},{g:cab,t:'서랍 · 프로젝트',to:'work',from:['home','work','open']},{g:mug,t:'컵',act:'bump'},{g:card,t:'명함 · 크게 보기',act:'card'}];
 PICK.forEach(p=>p.g.traverse(o=>{if(o.isMesh)o.userData.pick=p}));
-cv.addEventListener('pointermove',e=>{moved=true;mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);lbl.style.transform=`translate(${e.clientX+14}px,${e.clientY+14}px)`});
+cv.addEventListener('pointermove',e=>{moved=true;mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1)});
+// 커서: 평소엔 동그라미, 누를 수 있는 곳 위에서는 커지면서 클릭 아이콘 + 설명 글
+const cur=$('cur');let domEl=null,curOn=false;
+const tipOf=el=>el.dataset.tip||el.getAttribute('aria-label')||(el.classList.contains('card')?'프로젝트 열기':'');
+function updCur(){if(domEl&&(domEl.hidden||!domEl.isConnected))domEl=null;const on=!!(domEl||hover);if(on!==curOn){curOn=on;cur.classList.toggle('on',on)}
+ let t='',show=false;if(domEl){t=tipOf(domEl);show=!!t}else if(hover){t=st==='contact'?'전화 받기':hover.t;show=moved}
+ if(lbl.textContent!==t)lbl.textContent=t;const o=show?'1':'0';if(lbl.style.opacity!==o)lbl.style.opacity=o}
+if(matchMedia('(pointer:fine)').matches){document.documentElement.classList.add('cc');
+ addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;cur.style.transform=`translate(${e.clientX}px,${e.clientY}px)`;cur.style.opacity=/INPUT|TEXTAREA/.test(e.target.tagName)?0:1;
+  const el=e.target.closest&&e.target.closest('button,a,.card,[data-tip]');domEl=el&&!el.hidden&&!el.disabled?el:null;
+  const fx_=e.clientX>innerWidth-220,fy_=e.clientY>innerHeight-80;lbl.style.transform=`translate(${fx_?`calc(${e.clientX-28}px - 100%)`:e.clientX+28+'px'},${fy_?`calc(${e.clientY-24}px - 100%)`:e.clientY+22+'px'})`;updCur()},{passive:true});
+ document.documentElement.addEventListener('mouseleave',()=>{cur.style.opacity=0;domEl=null;updCur()})}
 cv.addEventListener('pointerleave',()=>mouse.set(0,0));
 cv.addEventListener('click',()=>{if(cardOpen){closeCard();return}if(st==='open'){go('pour');autoP=true;return}if(!hover){return}
  if(hover.act==='card'){openCard();return}
@@ -535,17 +545,16 @@ function drawPage(){const g=abPage.getContext('2d');g.clearRect(0,0,AW,AH);const
  g.fillStyle='#e6dcc6';g.fillRect(0,0,AW,72);g.fillStyle=INK;g.fillRect(0,72,AW,3);
  ['#db4a3e','#f0b93f','#3f8fd8'].forEach((c,i)=>{g.fillStyle=c;g.beginPath();g.arc(46+i*38,36,12,0,7);g.fill();g.strokeStyle=INK;g.lineWidth=2.5;g.stroke()});
  g.fillStyle='#fff';g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.roundRect(180,16,AW-220,40,20);g.fill();g.stroke();g.fillStyle=INK;g.font='500 24px '+JO;g.textAlign='left';g.textBaseline='middle';g.fillText('vin.portfolio/about',204,37);
- [['cv','이력서',40,160],['cl','자기소개서',215,230]].forEach(([k,t,x,w])=>{const on=abTab===k;g.fillStyle=on?'#fff':'#e6dcc6';g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.roundRect(x,90,w,48,[12,12,0,0]);g.fill();g.stroke();g.fillStyle=INK;g.font='500 24px '+KR;g.textAlign='center';g.fillText(t,x+w/2,115)});
- {const lb=abTab==='cv'?'이력서 다운로드':'자기소개서 다운로드';g.fillStyle=INK;g.beginPath();g.roundRect(AW-340,92,300,44,22);g.fill();g.fillStyle='#fff';g.font='500 22px '+KR;g.textAlign='center';g.textBaseline='middle';g.fillText('↓  '+lb,AW-190,115)}
+ [['cv','이력서',40,160],['cl','자기소개서',215,230]].forEach(([k,t,x,w])=>{const on=abTab===k;g.fillStyle=on?'#fff':'#e6dcc6';g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.roundRect(x,90,w,48,[12,12,0,0]);g.fill();g.stroke();g.fillStyle=INK;g.font='500 26px '+KR;g.textAlign='center';g.fillText(t,x+w/2,115)});
  g.fillStyle='#fff';g.fillRect(40,138,AW-80,AH-178);g.strokeStyle=INK;g.lineWidth=3;g.strokeRect(40,138,AW-80,AH-178);
  let y=168;const X=84,MW=AW-168;g.textAlign='left';g.textBaseline='top';
  const wrap=(t,f)=>{g.font=f;const out=[];let line='';for(const ch of t){const n=line+ch;if(g.measureText(n).width>MW&&line){out.push(line);line=ch}else line=n}out.push(line);return out};
  DOCB[abTab].forEach(([k,t])=>{
-  if(k==='ex'){g.font='500 20px '+JO;const w=g.measureText(t).width+34;g.fillStyle='#f0b93f';g.beginPath();g.roundRect(X,y,w,32,16);g.fill();g.fillStyle=INK;g.fillText(t,X+17,y+6);y+=42}
-  else if(k==='h2'){g.fillStyle=INK;g.font='600 44px '+JO;g.fillText(t,X,y);y+=58}
-  else if(k==='h3'){y+=6;g.fillStyle=INK;g.font='700 26px '+KR;g.fillText(t,X,y);y+=34;g.fillRect(X,y,MW,2);y+=8}
-  else if(k==='li'){g.fillStyle=INK;g.font='400 25px '+KR;g.beginPath();g.arc(X+8,y+16,5,0,7);g.fill();wrap(t,'400 25px '+KR).forEach(l=>{g.fillText(l,X+30,y);y+=35})}
-  else{g.fillStyle=INK;wrap(t,'400 25px '+KR).forEach(l=>{g.fillText(l,X,y);y+=38})}});
+  if(k==='ex'){g.font='500 24px '+JO;const w=g.measureText(t).width+38;g.fillStyle='#f0b93f';g.beginPath();g.roundRect(X,y,w,38,19);g.fill();g.fillStyle=INK;g.fillText(t,X+19,y+7);y+=44}
+  else if(k==='h2'){g.fillStyle=INK;g.font='600 54px '+JO;g.fillText(t,X,y);y+=62}
+  else if(k==='h3'){y+=4;g.fillStyle=INK;g.font='700 30px '+KR;g.fillText(t,X,y);y+=38;g.fillRect(X,y,MW,3);y+=6}
+  else if(k==='li'){g.fillStyle=INK;g.font='400 29px '+KR;g.beginPath();g.arc(X+9,y+18,6,0,7);g.fill();wrap(t,'400 29px '+KR).forEach(l=>{g.fillText(l,X+34,y);y+=40})}
+  else{g.fillStyle=INK;wrap(t,'400 29px '+KR).forEach(l=>{g.fillText(l,X,y);y+=42})}});
  abDirty=false}
 function drawAbout(p){const g=abC.getContext('2d');if(abDirty)drawPage();g.fillStyle='#0c0c12';g.fillRect(0,0,AW,AH);
  if(p<.18){const q=p/.18;g.fillStyle='#fff';g.globalAlpha=Math.min(1,q*1.5);g.fillRect(AW/2*(1-q),AH/2-3,AW*q,6);g.globalAlpha=1}
@@ -555,8 +564,8 @@ function drawAbout(p){const g=abC.getContext('2d');if(abDirty)drawPage();g.fillS
 const DLF={cv:['resume.pdf','박수빈_이력서.pdf'],cl:['cover-letter.pdf','박수빈_자기소개서.pdf']};
 const toastEl=document.createElement('div');toastEl.id='toast';toastEl.setAttribute('role','status');document.body.appendChild(toastEl);let toastT=0;
 function toast(m){toastEl.textContent=m;toastEl.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('on'),4200)}
-$('dlBtn').onclick=async()=>{const [u,n]=DLF[abTab];try{const r=await fetch(u,{method:'HEAD',cache:'no-store'});const ct=r.headers.get('content-type')||'';if(!r.ok||/text\/html/.test(ct))throw 0;const a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();a.remove();toast(n+' 다운로드를 시작했어요')}catch(e){toast('아직 '+u+' 파일이 등록되지 않았어요 · 파일을 같은 폴더에 넣으면 바로 받을 수 있어요')}};
-const showDoc=k=>{abTab=k;abDirty=true;drawAbout(1)};
+$('dl').onclick=async()=>{const [u,n]=DLF[abTab];try{const r=await fetch(u,{method:'HEAD',cache:'no-store'});const ct=r.headers.get('content-type')||'';if(!r.ok||/text\/html/.test(ct))throw 0;const a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();a.remove();toast(n+' 다운로드를 시작했어요')}catch(e){toast('파일을 준비 중이에요')}};
+const showDoc=k=>{abTab=k;abDirty=true;drawAbout(1);const t=k==='cv'?'이력서 다운로드':'자기소개서 다운로드';$('dl').setAttribute('aria-label',t);$('dl').dataset.tip=t};
 mon.querySelectorAll('.hit[data-d]').forEach(b=>b.onclick=()=>showDoc(b.dataset.d));
 if(document.fonts)document.fonts.ready.then(()=>{abDirty=true;if(abWas)drawAbout(1)});
 mon.addEventListener('touchmove',e=>e.stopPropagation(),{passive:true});
@@ -571,34 +580,53 @@ const ringsEl=$('rings');function dings(){if(st!=='contact')return;phone.updateM
 $('again').onclick=()=>{progT=prog=0;go('home')};
 drawPj();ctaEl.onclick=()=>{if(st==='pour')go('contact')};
 // ── 전화 받기 화면 ─────────────────────────────────────────────
-(()=>{let d='',d2='';for(let i=0;i<=44;i++){const x=60+15*Math.sin(i*1.15),y=4+i*4.1;d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' ';d2+=(i?'L':'M')+(x+1).toFixed(1)+' '+(y-.4).toFixed(1)+' '}$('cord').setAttribute('d',d);$('cord2').setAttribute('d',d2);
- let h='';for(let r=0;r<3;r++)for(let c=0;c<4;c++){h+=`<circle cx="${-12+c*8}" cy="${-14+r*9+20}" r="2"/><circle cx="${-12+c*8}" cy="${138+r*9+20}" r="2"/>`}$('holes').innerHTML=h})();
 $('x').onclick=()=>back.onclick();
 $('form').addEventListener('submit',e=>{e.preventDefault();$('st').textContent='보내는 중…';callEl.classList.add('up');setTimeout(()=>{if(st==='call')go('end')},1100)});
 
+// ── 수화기(전화 받기): 카메라에 붙은 3D 모델. 줄(용수철)이 늘어났다 줄어들며 띠~용~ 떨어져 등장 ──
+const hsA=new THREE.Group(),hsG=new THREE.Group(),hsC=new THREE.Group();hsA.visible=false;S.add(cam);cam.add(hsA);hsA.add(hsG);hsG.rotation.y=.35;
+const HB=(()=>{const cord=[],rest=[];mHand.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=false;(/coiled.?handset.?cord/i.test(o.name)?cord:rest).push(o)}});
+ mHand.updateMatrixWorld(true);const bc=new THREE.Box3(),br=new THREE.Box3();cord.forEach(o=>bc.expandByObject(o));rest.forEach(o=>br.expandByObject(o));
+ hsC.position.set(0,bc.min.y,0);mHand.add(hsC);mHand.updateMatrixWorld(true);cord.forEach(o=>hsC.attach(o));
+ mHand.position.y=-bc.min.y;hsG.add(mHand);                       // 줄이 시작되는 곳(수화기 윗부분)이 원점
+ return {cordLen:bc.max.y-bc.min.y,bodyH:br.max.y-br.min.y}})();
+let hsOn=false,hsT0=0,hsUp=false,hsUpT0=0;
+function updHandset(){
+ if(st!=='call'){if(hsOn){hsOn=false;hsUp=false;hsA.visible=false}return}
+ const now=performance.now();if(!hsOn){hsOn=true;hsT0=now}
+ const D=60,halfH=D*Math.tan(cam.fov*Math.PI/360),halfW=halfH*cam.aspect;
+ const sc=(.37*2*halfH)/HB.bodyH,bodyW=HB.bodyH*sc;                // 수화기 길이 = 화면 높이의 37%
+ const A=halfH+1.5,L=A-halfH*.4,len0=-bodyW*1.15;                  // 줄 걸린 곳(화면 위쪽 밖) / 정착했을 때 줄 길이
+ const tau=(now-hsT0)/1000;let len=L,rot=0;
+ if(!RM){len=L+(len0-L)*Math.exp(-3.4*tau)*Math.cos(8.5*tau);      // 감쇠 진동: 쭉 늘어났다가 튕겨 올라오길 몇 번 반복
+  rot=.05*Math.exp(-1.3*tau)*Math.sin(7*tau)+.03*Math.sin(tau*1.8)*Math.min(1,tau*.5)}
+ if(callEl.classList.contains('up')){if(!hsUp){hsUp=true;hsUpT0=now}const u=Math.min(1,(now-hsUpT0)/700);len=L+(len0-L)*Math.pow(u,2.2)}else hsUp=false;
+ hsA.visible=true;hsA.position.set(-.72*halfW,A,-D);hsA.rotation.z=rot;
+ hsG.scale.setScalar(sc);hsG.position.y=-len;
+ hsC.visible=len>.3;hsC.scale.y=Math.max(.05,len/(sc*HB.cordLen))}
 // ── 루프 ───────────────────────────────────────────────────────
 const clock=new THREE.Clock(),bumpBase=new Map(),vis=[],tmpQ=new THREE.Quaternion(),startQ=new THREE.Quaternion();
 const ease=x=>x*x*(3-2*x);
 function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
- if(autoP){progT=Math.min(1,progT+dt2*.55);if(progT>=1)autoP=false}
- prog+=(progT-prog)*(RM?1:.09);if(Math.abs(progT-prog)<.001)prog=progT;
+ if(autoP){progT=Math.min(1,progT+dt2*1.7);if(progT>=1)autoP=false}
+ prog+=(progT-prog)*(RM?1:.18);if(Math.abs(progT-prog)<.001)prog=progT;
  if(st==='pour'){const was=pj.classList.contains('on');syncOverlay()}
  const fileOpen=st==='open'||st==='pour';
  sm.lerp(mouse,RM?0:.05);cpos.lerp(tpos,RM?1:.055);clook.lerp(tlook,RM?1:.055);
- const k=st==='home'?1:.3;cam.position.copy(cpos);cam.position.x+=sm.x*7*k;cam.position.y+=sm.y*3*k;cam.lookAt(clook.x+sm.x*18*k,clook.y+sm.y*7*k,clook.z);
+ const k=st==='home'?1:.3;cam.position.copy(cpos);cam.position.x+=sm.x*7*k;cam.position.y+=sm.y*3*k;cam.lookAt(clook.x+sm.x*18*k,clook.y+sm.y*7*k,clook.z);updHandset();
  if(st==='home'||st==='work'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObjects(PICK.map(p=>p.g),true).find(h=>h.object.userData.pick);const p=hit?hit.object.userData.pick:null;
   if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?p.t:'';lbl.style.opacity=p&&moved?1:0}}
  else if(st==='contact'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObject(phone,true)[0];const p=hit?PICK[2]:null;if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?'전화 받기':'';lbl.style.opacity=p?1:0}}
  else if(hover){hover=null;cv.style.cursor='default';lbl.style.opacity=0}
- {eT+=(eTarget-eT)*Math.min(1,dt2*1.1);const k=eT<.001?0:eT;tmpC.copy(C_SUN0).lerp(C_SUN1,k);sun.color.copy(tmpC);sun.intensity=2.1-.85*k;fill.intensity=.7-.35*k;hemi.intensity=1.35-.75*k;hemi.color.copy(C_H0).lerp(C_H1,k);sun.position.lerpVectors(SUN_P0,SUN_P1,k);win.position.copy(tmpV.copy(sun.position).normalize().multiplyScalar(250));win.lookAt(0,0,0);tmpC.copy(C_BG0).lerp(C_BG1,k).convertLinearToSRGB();post.uniforms.cBg.value.set(tmpC.r,tmpC.g,tmpC.b)}
- lampV=lampOn?lampEnv(performance.now()/1000-lampT0):Math.max(0,lampV-dt2*5);spot.intensity=lampV*4200;post.uniforms.warmK.value=lampV;
+ {eT+=(eTarget-eT)*Math.min(1,dt2*1.1);const k=eT<.001?0:eT;tmpC.copy(C_SUN0).lerp(C_SUN1,k);sun.color.copy(tmpC);sun.intensity=2.3-.95*k;fill.intensity=.3-.15*k;hemi.intensity=1.8-1.0*k;hemi.color.copy(C_H0).lerp(C_H1,k);sun.position.lerpVectors(SUN_P0,SUN_P1,k);win.position.copy(tmpV.copy(sun.position).normalize().multiplyScalar(250));win.lookAt(0,0,0);tmpC.copy(C_BG0).lerp(C_BG1,k).convertLinearToSRGB();post.uniforms.cBg.value.set(tmpC.r,tmpC.g,tmpC.b)}
+ lampV=lampOn?lampEnv(performance.now()/1000-lampT0):Math.max(0,lampV-dt2*5);spot.intensity=lampV*4200*Math.max(0,1-1.4*eT);spot.angle=.6-.24*eT;post.uniforms.wLo.value=1+.35*eT;post.uniforms.wHi.value=1.6+.5*eT;cal.position.y=130-14*eT;post.uniforms.warmK.value=lampV;
  {const onScr=st==='screen'&&cpos.distanceTo(tpos)<16;if(onScr&&!abWas){abStart=performance.now();abDirty=true;abDone=false}abWas=onScr;scr.material=onScr?ABM:(st==='end'?ENDM:BLACK);if(onScr){const ap=Math.min(1,(performance.now()-abStart)/1400);if(!abDone){drawAbout(ap);if(ap>=1)abDone=true}}if(onScr){placeMon();if(!mon.classList.contains('on'))mon.classList.add('on')}else if(mon.classList.contains('on'))mon.classList.remove('on')}
  {const tt=clock.elapsedTime;LV.forEach(m=>{m.rotation.z=m.userData.base+Math.sin(tt*.9+m.userData.ph)*.07})}
  if(cardOpen){bcRY+=(bcTY-bcRY)*.12;bcRX+=(bcTX-bcRX)*.12;bcSpin.style.transform=`rotateX(${bcRX}deg) rotateY(${bcRY}deg)`}
  drawers.forEach((d,i)=>{const o=(i===2&&(fileOpen||prog>.05))?34:0;d.position.z+=((d.userData.z0+o)-d.position.z)*.1});
  // 파일: 서랍 안에서 서 있다가, 스크롤하면 하나씩 화면 앞으로 날아와 덮는다
  files.forEach(f=>{f.visible=fileOpen||prog>.02;const u=f.userData,base=new THREE.Vector3(40,22,fileDrawer.position.z-5-u.k*3);
-  const local=Math.max(0,Math.min(1,(prog-u.delay)/.45)),e=ease(local);
+  const local=Math.max(0,Math.min(1,(prog-u.delay)/.3)),e=ease(local);
   f.position.lerpVectors(base,u.end,e);
   startQ.setFromEuler(new THREE.Euler(-.3+u.jit,0,u.jit*.5));tmpQ.copy(startQ).slerp(u.endQ,e);f.quaternion.copy(tmpQ)});
  // 전화벨: 울리는 동안 몸체가 떨림
@@ -609,21 +637,17 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
   S.traverse(o=>{if(o.isMesh&&o.visible&&o.material&&o.material.colorWrite!==false){sw.push([o,o.material]);o.material=albOf(o.material)}});
   R.setRenderTarget(rtA);R.render(S,cam);sw.forEach(([o,m])=>o.material=m);hid.forEach(o=>o.visible=true)}
  vis.length=0;fx.forEach(o=>{if(o.visible){o.visible=false;vis.push(o)}});S.overrideMaterial=nMat;R.setRenderTarget(rtN);R.render(S,cam);S.overrideMaterial=null;vis.forEach(o=>o.visible=true);
- R.setRenderTarget(null);R.render(qS,qC);requestAnimationFrame(loop)}
+ R.setRenderTarget(null);R.render(qS,qC);updCur();requestAnimationFrame(loop)}
 const css=n=>'#'+n.toString(16).padStart(6,'0');
 const THEMES=[
- {n:'크림·레드·블루',W:0xf3e9d4,FL:0x85707c,RD:0xdb4a3e,BL:0x3f8fd8,YL:0xf0b93f,CM:0x3f86cc,DF:0x62a6e6},
- {n:'올리브·오렌지·틸',W:0xf1ead6,FL:0x6b7a5c,RD:0xd9633b,BL:0x2f7f6e,YL:0xe8b33a,CM:0x2f6f5e,DF:0x4f9a85},
- {n:'핑크·라벤더 (V1 청보라)',W:0xfaeee8,FL:0x9a86b8,RD:0xec6b8a,BL:0x5b4fee,YL:0xffc857,CM:0x5b4fee,DF:0x8379f0},
- {n:'먹색·레드 (레퍼런스 2~4)',W:0xf4efe0,FL:0x2f2e38,RD:0xd63a2f,BL:0x3a3a48,YL:0xe9e2cc,CM:0x3a3a48,DF:0x5a5a6a}];
+ {n:'크림·레드·블루',W:0xf3e9d4,FL:0x85707c,RD:0xdb4a3e,BL:0x3f8fd8,YL:0xf0b93f,CM:0x3f86cc,DF:0x62a6e6}];
 const MATS={W,FL,RD,BL,YL,CM,DF};let themeI=0;
 function applyTheme(i){themeI=i;const T=THEMES[i];for(const k in MATS)MATS[k].color.set(T[k]);CRM=css(T.W);RED=css(T.RD);BLU=css(T.BL);YEL=css(T.YL);
  texReg.forEach(r=>{r.g.setTransform(1,0,0,1,0,0);r.g.save();r.draw(r.g,r.w,r.h);r.g.restore();r.t.needsUpdate=true});aCache.clear();
- $('pal').textContent='팔레트 '+(i+1)+'/'+THEMES.length+' · '+T.n;try{localStorage.setItem('vinTheme',i)}catch(e){}}
-$('pal').onclick=()=>applyTheme((themeI+1)%THEMES.length);
-try{const sv=+localStorage.getItem('vinTheme');if(sv>0&&sv<THEMES.length)applyTheme(sv);else applyTheme(0)}catch(e){applyTheme(0)}
+}
+applyTheme(0);
 if(document.fonts){document.fonts.load('600 40px Jost');document.fonts.load('500 30px "Noto Sans KR"');document.fonts.ready.then(()=>applyTheme(themeI))}
-window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
+window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
 fit();addEventListener('resize',fit);if(window.ResizeObserver)new ResizeObserver(()=>{if(R.domElement.width!==innerWidth*2||innerWidth/innerHeight!==cam.aspect)fit()}).observe(document.documentElement);fromHash();loop();
 const ld=$('load');ld.style.opacity=0;setTimeout(()=>ld.hidden=true,600);
 </script>
