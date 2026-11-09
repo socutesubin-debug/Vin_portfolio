@@ -47,6 +47,9 @@ export const PROJECTS: Record<ProjectSlug, Project> = {
     title: 'PRINTCAFE',
     label: 'PRINTCAFE',
     category: 'UX/UI Redesign',
+    cover: '/printcafe/img/og.jpg',
+    // 케이스 스터디 원본 페이지 (public/printcafe/ 정적 사이트)
+    externalUrl: '/printcafe/',
     sections: {},
   },
   'le-labo': {
