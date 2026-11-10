@@ -9,3 +9,4 @@ Home → Work(모니터: 작업물 목록) → About(서랍: 이력서·자기�
 - 프로젝트 표지: `covers/이름.jpg`(상세용 2560px), `covers/이름-sm.jpg`(모니터 배경용 1280px)
 - 명함 이미지: `card-front.png`, `card-back.png` 를 넣으면 자동 적용
 - EmailJS 키는 `.env.local`에만 보관 (저장소에 올리지 않기)
+- 화면 스타일: 기본은 매트캡 v2(`matcap/v2/` 금속·플라스틱·종이). 비교용으로 주소 끝에 `?style=basic`(평면 일러스트), `?style=retro`(레트로), `?style=matcap`(매트캡 v1)

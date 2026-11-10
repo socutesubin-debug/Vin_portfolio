@@ -294,8 +294,9 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {toCreasedNormals} from 'three/addons/utils/BufferGeometryUtils.js';
 const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
-const RETRO=new URLSearchParams(location.search).get('style')==='retro';
-const MATCAP=/^matcap2?$/.test(new URLSearchParams(location.search).get('style')||''),MCDIR=new URLSearchParams(location.search).get('style')==='matcap2'?'matcap/v2/':'matcap/';   /* ?style=matcap2 → v2 매트캡 */   /* 매트캡 버전 (?style=matcap) */   // 비교용 레트로 일러스트 버전 (?style=retro)
+const STYLE=new URLSearchParams(location.search).get('style')||'matcap2';   /* 기본: 매트캡 v2. 비교용 ?style=basic | retro | matcap */
+const RETRO=STYLE==='retro';
+const MATCAP=STYLE==='matcap'||STYLE==='matcap2',MCDIR=STYLE==='matcap2'?'matcap/v2/':'matcap/';   /* ?style=matcap2 → v2 매트캡 */   /* 매트캡 버전 (?style=matcap) */   // 비교용 레트로 일러스트 버전 (?style=retro)
 const $=id=>document.getElementById(id);
 // ── 렌더러 / 장면 ────────────────────────────────────────────
 const cv=$('c'),R=new THREE.WebGLRenderer({canvas:cv,antialias:false});R.setPixelRatio(2);
