@@ -191,8 +191,11 @@ html.cc input,html.cc textarea{cursor:text!important}
 /* 프로젝트 상세: 위쪽 막대 없이 작품만 보이게. 닫기는 오른쪽 아래 둥근 ✕ (Esc로도 닫힘) */
 #detail.nobar #dBar{background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border:0;box-shadow:none;padding:0;pointer-events:none}
 #detail.nobar #dBar>*:not(#dRight),#detail.nobar #dRight>*:not(#dClose){display:none}
-#detail.nobar #dClose{pointer-events:auto;position:fixed;right:max(20px,2.5vw);bottom:calc(20px + env(safe-area-inset-bottom,0px));width:48px;height:48px;padding:0;display:grid;place-items:center;font-size:0;border-radius:50%;background:rgba(15,15,24,.82);box-shadow:0 0 0 2px #fff,0 8px 24px rgba(0,0,0,.3)}
-#detail.nobar #dClose::before{content:"✕";font-size:18px;color:#fff}
+#detail.nobar #dClose{pointer-events:auto;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(22px + env(safe-area-inset-bottom,0px));width:40px;height:40px;padding:0;display:grid;place-items:center;font-size:0;border-radius:50%;
+ background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5);border:1px solid rgba(255,255,255,.42);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 24px rgba(0,0,0,.22);transition:background .2s,transform .2s}   /* 유리 느낌(글래스모피즘) */
+#detail.nobar #dClose:hover{background:rgba(255,255,255,.28);transform:translateX(-50%) scale(1.06)}
+#detail.nobar #dClose:focus-visible{outline:1.5px solid rgba(255,255,255,.55);outline-offset:3px}
+#detail.nobar #dClose::before{content:"✕";font-size:15px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.35)}
 #detail.nobar #dBody{padding-top:0!important}
 #detail.fr{overflow:hidden}#detail.fr #dChips,#detail.fr #dPct,#detail.fr #dProg{visibility:hidden}
 #dBody.fr iframe{display:block;width:100%;border:0;background:#fff}
@@ -201,7 +204,7 @@ html.cc input,html.cc textarea{cursor:text!important}
 #dBody.cv{color:#f3f1ea}
 #dBody.cv .cvs{display:grid;place-items:center;padding:20px max(16px,3vw) 0}
 #dBody.cv .cvs img{display:block;width:100%;max-width:calc((100vh - 40px)*16/9);height:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-#dBody.cv .cvm{text-align:center;padding:36px 20px 80px;font:400 15px/1.7 "Noto Sans KR",sans-serif;opacity:.7}
+#dBody.cv .cvm{text-align:center;padding:0 20px 84px;font:400 15px/1.7 "Noto Sans KR",sans-serif;opacity:.7}
 #dBody.cv .cvs img{animation:cvIn 1s .35s cubic-bezier(.2,.8,.2,1) both}#dBody.cv .cvm{animation:cvIn2 .8s .9s ease-out both}   /* 들어가면 텍스트 표지가 살짝 떠오르며 등장 */
 @keyframes cvIn{from{opacity:0;transform:translateY(28px) scale(.985)}to{opacity:1;transform:none}}@keyframes cvIn2{from{opacity:0}to{opacity:.7}}
 @media (prefers-reduced-motion:reduce){#dBody.cv .cvs img,#dBody.cv .cvm{animation:none}}
@@ -577,7 +580,7 @@ function fitFrame(){const f=$('dFrame');if(!f)return;f.onmouseenter=()=>{cur.sty
 addEventListener('resize',()=>{if(dOpen)fitFrame()});
 function dKind(k){return /brand|graphic/i.test(k)?'br':'ux'}
 function openDetail(a,e){const r=a.getBoundingClientRect();const x=e.clientX||r.left+r.width/2,y=e.clientY||r.top+r.height/2;dXY=`${x}px ${y}px`;
- const cvU=a.dataset.url,cvI=a.dataset.img,t=cvU?'fr':cvI?'cv':dKind(a.dataset.k),d=cvU?{ty:a.dataset.k,secs:[],html:`<iframe id="dFrame" src="${cvU}" title="${a.dataset.n} 케이스 스터디"></iframe>`}:cvI?{ty:a.dataset.k,secs:[['표지','cover']],html:`<section id="cover" class="cvs"><img src="covers/${cvI}.jpg" alt="${a.dataset.n} 표지"></section><section class="cvm"><p>자세한 작업 과정은 곧 추가될 예정이에요.</p></section>`}:TPL[t](a.dataset.n,a.dataset.k);
+ const cvU=a.dataset.url,cvI=a.dataset.img,t=cvU?'fr':cvI?'cv':dKind(a.dataset.k),d=cvU?{ty:a.dataset.k,secs:[],html:`<iframe id="dFrame" src="${cvU}" title="${a.dataset.n} 케이스 스터디"></iframe>`}:cvI?{ty:a.dataset.k,secs:[['표지','cover']],html:`<section id="cover" class="cvs"><img src="covers/${cvI}.jpg" alt="${a.dataset.n} 표지"></section><section class="cvm"></section>`}:TPL[t](a.dataset.n,a.dataset.k);
  $('dBody').className=t;$('dBody').innerHTML=d.html;$('dTy').textContent=d.ty;$('dNm').textContent=a.dataset.n;
  dSecs=d.secs;$('dChips').innerHTML=d.secs.map(([nm,id],i)=>`<button data-id="${id}" aria-current="${i===0}"><i>0${i+1}</i><span>${nm}</span></button>`).join('');
  dEls=d.secs.map(([n,id])=>$(id));det.classList.toggle('fr',t==='fr');det.classList.toggle('nobar',t==='fr'||t==='cv');if(t==='fr')fitFrame();else $('dBody').style.paddingTop='';
