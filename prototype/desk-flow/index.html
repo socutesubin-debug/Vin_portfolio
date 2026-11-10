@@ -426,7 +426,7 @@ const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:
    col+=vec3(1.,.97,.9)*clamp(l-1.,0.,.6)*.4;                                                 // 광택 하이라이트
    col=mix(col,vec3(dot(col,vec3(.299,.587,.114))),.1)*vec3(1.03,1.,.95);                    // 살짝 차분하고 따뜻하게
    col*=1.07-.1*clamp(dot(v-vec2(.1,.95),vec2(.7071,-.7071)),0.,1.);}                          // 창문 쪽(왼쪽 위)이 조금 더 밝게
-  if(mc>.5){vec3 W3=vec3(.299,.587,.114);float ms=dot(pow(texture2D(tM,v).rgb,vec3(.4545)),W3)/max(dot(a,W3),.03);vec3 m=a*clamp(ms/.66,0.,1.25)*vec3(1.02,1.,.97);float ls=clamp(l,0.,1.);   // 매트캡(물건 볼륨) × 그림자(창문·물체)
+  if(mc>.5){vec3 W3=vec3(.299,.587,.114);float ms=dot(pow(texture2D(tM,v).rgb,vec3(.4545)),W3)/max(dot(a,W3),.03);vec3 m=a*clamp(ms/.66,0.,1.25);float ls=clamp(l,0.,1.);   // 매트캡(물건 볼륨) × 그림자(창문·물체)
    col=m*mix(sh,vec3(1.),ls*ls*(3.-2.*ls))+vec3(1.,.97,.9)*clamp(l-1.,0.,.5)*.3;}
   col=mix(col,col*vec3(1.,.88,.62)+vec3(.05,.025,0.),warmK*smoothstep(wLo,wHi,l)*step(.72,t0));
   vec2 px=ow/res;float d0=ld(v);vec3 n0=texture2D(tN,v).rgb;float e=0.;
@@ -436,7 +436,7 @@ const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:
   if(texture2D(tD,v).r>.9999)col=cBg;
   if(grainA>0.){float n=fract(sin(dot(floor(gl_FragCoord.xy),vec2(12.9898,78.233)))*43758.5453);float m=fract(sin(dot(floor(gl_FragCoord.xy/3.),vec2(39.34,11.13)))*24634.63);col+=(n-.5)*grainA+(m-.5)*grainA*.5;}
   if(dbg>.5)col=vec3(l/3.);gl_FragColor=vec4(col,1.);}`});
-if(MATCAP)Object.assign(post.uniforms,{mc:{value:1},grainA:{value:.035},ow:{value:1.5},sh:{value:new THREE.Vector3(.86,.83,.89)}});
+if(MATCAP)Object.assign(post.uniforms,{mc:{value:1},grainA:{value:.035},ow:{value:1.5},sh:{value:new THREE.Vector3(.85,.85,.89)}});
 if(RETRO)Object.assign(post.uniforms,{soft:{value:1},grainA:{value:.06},ow:{value:1.6},eThr:{value:.5},sh:{value:new THREE.Vector3(.86,.80,.75)},cDark:{value:toLin('#221e1c')},cBg:{value:toLin('#d8cdb7')}});
 const aCache=new Map();const albOf=m=>{let a=aCache.get(m);if(!a){a=new THREE.MeshBasicMaterial({color:m.color.clone(),map:m.map||null,side:m.side});aCache.set(m,a)}return a};
 const MCK={},mCache=new Map();
@@ -815,12 +815,13 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
 const css=n=>'#'+n.toString(16).padStart(6,'0');
 const THEMES=[
  {n:'크림·레드·블루',W:0xf3e9d4,FL:0x85707c,RD:0xdb4a3e,BL:0x3f8fd8,YL:0xf0b93f,CM:0x3f86cc,DF:0x62a6e6},
- {n:'레트로 일러스트',W:0xebe2d1,FL:0x9d8f7e,RD:0xb03a24,BL:0x86c2bb,YL:0xd9a845,CM:0x56677c,DF:0x6c8098}];
+ {n:'레트로 일러스트',W:0xebe2d1,FL:0x9d8f7e,RD:0xb03a24,BL:0x86c2bb,YL:0xd9a845,CM:0x56677c,DF:0x6c8098},
+ {n:'화이트(매트캡)',W:0xf6f5f2,FL:0x8a7f86,RD:0xdb4a3e,BL:0x3f8fd8,YL:0xf0b93f,CM:0x3f86cc,DF:0x62a6e6}];
 const MATS={W,FL,RD,BL,YL,CM,DF};let themeI=0;
 function applyTheme(i){themeI=i;const T=THEMES[i];for(const k in MATS)MATS[k].color.set(T[k]);CRM=css(T.W);RED=css(T.RD);BLU=css(T.BL);YEL=css(T.YL);
  texReg.forEach(r=>{r.g.setTransform(1,0,0,1,0,0);r.g.save();r.draw(r.g,r.w,r.h);r.g.restore();r.t.needsUpdate=true});aCache.clear();
 }
-applyTheme(RETRO?1:0);
+applyTheme(RETRO?1:MATCAP?2:0);
 if(document.fonts){document.fonts.load('600 40px Jost');document.fonts.load('500 30px "Noto Sans KR"');document.fonts.ready.then(()=>applyTheme(themeI))}
 window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={files,scr,cam,AW,AH,get wk(){return WKR},cpos,fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
 fit();addEventListener('resize',fit);if(window.ResizeObserver)new ResizeObserver(()=>{if(R.domElement.width!==innerWidth*2||innerWidth/innerHeight!==cam.aspect)fit()}).observe(document.documentElement);fromHash();loop();
