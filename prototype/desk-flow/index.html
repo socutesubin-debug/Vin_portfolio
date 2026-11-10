@@ -231,6 +231,11 @@ html.cc input,html.cc textarea{cursor:text!important}
 #doc .dbar button{all:unset;cursor:pointer;flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:var(--ink);color:#fff;font-size:15px}
 #doc .dbar button:disabled{opacity:.3;cursor:default}#doc .dbar button:focus-visible{outline:2px solid #3f8fd8;outline-offset:2px}
 #doc .dpg{display:flex;align-items:center;gap:6px;font:500 13px var(--display);font-variant-numeric:tabular-nums}#doc .dpg[hidden]{display:none}
+#doc .dhint{position:absolute;top:66px;left:50%;transform:translateX(-50%);margin:0;padding:5px 12px;border-radius:99px;background:rgba(15,18,30,.55);color:#fff;font:500 12px "Noto Sans KR",sans-serif;letter-spacing:-.02em;white-space:nowrap;pointer-events:none;transition:opacity .6s}
+#lens{position:fixed;left:0;top:0;z-index:61;width:230px;height:230px;margin:-115px 0 0 -115px;border-radius:50%;overflow:hidden;pointer-events:none;display:none;background:#fdfcf8;border:3px solid #fff;box-shadow:0 0 0 1.5px var(--ink),0 14px 34px rgba(0,0,0,.35);will-change:transform}   /* 돋보기 */
+#lens canvas{display:block;width:100%;height:100%}
+#lens span{position:absolute;right:50%;bottom:10px;transform:translateX(50%);padding:1px 8px;border-radius:99px;background:rgba(29,36,51,.75);color:#fff;font:500 11px var(--display)}
+html.lensOn #cur,html.lensOn #label{opacity:0!important}html.lensOn #doc{cursor:none}
 #doc .dbar .dgo{width:auto;padding:0 14px;border-radius:99px;font:500 13px var(--display)}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 #mon .hit{all:unset;position:absolute;cursor:pointer}#mon .hit:focus-visible{outline:.15em solid #3f8fd8}
@@ -288,7 +293,7 @@ html.cc input,html.cc textarea{cursor:text!important}
 <button id="cta" aria-label="연락하기">연락하기 <span aria-hidden="true">→</span></button>
 <div id="mon" aria-hidden="true"></div>
 <div id="wkA11y" class="sr" hidden aria-label="작업물 목록"></div>
-<div id="doc" role="dialog" aria-modal="true" aria-labelledby="docT" hidden><div class="dbar"><span id="docT"></span><span class="dpg" id="docPgW" hidden><button id="docPv" aria-label="이전 장" data-tip="이전 장">‹</button><span id="docPg"></span><button id="docNx" aria-label="다음 장" data-tip="다음 장">›</button></span><button id="docGo" class="dgo" hidden>전화기로 메시지 남기기 →</button><button id="docDl" aria-label="다운로드" data-tip="다운로드"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg></button><button id="docX" aria-label="닫기" data-tip="닫기">✕</button></div><div id="docB" class="docb sr"></div></div>
+<div id="doc" role="dialog" aria-modal="true" aria-labelledby="docT" hidden><div class="dbar"><span id="docT"></span><span class="dpg" id="docPgW" hidden><button id="docPv" aria-label="이전 장" data-tip="이전 장">‹</button><span id="docPg"></span><button id="docNx" aria-label="다음 장" data-tip="다음 장">›</button></span><button id="docGo" class="dgo" hidden>전화기로 메시지 남기기 →</button><button id="docDl" aria-label="다운로드" data-tip="다운로드"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg></button><button id="docX" aria-label="닫기" data-tip="닫기">✕</button></div><div id="docB" class="docb sr"></div><p class="dhint" id="docHint">종이 위에 올리면 돋보기 · 휠로 배율 조절</p></div><div id="lens" aria-hidden="true"><canvas></canvas><span id="lensZ"></span></div>
 <div id="endmsg"><button id="again" aria-label="처음으로 돌아가기" data-tip="처음으로 돌아가기"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v5h5"/></svg></button></div>
 <div id="bc" role="dialog" aria-label="명함"><div class="cd"><div class="spin"><div class="f a"><img src="card-front.png" alt="명함 앞면" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'<span>VISION INSIDE</span><b>박수빈</b><span>UX/UI Designer · eilibean01@gmail.com</span>'}))"></div>
  <div class="f b"><img src="card-back.png" alt="명함 뒷면" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'<span></span><b>VIN</b><span>card-back.png 자리</span>'}))"></div></div></div></div>
@@ -976,18 +981,37 @@ function renderDoc(dt2,t){if(!docSt)return;const S=docSt;S.p=cl01(S.p+S.dir*(RM?
 SYN.paper=t=>{nz(t,.32,{f:1800,f2:5200,q:.7,peak:.07,a:.03});nz(t+.05,.2,{f:900,f2:2400,q:.9,peak:.04,a:.02})};   // 종이 스르륵
 
 let docOpen=false;const docEl=$('doc');
-function docPage(a){if(!docSt)return;const n=docSt.sh.length;a=Math.max(0,Math.min(n-1,a));if(a===docSt.a)return;docSt.a=a;sfx('paper');updPg()}
+function docPage(a){if(!docSt)return;const n=docSt.sh.length;a=Math.max(0,Math.min(n-1,a));if(a===docSt.a)return;docSt.a=a;sfx('paper');updPg();lensHide()}
 function updPg(){const n=docSt?docSt.sh.length:1;$('docPgW').hidden=n<2;if(n>1){$('docPg').textContent=`${docSt.a+1} / ${n}`;$('docPv').disabled=docSt.a===0;$('docNx').disabled=docSt.a===n-1}}
 function openDoc(k){const [id,ko,en]=DOCN[k],pgs=PG[id];if(!pgs||!pgs.length)return;if(docSt){docSt.sh.forEach(s=>{PS.remove(s.m);PS.remove(s.sh)});docSt=null}
  $('docT').textContent=ko+' · '+en;$('docB').innerHTML=DOCH[id];$('docDl').hidden=!DLF[id];docEl.dataset.id=id;$('docGo').hidden=!/data-go=/.test(DOCH[id]);
  docSt={k,id,p:0,dir:1,a:0,sh:pgs.map(mkSheet)};updPg();sfx('paper');
- docOpen=true;docEl.hidden=false;if(window.gsap&&!RM)gsap.fromTo('#doc .dbar',{opacity:0,y:-12},{opacity:1,y:0,duration:.4,delay:.55,ease:'power2.out'});
+ docOpen=true;docEl.hidden=false;$('docHint').style.opacity=1;if(window.gsap&&!RM)gsap.fromTo('#doc .dbar',{opacity:0,y:-12},{opacity:1,y:0,duration:.4,delay:.55,ease:'power2.out'});
  setTimeout(()=>{if(docOpen)$('docX').focus()},RM?0:600)}
-function closeDoc(){if(!docOpen)return;docOpen=false;if(docSt){docSt.dir=-1;sfx('paper')}docEl.hidden=true}
+function closeDoc(){if(!docOpen)return;docOpen=false;lensHide();if(docSt){docSt.dir=-1;sfx('paper')}docEl.hidden=true}
 $('docX').onclick=closeDoc;$('docDl').onclick=()=>dlDoc(docEl.dataset.id);$('docPv').onclick=()=>docSt&&docPage(docSt.a-1);$('docNx').onclick=()=>docSt&&docPage(docSt.a+1);
 $('docGo').onclick=()=>{closeDoc();go('contact')};
 docEl.addEventListener('click',e=>{if(e.target.closest('.dbar'))return;if(!docSt)return;const s=docSt.sh[docSt.a];ray.setFromCamera(new THREE.Vector2(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1),cam);
  if(ray.intersectObject(s.m,false).length){if(docSt.sh.length>1)docPage(docSt.a+1<docSt.sh.length?docSt.a+1:0)}else closeDoc()});   /* 종이를 누르면 다음 장, 바깥을 누르면 닫기 */
+// 돋보기: 펼친 종이 위에 마우스를 올리면 커서가 돋보기가 되어 그 부분을 크게. 휠로 배율, 휴대폰은 누른 채 끌기
+const lensEl=$('lens'),lensC=lensEl.querySelector('canvas'),lensG=lensC.getContext('2d'),LS=230;let lensZ=2.6,lensOn=false,lensDrag=null,lensLast=null;
+lensC.width=lensC.height=Math.round(LS*Math.min(devicePixelRatio||1,2));
+const _la=new THREE.Vector3(),_lb=new THREE.Vector3();
+function lensHide(){if(!lensOn)return;lensOn=false;lensEl.style.display='none';document.documentElement.classList.remove('lensOn')}
+function lensAt(x,y){if(!docSt||docSt.dir<0||docSt.p<1)return lensHide();const s=docSt.sh[docSt.a],pg=PG[docSt.id]&&PG[docSt.id][docSt.a];if(!pg)return lensHide();
+ ray.setFromCamera(new THREE.Vector2(x/innerWidth*2-1,-(y/innerHeight)*2+1),cam);const h=ray.intersectObject(s.m,false)[0];if(!h||!h.uv)return lensHide();
+ s.m.localToWorld(_la.set(0,s.h/2,0)).project(cam);s.m.localToWorld(_lb.set(0,-s.h/2,0)).project(cam);
+ const cw=pg.cv.width,ch=pg.cv.height,scr=Math.abs(_la.y-_lb.y)/2*innerHeight/ch,src=LS/(scr*lensZ),sx=h.uv.x*cw-src/2,sy=(1-h.uv.y)*ch-src/2;   /* 화면에 보이는 크기 × 배율 */
+ lensG.fillStyle=PAPER;lensG.fillRect(0,0,lensC.width,lensC.height);lensG.imageSmoothingQuality='high';lensG.drawImage(pg.cv,sx,sy,src,src,0,0,lensC.width,lensC.height);
+ $('lensZ').textContent='×'+lensZ.toFixed(1);lensEl.style.transform=`translate(${x}px,${y}px)`;
+ if(!lensOn){lensOn=true;lensEl.style.display='block';document.documentElement.classList.add('lensOn');const hn=$('docHint');if(hn)hn.style.opacity=0}}
+docEl.addEventListener('pointermove',e=>{lensLast=[e.clientX,e.clientY];if(e.pointerType==='touch'){if(lensDrag){if(Math.hypot(e.clientX-lensDrag[0],e.clientY-lensDrag[1])>6)lensDrag.moved=true;lensAt(e.clientX,e.clientY-90)}return}
+ if(e.target.closest('.dbar'))return lensHide();lensAt(e.clientX,e.clientY)});
+docEl.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!e.target.closest('.dbar')){lensDrag=[e.clientX,e.clientY];lensDrag.moved=false;lensAt(e.clientX,e.clientY-90)}});   /* 손가락에 가리지 않게 위쪽에 */
+addEventListener('pointerup',()=>{if(lensDrag){setTimeout(()=>{lensDrag=null},0);lensHide()}});
+docEl.addEventListener('pointerleave',lensHide);
+docEl.addEventListener('wheel',e=>{if(!docSt)return;e.preventDefault();lensZ=Math.max(1.5,Math.min(5,lensZ*(e.deltaY<0?1.12:1/1.12)));if(lensLast)lensAt(lensLast[0],lensLast[1])},{passive:false});
+docEl.addEventListener('click',e=>{if(lensDrag&&lensDrag.moved)e.stopImmediatePropagation()},true);   /* 끌어서 본 뒤엔 클릭(닫기·넘기기)으로 치지 않음 */
 addEventListener('keydown',e=>{if(!docOpen||!docSt)return;if(e.key==='ArrowRight')docPage(docSt.a+1);else if(e.key==='ArrowLeft')docPage(docSt.a-1)});
 if(document.fonts)document.fonts.ready.then(()=>{abDirty=true;if(abWas)drawAbout(1)});
 mon.addEventListener('touchmove',e=>e.stopPropagation(),{passive:true});
