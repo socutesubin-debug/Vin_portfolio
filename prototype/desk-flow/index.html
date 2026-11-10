@@ -98,7 +98,7 @@ html.cc input,html.cc textarea{cursor:text!important}
 @keyframes ding{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(var(--r))}25%{opacity:1;transform:translate(calc(-50% + var(--dx)*.6),calc(-50% + var(--dy)*.6)) scale(1.1) rotate(var(--r))}75%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1) rotate(var(--r))}}
 /* 프로젝트 상세 (원형 전환) */
 #detail{position:fixed;inset:0;z-index:12;background:#f7f1e3;color:var(--ink);overflow:auto;overscroll-behavior:contain;clip-path:circle(0px at 50% 50%);visibility:hidden;scroll-behavior:auto}
-#dBar{position:fixed;top:0;left:0;right:0;z-index:3;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:18px;padding:calc(10px + env(safe-area-inset-top,0px)) max(20px,3vw) 10px;background:rgba(247,241,227,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--ink)}
+#dBar{position:fixed;top:0;left:0;right:0;z-index:3;display:grid;grid-template-columns:auto auto 1fr auto;align-items:center;gap:18px;padding:calc(10px + env(safe-area-inset-top,0px)) max(20px,3vw) 10px;background:rgba(247,241,227,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--ink)}
 #dBar .ty{font:500 12px var(--display);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
 #dBar .ty b{display:block;font:500 15px var(--display);letter-spacing:0;text-transform:none;color:#3f8fd8}
 #dChips{display:flex;gap:6px;justify-content:center;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
@@ -167,7 +167,7 @@ html.cc input,html.cc textarea{cursor:text!important}
 .br .g1{grid-column:span 8;aspect-ratio:16/10}.br .g2{grid-column:span 4;aspect-ratio:3/4}.br .g3{grid-column:span 4;aspect-ratio:1}.br .g4{grid-column:span 8;aspect-ratio:16/10}.br .g5{grid-column:span 12;aspect-ratio:21/9}
 .br .closing{text-align:center;padding:160px 0}.br .closing h2{margin:0 auto 26px}.br .closing p{margin:0 auto}
 @media (max-width:760px){
- #dBar{grid-template-columns:1fr auto;gap:8px 12px}#dChips{grid-column:1/-1;order:3;justify-content:flex-start}
+ #dBar{grid-template-columns:auto 1fr auto;gap:8px 12px}#dChips{grid-column:1/-1;order:3;justify-content:flex-start}
  #dChips button{padding:5px 9px}#dChips button span{display:none}#dChips button[aria-current="true"] span{display:inline}
  #dBar .ty b{font-size:14px}#dBody{padding-top:104px}#dBody section{scroll-margin-top:100px}
  .ux .meta,.ux .cards,.ux .stats{grid-template-columns:1fr 1fr}.ux .split,.ux .steps .st{grid-template-columns:1fr}.ux .split.rev>:first-child{order:0}.ux .steps .st>span{font-size:36px}.ux .screens{gap:10px}.ux .sec{padding:56px 0}
@@ -190,10 +190,10 @@ html.cc input,html.cc textarea{cursor:text!important}
 /* 케이스 스터디 페이지를 상세 화면 안에 */
 /* 프로젝트 상세: 위쪽 막대 없이 작품만 보이게. 닫기는 오른쪽 아래 둥근 ✕ (Esc로도 닫힘) */
 #detail.nobar #dBar{background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border:0;box-shadow:none;padding:0;pointer-events:none}
-#detail.nobar #dBar>*:not(#dRight),#detail.nobar #dRight>*:not(#dClose){display:none}
-#detail.nobar #dClose{pointer-events:auto;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(22px + env(safe-area-inset-bottom,0px));width:40px;height:40px;padding:0;display:grid;place-items:center;font-size:0;border-radius:50%;
+#detail.nobar #dBar>*:not(#dClose){display:none}
+#detail.nobar #dClose{pointer-events:auto;position:fixed;left:calc(18px + env(safe-area-inset-left,0px));top:calc(18px + env(safe-area-inset-top,0px));width:40px;height:40px;padding:0;display:grid;place-items:center;font-size:0;border-radius:50%;
  background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5);border:1px solid rgba(255,255,255,.42);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 24px rgba(0,0,0,.22);transition:background .2s,transform .2s}   /* 유리 느낌(글래스모피즘) */
-#detail.nobar #dClose:hover{background:rgba(255,255,255,.28);transform:translateX(-50%) scale(1.06)}
+#detail.nobar #dClose:hover{background:rgba(255,255,255,.28);transform:scale(1.06)}
 #detail.nobar #dClose:focus-visible{outline:1.5px solid rgba(255,255,255,.55);outline-offset:3px}
 #detail.nobar #dClose::before,#detail.nobar #dClose::after{content:"";position:absolute;left:50%;top:50%;width:15px;height:1.6px;border-radius:2px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transform:translate(-50%,-50%) rotate(45deg)}   /* X를 선 두 개로 그려 정확히 가운데 */
 #detail.nobar #dClose::after{transform:translate(-50%,-50%) rotate(-45deg)}
@@ -236,6 +236,9 @@ html.cc input,html.cc textarea{cursor:text!important}
 #lens canvas{display:block;width:100%;height:100%}
 #lens span{position:absolute;right:50%;bottom:10px;transform:translateX(50%);padding:1px 8px;border-radius:99px;background:rgba(29,36,51,.75);color:#fff;font:500 11px var(--display)}
 html.lensOn #cur,html.lensOn #label{opacity:0!important}html.lensOn #doc{cursor:none}
+#docX{all:unset;position:absolute;left:calc(18px + env(safe-area-inset-left,0px));top:14px;width:40px;height:40px;display:grid;place-items:center;border-radius:50%;cursor:pointer;background:rgba(255,253,247,.94);color:var(--ink);border:1.5px solid var(--ink);box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:16px;transition:transform .2s}#docX:hover{transform:scale(1.06)}#docX:focus-visible{outline:2px solid #3f8fd8;outline-offset:2px}
+#doc .dbar{padding-right:18px}
+body:has(#doc:not([hidden])) header{opacity:0;pointer-events:none}   /* 서류 보는 동안 위쪽 로고·메뉴 숨김(닫기 버튼과 겹치지 않게) */
 #doc .dbar .dgo{width:auto;padding:0 14px;border-radius:99px;font:500 13px var(--display)}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 #mon .hit{all:unset;position:absolute;cursor:pointer}#mon .hit:focus-visible{outline:.15em solid #3f8fd8}
@@ -298,13 +301,13 @@ html.lensOn #cur,html.lensOn #label{opacity:0!important}html.lensOn #doc{cursor:
 <button id="cta" aria-label="연락하기">연락하기 <span aria-hidden="true">→</span></button>
 <div id="mon" aria-hidden="true"></div>
 <div id="wkA11y" class="sr" hidden aria-label="작업물 목록"></div>
-<div id="doc" role="dialog" aria-modal="true" aria-labelledby="docT" hidden><div class="dbar"><span id="docT"></span><span class="dpg" id="docPgW" hidden><button id="docPv" aria-label="이전 장" data-tip="이전 장">‹</button><span id="docPg"></span><button id="docNx" aria-label="다음 장" data-tip="다음 장">›</button></span><button id="docGo" class="dgo" hidden>전화기로 메시지 남기기 →</button><button id="docDl" aria-label="다운로드" data-tip="다운로드"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg></button><button id="docX" aria-label="닫기" data-tip="닫기">✕</button></div><div id="docB" class="docb sr"></div><p class="dhint" id="docHint">종이 위에 올리면 돋보기 · 휠로 배율 조절</p></div><div id="lens" aria-hidden="true"><canvas></canvas><span id="lensZ"></span></div>
+<div id="doc" role="dialog" aria-modal="true" aria-labelledby="docT" hidden><div class="dbar"><span id="docT"></span><span class="dpg" id="docPgW" hidden><button id="docPv" aria-label="이전 장" data-tip="이전 장">‹</button><span id="docPg"></span><button id="docNx" aria-label="다음 장" data-tip="다음 장">›</button></span><button id="docGo" class="dgo" hidden>전화기로 메시지 남기기 →</button><button id="docDl" aria-label="다운로드" data-tip="다운로드"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg></button></div><button id="docX" aria-label="닫기" data-tip="닫기">✕</button><div id="docB" class="docb sr"></div><p class="dhint" id="docHint">종이 위에 올리면 돋보기 · 휠로 배율 조절</p></div><div id="lens" aria-hidden="true"><canvas></canvas><span id="lensZ"></span></div>
 <div id="endmsg"><button id="again" aria-label="처음으로 돌아가기" data-tip="처음으로 돌아가기"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v5h5"/></svg></button></div>
 <div id="bc" role="dialog" aria-label="명함"><div class="cd"><div class="spin"><div class="f a"><img src="card-front.png" alt="명함 앞면" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'<span>VISION INSIDE</span><b>박수빈</b><span>UX/UI Designer · eilibean01@gmail.com</span>'}))"></div>
  <div class="f b"><img src="card-back.png" alt="명함 뒷면" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'<span></span><b>VIN</b><span>card-back.png 자리</span>'}))"></div></div></div></div>
 <div id="rings" aria-hidden="true"></div>
 
-<section id="detail" aria-label="프로젝트 상세"><div id="dBar"><div class="ty"><span id="dTy"></span><b id="dNm"></b></div><nav id="dChips" aria-label="섹션 이동"></nav><div id="dRight"><span id="dPct" aria-live="off">0%</span><button id="dClose">닫기 ✕</button></div><div id="dProg"></div></div><div id="dBody"></div></section>
+<section id="detail" aria-label="프로젝트 상세"><div id="dBar"><button id="dClose">✕ 닫기</button><div class="ty"><span id="dTy"></span><b id="dNm"></b></div><nav id="dChips" aria-label="섹션 이동"></nav><div id="dRight"><span id="dPct" aria-live="off">0%</span></div><div id="dProg"></div></div><div id="dBody"></div></section>
 <div id="dusk"></div>
 <section id="call" aria-label="메시지 남기기">
  <div id="callBlur" aria-hidden="true"></div>
@@ -996,7 +999,7 @@ function openDoc(k){const [id,ko,en]=DOCN[k],pgs=PG[id];if(!pgs||!pgs.length)ret
  docOpen=true;docEl.hidden=false;$('docHint').style.opacity=1;if(window.gsap&&!RM)gsap.fromTo('#doc .dbar',{opacity:0,y:-12},{opacity:1,y:0,duration:.4,delay:.55,ease:'power2.out'});
  setTimeout(()=>{if(docOpen)$('docX').focus()},RM?0:600)}
 function closeDoc(){if(!docOpen)return;docOpen=false;lensHide();if(docSt){docSt.dir=-1;sfx('paper')}docEl.hidden=true}
-$('docX').onclick=closeDoc;$('docDl').onclick=()=>dlDoc(docEl.dataset.id);$('docPv').onclick=()=>docSt&&docPage(docSt.a-1);$('docNx').onclick=()=>docSt&&docPage(docSt.a+1);
+$('docX').onclick=e=>{e.stopPropagation();closeDoc()};$('docDl').onclick=()=>dlDoc(docEl.dataset.id);$('docPv').onclick=()=>docSt&&docPage(docSt.a-1);$('docNx').onclick=()=>docSt&&docPage(docSt.a+1);
 $('docGo').onclick=()=>{closeDoc();go('contact')};
 docEl.addEventListener('click',e=>{if(e.target.closest('.dbar'))return;if(!docSt)return;const s=docSt.sh[docSt.a];ray.setFromCamera(new THREE.Vector2(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1),cam);
  if(ray.intersectObject(s.m,false).length){if(docSt.sh.length>1)docPage(docSt.a+1<docSt.sh.length?docSt.a+1:0)}else closeDoc()});   /* 종이를 누르면 다음 장, 바깥을 누르면 닫기 */
