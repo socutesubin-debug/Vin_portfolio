@@ -187,6 +187,9 @@ html.cc input,html.cc textarea{cursor:text!important}
 #endmsg button{all:unset;cursor:pointer;width:44px;height:44px;display:grid;place-items:center;background:var(--ink);box-shadow:4px 5px 0 #3f8fd8}#endmsg button:focus-visible{outline:2px solid #fff;outline-offset:4px}
 #mon{background:transparent!important;animation:none!important;overflow:visible;display:none}#mon.on{display:block;animation:none!important}
 #mon{pointer-events:none}
+/* 케이스 스터디 페이지를 상세 화면 안에 */
+#detail.fr{overflow:hidden}#detail.fr #dChips,#detail.fr #dPct,#detail.fr #dProg{visibility:hidden}
+#dBody.fr iframe{display:block;width:100%;border:0;background:#fff}
 /* 프로젝트 표지 상세 */
 #detail:has(#dBody.cv){background:#141416}
 #dBody.cv{color:#f3f1ea}
@@ -517,7 +520,7 @@ cv.addEventListener('click',e=>{if(cardOpen){closeCard();return}
  if(st==='open'){if(hover&&hover.doc!=null)openDoc(hover.doc);return}                                   // ABOUT: 서류 꺼내 보기
  if(st==='screen'){if(hover&&hover.wk){const r=hover.wk,L=wkList();wLastUser=performance.now();             // WORK: 분류 / 이전·다음 / 프로젝트 열기
   if(r.type==='chip'){wCat=r.c;wI=wOld=0;wFrom=0;wAnim=false;wkRedraw()}else if(r.type==='prev')wkGoto(wI-1);else if(r.type==='next')wkGoto(wI+1);
-  else{const p=L[wI];if(p)openDetail({getBoundingClientRect:()=>({left:e.clientX,top:e.clientY,width:0,height:0}),dataset:{n:p.t,k:p.c,img:p.img}},e)}}return}
+  else{const p=L[wI];if(p)openDetail({getBoundingClientRect:()=>({left:e.clientX,top:e.clientY,width:0,height:0}),dataset:{n:p.t,k:p.c,img:p.img,url:p.url||''}},e)}}return}
  if(!hover){return}
  if(hover.act==='card'){openCard();return}
  if(hover.act==='lamp'){setLamp(!lampOn);return}if(hover.act==='bump'){hover.g.userData.bump=1;return}if(hover.act==='card'){openCard();return}
@@ -559,12 +562,16 @@ br:(n,k)=>({ty:'Visual Archive',secs:[['콘셉트','concept'],['로고','logo'],
 <section id="apply" class="sec"><div class="dw"><div class="dk">04 Application</div><h2>일상에 놓인 브랜드</h2><div class="gal"><div class="ph b g1">APPLICATION 01</div><div class="ph y g2">APPLICATION 02</div><div class="ph r g3">APPLICATION 03</div><div class="ph g4">APPLICATION 04</div><div class="ph k g5">APPLICATION 05 · WIDE</div></div></div></section>
 <section id="closing" class="sec closing"><div class="dw"><div class="dk" style="justify-content:center">05 Closing</div><h2>Thank you.</h2><p>프로젝트를 마무리하며 남기고 싶은 한마디를 적어요.</p></div></section>`})};
 let dSecs=[],dEls=[],dRAF=0;
+// 케이스 스터디(별도 페이지) 칸 높이 = 화면 높이 - 위쪽 막대
+function fitFrame(){const f=$('dFrame');if(!f)return;f.onmouseenter=()=>{cur.style.opacity=0;lbl.style.opacity=0};   // 케이스 스터디 위에서는 내 커서 숨김
+ const h=$('dBar').offsetHeight;$('dBody').style.paddingTop=h+'px';f.style.height=(innerHeight-h)+'px'}
+addEventListener('resize',()=>{if(dOpen)fitFrame()});
 function dKind(k){return /brand|graphic/i.test(k)?'br':'ux'}
 function openDetail(a,e){const r=a.getBoundingClientRect();const x=e.clientX||r.left+r.width/2,y=e.clientY||r.top+r.height/2;dXY=`${x}px ${y}px`;
- const cvI=a.dataset.img,t=cvI?'cv':dKind(a.dataset.k),d=cvI?{ty:a.dataset.k,secs:[['표지','cover']],html:`<section id="cover" class="cvs"><img src="covers/${cvI}.jpg" alt="${a.dataset.n} 표지"></section><section class="cvm"><p>자세한 작업 과정은 곧 추가될 예정이에요.</p></section>`}:TPL[t](a.dataset.n,a.dataset.k);
+ const cvU=a.dataset.url,cvI=a.dataset.img,t=cvU?'fr':cvI?'cv':dKind(a.dataset.k),d=cvU?{ty:a.dataset.k,secs:[],html:`<iframe id="dFrame" src="${cvU}" title="${a.dataset.n} 케이스 스터디"></iframe>`}:cvI?{ty:a.dataset.k,secs:[['표지','cover']],html:`<section id="cover" class="cvs"><img src="covers/${cvI}.jpg" alt="${a.dataset.n} 표지"></section><section class="cvm"><p>자세한 작업 과정은 곧 추가될 예정이에요.</p></section>`}:TPL[t](a.dataset.n,a.dataset.k);
  $('dBody').className=t;$('dBody').innerHTML=d.html;$('dTy').textContent=d.ty;$('dNm').textContent=a.dataset.n;
  dSecs=d.secs;$('dChips').innerHTML=d.secs.map(([nm,id],i)=>`<button data-id="${id}" aria-current="${i===0}"><i>0${i+1}</i><span>${nm}</span></button>`).join('');
- dEls=d.secs.map(([n,id])=>$(id));
+ dEls=d.secs.map(([n,id])=>$(id));det.classList.toggle('fr',t==='fr');if(t==='fr')fitFrame();else $('dBody').style.paddingTop='';
  [...$('dChips').children].forEach(b=>b.onclick=()=>{const el=$(b.dataset.id);det.scrollTo({top:el.offsetTop-(innerWidth<760?96:70),behavior:RM?'auto':'smooth'})});
  dOpen=true;det.scrollTop=0;dUpd();
  if(window.gsap&&!RM){gsap.fromTo(det,{clipPath:`circle(0px at ${dXY})`,visibility:'visible'},{clipPath:`circle(150% at ${dXY})`,duration:.9,ease:'power3.inOut',onComplete:()=>$('dClose').focus()})}else{det.style.visibility='visible';det.style.clipPath='none'}}
@@ -605,7 +612,7 @@ let abTab='cv',abStart=0,abWas=false,abDirty=true,abDone=false;
 // 가운데 눈금 막대가 굴러가며 01 → 02, 분류·이름·연도가 바뀐다. 스크롤/막대 클릭/자동(3.4초)으로 넘어감
 // 나중에 표지 이미지가 오면 가운데 빈 공간에 넣을 예정
 const WP=[
- {t:'프린트카페 UI 리뉴얼',c:'UXUI',g:'UXUI',y:'2026',img:'printcafe'},
+ {t:'프린트카페 UI 리뉴얼',c:'UXUI',g:'UXUI',y:'2026',img:'printcafe',url:'printcafe/'},
  {t:'Tower28 상세페이지 리디자인',c:'PROMOTION',g:'WEB',y:'2026',img:'tower28'},
  {t:'큐시락토 상세페이지 리디자인',c:'PROMOTION',g:'WEB',y:'2026',img:'qsilacto'},
  {t:'템페스트 리플렛 리디자인',c:'EDITORIAL',g:'GRAPHIC',y:'2025',img:'tempest'},
@@ -617,7 +624,7 @@ let wEdgeT=0,wCat='ALL',wI=0,wOld=0,wFrom=0,wT0=0,wAnim=false,wDir=1,wLastUser=0
 const wkList=()=>WP.filter(p=>wCat==='ALL'||p.g===wCat);
 // 표지(작은 판)를 불러와 모니터 배경용으로 흐리고 어둡게 만든 그림을 미리 준비
 const WIMG={};WP.forEach(p=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=AW;c.height=AH;const g=c.getContext('2d');g.filter='blur(4px)';g.drawImage(im,-16,-9,AW+32,AH+18);g.filter='none';g.fillStyle='rgba(26,26,28,.62)';g.fillRect(0,0,AW,AH);WIMG[p.img]=c;if(st==='screen')wkRedraw()};im.src='covers/'+p.img+'-sm.jpg'});
-$('wkA11y').innerHTML=WP.map(p=>`<button data-n="${p.t}" data-k="${p.c}" data-img="${p.img}">${p.t} (${p.c}, ${p.y}) 열기</button>`).join('');[...$('wkA11y').children].forEach(b=>b.onclick=e=>openDetail(b,e));
+$('wkA11y').innerHTML=WP.map(p=>`<button data-n="${p.t}" data-k="${p.c}" data-img="${p.img}" data-url="${p.url||''}">${p.t} (${p.c}, ${p.y}) 열기</button>`).join('');[...$('wkA11y').children].forEach(b=>b.onclick=e=>openDetail(b,e));
 function wkRedraw(){abDirty=true;if(abDone)drawAbout(1)}
 function wPosNow(){if(!wAnim)return wI;return wFrom+(wI-wFrom)*wE(Math.min(1,(performance.now()-wT0)/WDUR))}
 function wkGoto(ni,wrap){const L=wkList();if(ni<0||ni>=L.length||ni===wI)return;wFrom=wrap?ni-1:wPosNow();wOld=wI;wDir=wrap||ni>wI?1:-1;wI=ni;wT0=performance.now();wAnim=true;wLastChange=wT0;wkRedraw()}
