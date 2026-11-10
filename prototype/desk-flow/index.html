@@ -186,6 +186,21 @@ html.cc input,html.cc textarea{cursor:text!important}
 #endmsg p{margin:0;font:400 14px/1.6 "Noto Sans KR";color:var(--ink);background:#fff6e0;padding:8px 14px;border:1.5px solid var(--ink)}
 #endmsg button{all:unset;cursor:pointer;width:44px;height:44px;display:grid;place-items:center;background:var(--ink);box-shadow:4px 5px 0 #3f8fd8}#endmsg button:focus-visible{outline:2px solid #fff;outline-offset:4px}
 #mon{background:transparent!important;animation:none!important;overflow:visible;display:none}#mon.on{display:block;animation:none!important}
+#mon{pointer-events:none}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* ABOUT 서류 읽기 창 */
+#doc{position:fixed;inset:0;z-index:11;display:grid;place-items:center;padding:16px;background:rgba(15,15,24,.38);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+#doc .pp{width:min(720px,100%);max-height:min(84vh,900px);overflow:auto;overscroll-behavior:contain;background:#fffdf7;color:var(--ink);border:1.5px solid var(--ink);box-shadow:10px 12px 0 var(--ink);font:400 16px/1.75 "Noto Sans KR",sans-serif}
+#doc header{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px 12px 20px;background:#f0e7d2;border-bottom:1.5px solid var(--ink);font:600 15px var(--display);letter-spacing:.04em}
+#doc header div{display:flex;gap:8px}
+#doc header button{all:unset;cursor:pointer;width:36px;height:36px;display:grid;place-items:center;background:var(--ink);color:#fff;font-size:15px}
+#doc header button:focus-visible{outline:2px solid #3f8fd8;outline-offset:3px}
+.docb{padding:28px clamp(20px,5vw,48px) 36px}
+.docb h2{font:600 34px/1.2 var(--display);margin:4px 0 14px}
+.docb h3{font:700 17px "Noto Sans KR",sans-serif;margin:22px 0 6px;padding-bottom:6px;border-bottom:1.5px solid var(--ink)}
+.docb ul{margin:0;padding-left:1.2em}.docb p{margin:.4em 0}.docb a{color:#2f6fb8}
+.docb .ex{display:inline-block;font:500 13px var(--display);background:#f0b93f;padding:2px 10px;border-radius:99px;margin-bottom:6px}
+.docb .go{all:unset;cursor:pointer;display:inline-block;margin-top:18px;font:500 15px var(--display);padding:11px 20px;background:var(--ink);color:#fff;box-shadow:4px 5px 0 #db4a3e}
 #mon .hit{all:unset;position:absolute;cursor:pointer}#mon .hit:focus-visible{outline:.15em solid #3f8fd8}
 #toast{position:fixed;left:50%;bottom:120px;transform:translate(-50%,16px);z-index:30;max-width:min(92vw,520px);background:var(--ink);color:#fff;font:400 14px/1.5 "Noto Sans KR";padding:12px 18px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;text-align:center}
 #toast.on{opacity:1;transform:translate(-50%,0)}
@@ -220,8 +235,8 @@ html.cc input,html.cc textarea{cursor:text!important}
 @media (max-width:700px){#grid{grid-template-columns:1fr}#form{right:50%;transform:translate(50%,-40%)}}
 @media (prefers-reduced-motion:reduce){#mon.on,#bc.on .cd,#rings span{animation:none!important;opacity:1}#mon *{animation:none!important;opacity:1!important}#c{transition:none}}
 </style>
-<canvas id="c" aria-label="두 가지 색으로 그린 책상 3D. 아래로 스크롤하면 서랍으로 가고, 파일이 쏟아져 프로젝트가 나와요."></canvas>
-<header><div class="logo">Vision INside</div><nav aria-label="주 메뉴"><a href="#home">HOME</a><a href="#screen">ABOUT</a><a href="#work">WORK</a><a href="#contact">CONTACT</a></nav></header>
+<canvas id="c" aria-label="일러스트 책상 3D. 서랍에는 소개 서류(이력서·자기소개서 등), 모니터에는 작업물이 있어요."></canvas>
+<header><div class="logo">Vision INside</div><nav aria-label="주 메뉴"><a href="#home">HOME</a><a href="#about">ABOUT</a><a href="#work">WORK</a><a href="#contact">CONTACT</a></nav></header>
 <div id="label"></div>
 <div id="hint"></div>
 <button id="back" hidden>Back</button>
@@ -231,7 +246,9 @@ html.cc input,html.cc textarea{cursor:text!important}
 <div id="sheet2"></div>
 <section id="pj" aria-label="프로젝트 목록"><h1>Projects</h1><div id="chips"></div><div id="grid"></div></section>
 <button id="cta" aria-label="연락하기">연락하기 <span aria-hidden="true">→</span></button>
-<div id="mon" aria-label="모니터 화면: 이력서와 자기소개서"><button class="hit" data-d="cv" style="left:2.5%;top:10%;width:10%;height:5.4%" aria-label="이력서 탭"></button><button class="hit" data-d="cl" style="left:13.4%;top:10%;width:14.5%;height:5.4%" aria-label="자기소개서 탭"></button></div>
+<div id="mon" aria-hidden="true"></div>
+<div id="wkA11y" class="sr" hidden aria-label="작업물 목록"></div>
+<div id="doc" role="dialog" aria-modal="true" aria-labelledby="docT" hidden><div class="pp"><header><span id="docT"></span><div><button id="docDl" aria-label="다운로드" data-tip="다운로드"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg></button><button id="docX" aria-label="닫기" data-tip="닫기">✕</button></div></header><div id="docB" class="docb"></div></div></div>
 <div id="endmsg"><button id="again" aria-label="처음으로 돌아가기" data-tip="처음으로 돌아가기"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v5h5"/></svg></button></div>
 <div id="bc" role="dialog" aria-label="명함"><div class="cd"><div class="spin"><div class="f a"><img src="card-front.png" alt="명함 앞면" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'<span>VISION INSIDE</span><b>박수빈</b><span>UX/UI Designer · eilibean01@gmail.com</span>'}))"></div>
  <div class="f b"><img src="card-back.png" alt="명함 뒷면" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'<span></span><b>VIN</b><span>card-back.png 자리</span>'}))"></div></div></div></div>
@@ -304,16 +321,19 @@ DR.forEach(([y,h],i)=>{const d=new THREE.Group();d.position.set(0,y,24.4);cab.ad
  drawers.push(d)});
 const fileDrawer=drawers[2];
 add(new THREE.PlaneGeometry(12,3.4),TM(tex(360,102,(g,w,h)=>{g.fillStyle=YEL;g.fillRect(0,0,w,h);g.strokeStyle=INK;g.lineWidth=5;g.strokeRect(3,3,w-6,h-6);g.fillStyle=INK;g.font='500 36px Jost, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText("VIN's secret files",w/2,h/2+3)})),[0,-8.5,.85],[0,0,0],fileDrawer);
-// 파일(폴더) 14장
-const NF=14,files=[],FMS=[BL,RD,YL,W];
-const NAMES=['Tunee','App','Service','Kiosk','Brand','Package','Landing','Micro site','Sketch','Fashion','Poster','Logo','Dashboard','Onboarding','Research','Persona','Wireframe','Prototype','Moodboard','Icon set'];
-const CATS=['UX/UI','Branding','Web','Archive'];
+// ABOUT 서류 폴더 6장: 마우스를 올리면 폴더가 살짝 떠오르고 안의 종이가 빼꼼 나온다
+const DOCN=[['cv','이력서','Resume'],['cl','자기소개서','Cover Letter'],['edu','학력·교육','Education'],['exp','경력','Experience'],['skill','자격·도구','Skills'],['contact','연락처','Contact']];
+const NF=DOCN.length,FS=5.2,files=[],FMS=[BL,RD,YL,W];
 const tabGeo=(()=>{const sh=new THREE.Shape();sh.moveTo(-6.5,0);sh.lineTo(-5.7,2.5);sh.quadraticCurveTo(-5.2,3.6,-4,3.6);sh.lineTo(4,3.6);sh.quadraticCurveTo(5.2,3.6,5.7,2.5);sh.lineTo(6.5,0);sh.lineTo(-6.5,0);const g=new THREE.ShapeGeometry(sh);const p=g.attributes.position,uv=g.attributes.uv;for(let i=0;i<p.count;i++)uv.setXY(i,(p.getX(i)+6.5)/13,p.getY(i)/3.6);return g})();
-for(let k=0;k<NF;k++){const f=new THREE.Group();const ci=k%4,isCat=k%5===0,num=String(k+1).padStart(3,'0'),nm=isCat?CATS[(k/5)|0]:NAMES[k%NAMES.length];
+for(let k=0;k<NF;k++){const f=new THREE.Group();const ci=k%4,[id,ko,en]=DOCN[k],num=String(k+1).padStart(2,'0');
  add(BX(30,25,.5),FMS[ci],[0,0,0],[0,0,0],f);
- const tm=TM(tex(390,108,(g,w,h)=>{g.fillStyle=[BLU,RED,YEL,CRM][ci];g.fillRect(0,0,w,h);g.fillStyle='#17151f';g.font=(isCat?'700':'500')+' 36px Jost, "Noto Sans KR", sans-serif';g.textBaseline='middle';g.textAlign='left';g.fillText(num,26,h/2+6);g.textAlign='right';g.fillText(nm,w-24,h/2+6)}),{side:THREE.DoubleSide});
- add(tabGeo,tm,[[-8,0,8][k%3],12.5,.16],[0,0,0],f);S.add(f);
- f.userData={k,jit:(Math.random()-.5)*.04,delay:k/NF*.62};files.push(f)}
+ const tm=TM(tex(390,108,(g,w,h)=>{g.fillStyle=[BLU,RED,YEL,CRM][ci];g.fillRect(0,0,w,h);g.fillStyle='#17151f';g.textBaseline='middle';g.font='500 30px Jost, sans-serif';g.textAlign='left';g.fillText(num,24,h/2+6);g.font='700 34px "Noto Sans KR", sans-serif';g.textAlign='right';g.fillText(ko,w-22,h/2+6)}),{side:THREE.DoubleSide});
+ add(tabGeo,tm,[[-8,0,8][k%3],12.5,.16],[0,0,0],f);
+ // 안에 든 종이: 평소엔 폴더 뒤에 숨어 있고, hover하면 위로 빼꼼 나온다
+ const pm=TM(tex(312,264,(g,w,h)=>{g.fillStyle='#fffdf7';g.fillRect(0,0,w,h);g.strokeStyle='#17151f';g.lineWidth=4;g.strokeRect(2,2,w-4,h-4);g.fillStyle='#17151f';g.textAlign='left';g.textBaseline='top';g.font='600 30px Jost, sans-serif';g.fillText(en.toUpperCase(),20,18);g.font='500 22px "Noto Sans KR", sans-serif';g.fillText(ko,20,56);g.fillStyle='#cfc6b4';for(let i=0;i<7;i++)g.fillRect(20,100+i*22,w-40-(i%3)*44,8)}),{side:THREE.DoubleSide});
+ const paper=add(new THREE.PlaneGeometry(26,22),pm,[0,0,-.42],[0,0,0],f);
+ S.add(f);f.userData={k,doc:k,h:0,paper,jit:(Math.random()-.5)*.04,delay:k/NF*.62};files.push(f)}
+const DOCP=DOCN.map(([id,ko],k)=>({t:ko+' 꺼내 보기',doc:k}));
 // iMac, 스탠드, 전화기, 명함, 컵, 연필꽂이, 의자, 탁상시계
 const imac=new THREE.Group();imac.position.set(0,TOP,-6);S.add(imac);
 const im=new THREE.Group();im.add(mImac);im.scale.setScalar(90);im.rotation.x=-Math.PI/2;imac.add(im);
@@ -395,24 +415,26 @@ files.forEach((f,k)=>{const d=34+((k*37)%11)*3.6,sx=d*.364*1.8*.85,sy=d*.364*.85
 // ── 상태 전환 ────────────────────────────────────────────────
 const hint=$('hint'),back=$('back'),pj=$('pj'),callEl=$('call');
 const HINT={};
-const HASH={end:'thanks',home:'',screen:'screen',work:'work',open:'work-open',pour:'projects',contact:'contact',call:'call'};
-const BACK={end:'contact',screen:'home',work:'screen',open:'work',pour:'open',contact:'pour',call:'contact'};
-const NAV={end:'contact',home:'home',screen:'screen',work:'work',open:'work',pour:'work',contact:'contact',call:'contact'};
+// 화면 이름(코드 안): screen=모니터(WORK), work/open=서랍(ABOUT). 흐름: home → work → open → screen → contact → end
+const HASH={end:'thanks',home:'',work:'about',open:'about-open',pour:'about-open',screen:'work',contact:'contact',call:'call'};
+const BACK={end:'contact',work:'home',open:'work',pour:'open',screen:'open',contact:'screen',call:'contact'};
+const NAV={end:'contact',home:'home',work:'about',open:'about',pour:'about',screen:'work',contact:'contact',call:'contact'};
 // 카메라 이동: 요청 0.3초 뒤 출발 → 천천히 가속 → 천천히 안착 (cubic-bezier .7,0,.16,1, 거리에 따라 1.3~2.8초)
 const bez=(x1,y1,x2,y2)=>{const cx=3*x1,bx=3*(x2-x1)-cx,ax=1-cx-bx,cy=3*y1,by=3*(y2-y1)-cy,ay=1-cy-by;
  const X=t=>((ax*t+bx)*t+cx)*t,Y=t=>((ay*t+by)*t+cy)*t,dX=t=>(3*ax*t+2*bx)*t+cx;
  return x=>{if(x<=0)return 0;if(x>=1)return 1;let t=x,lo=0,hi=1;
   for(let i=0;i<12;i++){const e=X(t)-x;if(Math.abs(e)<1e-5)break;if(e>0)hi=t;else lo=t;const d=dX(t);t=Math.abs(d)>1e-4?t-e/d:(lo+hi)/2;if(t<lo||t>hi)t=(lo+hi)/2}
   return Y(t)}};
-const camEase=bez(.7,0,.16,1),camPrevP=new THREE.Vector3(),camPrevL=new THREE.Vector3(),camVp=new THREE.Vector3(),camVl=new THREE.Vector3();let camT=null;
+const camEase=bez(.7,0,.16,1),camPrevP=new THREE.Vector3(),camPrevL=new THREE.Vector3(),camVp=new THREE.Vector3(),camVl=new THREE.Vector3();let camT=null,camArc=false;
 function camStart(){const d=cpos.distanceTo(tpos)+.5*clook.distanceTo(tlook);if(d<.01){camT=null;return}
  // 이미 움직이는 중이면 지금 속도를 이어받고(딜레이 없이), 멈춰 있으면 0.3초 뒤에 출발
  const moving=camVp.lengthSq()>.25;
- camT={fp:cpos.clone(),fl:clook.clone(),tp:tpos.clone(),tl:tlook.clone(),vp:camVp.clone(),vl:camVl.clone(),t0:performance.now()+(moving?0:300),dur:Math.min(2800,Math.max(1300,1300+(d-30)/120*1500))}}
+ camT={fp:cpos.clone(),fl:clook.clone(),tp:tpos.clone(),tl:tlook.clone(),vp:camVp.clone(),vl:camVl.clone(),t0:performance.now()+(moving?0:300),dur:Math.min(2800,Math.max(1300,1300+(d-30)/120*1500))};
+ const a=camArc?Math.min(40,d*.28):0;camArc=false;camT.arc=a?new THREE.Vector3(0,a*.45,a):null}   // 메뉴 이동: 책상이 한눈에 보이도록 뒤로 살짝 물러났다 다시 다가감
 function camStep(dt){camPrevP.copy(cpos);camPrevL.copy(clook);
  if(RM){cpos.copy(tpos);clook.copy(tlook);camT=null}
  else if(camT){const T=camT,u=Math.max(0,Math.min(1,(performance.now()-T.t0)/T.dur)),e=camEase(u),g=u*(1-u)*(1-u)*T.dur/1000; // g: 이어받은 속도가 부드럽게 사라지게 하는 항
-  cpos.lerpVectors(T.fp,T.tp,e).addScaledVector(T.vp,g);clook.lerpVectors(T.fl,T.tl,e).addScaledVector(T.vl,g);
+  cpos.lerpVectors(T.fp,T.tp,e).addScaledVector(T.vp,g);if(T.arc)cpos.addScaledVector(T.arc,Math.sin(Math.PI*e));clook.lerpVectors(T.fl,T.tl,e).addScaledVector(T.vl,g);
   if(u>=1){cpos.copy(T.tp);clook.copy(T.tl);camT=null}}
  if(dt>0){camVp.copy(cpos).sub(camPrevP).divideScalar(dt);camVl.copy(clook).sub(camPrevL).divideScalar(dt)}}
 function retarget(inst){const c=camFor(st);tpos.copy(c.p);tlook.copy(c.l);if(inst||RM){cpos.copy(tpos);clook.copy(tlook);camT=null;camVp.set(0,0,0);camVl.set(0,0,0)}else camStart()}
@@ -420,7 +442,7 @@ function go(s,opts={}){domEl=null;const was=st;st=s;lockUntil=performance.now()+
  if(s==='pour'&&opts.full){progT=1}else if(s==='pour'&&was!=='pour'&&progT<.02){progT=.0}
  if(s==='open'||s==='work'||s==='home'||s==='screen'){if(s!=='pour')progT=Math.min(progT,0)}
  retarget(opts.instant);
- back.hidden=s==='home';$('dl').hidden=s!=='screen';back.textContent=s==='call'?'Back':'Back';hint.textContent=HINT[s]||'';
+ back.hidden=s==='home';$('dl').hidden=true;$('wkA11y').hidden=s!=='screen';wkHov=-1;wkChipHov='';back.textContent=s==='call'?'Back':'Back';hint.textContent=HINT[s]||'';
  document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+(NAV[s]==='home'?'home':NAV[s])));
  const h=HASH[s];if(!opts.fromHash&&('#'+h)!==location.hash){try{history.replaceState(null,'',h?'#'+h:location.pathname+location.search)}catch(e){}}
  callEl.classList.toggle('on',s==='call');callEl.classList.remove('up');$('dusk').classList.toggle('on',s==='end');$('endmsg').classList.toggle('on',s==='end');setLamp(true);eTarget=s==='end'?1:0;scr.material=s==='end'?ENDM:BLACK;if(s==='end'){setTimeout(()=>{if(st==='end')endClock(true)},900)}else if(was==='end')endClock(false);if(s==='open')openT=performance.now();if(s!=='pour')autoP=false;
@@ -436,32 +458,42 @@ function flipPj(show){const g=window.gsap;
    g.fromTo(sheet2,{yPercent:-104},{yPercent:0,duration:.6,ease:'power3.out',onComplete:()=>{sheet2.style.display='none';g.set(sheet2,{clearProps:'transform'})}});
    g.fromTo(pj,{yPercent:-104},{yPercent:0,duration:.7,delay:.06,ease:'power3.out',clearProps:'transform'})}}
  else{if(g&&!RM&&pj.classList.contains('on')){g.killTweensOf(pj);g.to(pj,{yPercent:-104,duration:.75,ease:'power2.inOut',onComplete:()=>{pj.classList.remove('on');g.set(pj,{clearProps:'transform'})}})}else pj.classList.remove('on')}}
-function fromHash(){const h=location.hash.slice(1);const m={'':'home',home:'home',screen:'screen',about:'screen',work:'work','work-open':'open',projects:'pour',contact:'contact',call:'call',thanks:'end'}[h]||'home';
+function fromHash(){const h=location.hash.slice(1);const m={'':'home',home:'home',about:'work','about-open':'open',work:'screen',screen:'screen',projects:'screen','work-open':'open',contact:'contact',call:'call',thanks:'end'}[h]||'home';
  if(m==='pour'){progT=prog=1}go(m,{instant:true,fromHash:true})}
 addEventListener('hashchange',fromHash);
-back.onclick=()=>{if(cardOpen){closeCard();return}if(dOpen){closeDetail();return}if(st==='pour'&&progT>.05){progT=0;go('open');return}go(BACK[st]||'home')};
+// 상단 메뉴: 누르면 카메라가 책상 위를 부드럽게 날아가 섹션으로 이동 (주소로 바로 들어올 때만 즉시 이동)
+const NAVTO={home:'home',about:'work',work:'screen',contact:'contact'};
+document.querySelector('nav[aria-label="주 메뉴"]').addEventListener('click',e=>{const a=e.target.closest('a');if(!a||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button)return;
+ const k=(a.getAttribute('href')||'').slice(1),to=NAVTO[k];if(!to)return;e.preventDefault();
+ if(docOpen)closeDoc();if(dOpen)closeDetail();if(cardOpen)closeCard();
+ if(NAV[st]===k)return;camArc=true;go(to)});
+back.onclick=()=>{if(docOpen){closeDoc();return}if(cardOpen){closeCard();return}if(dOpen){closeDetail();return}if(st==='pour'&&progT>.05){progT=0;go('open');return}go(BACK[st]||'home')};
 addEventListener('keydown',e=>{if(/INPUT|TEXTAREA/.test(e.target.tagName)&&e.key!=='Escape')return;if(e.key==='Escape')back.onclick();else if(e.key==='ArrowDown'||e.key==='PageDown'||e.key===' ')step(120,e);else if(e.key==='ArrowUp'||e.key==='PageUp')step(-120,e)});
 // ── 스크롤 / 터치 ─────────────────────────────────────────────
 let acc=0,accT=0;
 let openT=0,autoP=false,lockUntil=0;
 function step(dy,e){
- if(cardOpen||dOpen)return;if(performance.now()<lockUntil){e&&e.preventDefault&&e.preventDefault();return}
+ if(cardOpen||dOpen||docOpen)return;if(performance.now()<lockUntil){e&&e.preventDefault&&e.preventDefault();return}
  if(st==='pour'&&pj.classList.contains('on')){const atBot=pj.scrollTop+pj.clientHeight>=pj.scrollHeight-2;
   if(dy>0&&atBot){e&&e.preventDefault&&e.preventDefault();const now=performance.now();if(now-accT>300)acc=0;accT=now;acc+=dy;if(acc>160&&ctaEl.classList.contains('show')&&now-ctaT>700){acc=0;go('contact')}return}
   if(dy>0||pj.scrollTop>0)return}
+ // WORK(모니터): 목록이 넘치면 먼저 목록을 스크롤하고, 끝에 닿은 뒤 한 번 더 굴리면 다음/이전 섹션
+ if(st==='screen'&&abDone&&wkMaxY>0){e&&e.preventDefault&&e.preventDefault();const now=performance.now();
+  if((dy>0&&wkY<wkMaxY-.5)||(dy<0&&wkY>.5)){wkY=Math.max(0,Math.min(wkMaxY,wkY+dy*1.4));wkRedraw();wkEdgeT=now;acc=0;return}
+  if(now-wkEdgeT<450)return}
  e&&e.preventDefault&&e.preventDefault();
  const now=performance.now();if(now-accT>300)acc=0;accT=now;acc+=dy;
  if(st==='pour'){autoP=false;progT=Math.max(0,Math.min(1,progT+dy*.0008));if(progT<=0&&dy<0){go('open')}return}
  if(Math.abs(acc)<90)return;const d=acc>0?1:-1;acc=0;
- if(st==='home'&&d>0)go('screen');else if(st==='screen')go(d>0?'work':'home');else if(st==='work'){go(d>0?'open':'screen')}else if(st==='open'){if(d>0){if(performance.now()-openT>1000){go('pour');autoP=true}}else go('work')}else if(st==='contact'){d>0?go('end'):(progT=prog=1,go('pour'))}else if(st==='end'&&d<0)go('contact')}
-addEventListener('wheel',e=>{if(e.target.closest&&e.target.closest('#form'))return;step(e.deltaY,e)},{passive:false});
+ if(st==='home'&&d>0)go('work');else if(st==='work'){go(d>0?'open':'home')}else if(st==='open'){if(d>0){if(performance.now()-openT>900)go('screen')}else go('work')}else if(st==='screen')go(d>0?'contact':'open');else if(st==='contact'){go(d>0?'end':'screen')}else if(st==='end'&&d<0)go('contact')}
+addEventListener('wheel',e=>{if(e.target.closest&&e.target.closest('#form,#doc'))return;step(e.deltaY,e)},{passive:false});
 let ty=null;addEventListener('touchstart',e=>{ty=e.touches[0].clientY},{passive:true});
-addEventListener('touchmove',e=>{if(ty==null||e.target.closest('#form'))return;const y=e.touches[0].clientY,dy=(ty-y)*2.2;ty=y;step(dy,e)},{passive:false});
+addEventListener('touchmove',e=>{if(ty==null||e.target.closest('#form,#doc'))return;const y=e.touches[0].clientY,dy=(ty-y)*2.2;ty=y;step(dy,e)},{passive:false});
 // ── 선택 ──────────────────────────────────────────────────────
-const lbl=$('label'),mouse=new THREE.Vector2(0,0),ray=new THREE.Raycaster();let hover=null,moved=false;
-const PICK=[{g:lamp,t:'스탠드 · 불 켜고 끄기',act:'lamp'},{g:imac,t:'모니터 · 소개',to:'screen',from:['home']},{g:phone,t:'전화기 · 연락하기',to:'contact',from:['home','contact']},{g:cab,t:'서랍 · 프로젝트',to:'work',from:['home','work','open']},{g:mug,t:'컵',act:'bump'},{g:card,t:'명함 · 크게 보기',act:'card'}];
+const lbl=$('label'),mouse=new THREE.Vector2(0,0),ray=new THREE.Raycaster();let hover=null,moved=false,ptrIn=false;
+const PICK=[{g:lamp,t:'스탠드 · 불 켜고 끄기',act:'lamp'},{g:imac,t:'모니터 · 작업물 보기',to:'screen',from:['home']},{g:phone,t:'전화기 · 연락하기',to:'contact',from:['home','contact']},{g:cab,t:'서랍 · 소개 서류',to:'work',from:['home','work','open']},{g:mug,t:'컵',act:'bump'},{g:card,t:'명함 · 크게 보기',act:'card'}];
 PICK.forEach(p=>p.g.traverse(o=>{if(o.isMesh)o.userData.pick=p}));
-cv.addEventListener('pointermove',e=>{moved=true;mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1)});
+cv.addEventListener('pointermove',e=>{moved=true;ptrIn=true;mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1)});
 // 커서: 평소엔 동그라미, 누를 수 있는 곳 위에서는 커지면서 클릭 아이콘 + 설명 글
 const cur=$('cur');let domEl=null,curOn=false;
 const tipOf=el=>el.dataset.tip||el.getAttribute('aria-label')||(el.classList.contains('card')?'프로젝트 열기':'');
@@ -473,8 +505,12 @@ if(matchMedia('(pointer:fine)').matches){document.documentElement.classList.add(
   const el=e.target.closest&&e.target.closest('button,a,.card,[data-tip]');domEl=el&&!el.hidden&&!el.disabled?el:null;
   const fx_=e.clientX>innerWidth-220,fy_=e.clientY>innerHeight-80;lbl.style.transform=`translate(${fx_?`calc(${e.clientX-28}px - 100%)`:e.clientX+28+'px'},${fy_?`calc(${e.clientY-24}px - 100%)`:e.clientY+22+'px'})`;updCur()},{passive:true});
  document.documentElement.addEventListener('mouseleave',()=>{cur.style.opacity=0;domEl=null;updCur()})}
-cv.addEventListener('pointerleave',()=>mouse.set(0,0));
-cv.addEventListener('click',()=>{if(cardOpen){closeCard();return}if(st==='open'){go('pour');autoP=true;return}if(!hover){return}
+cv.addEventListener('pointerleave',()=>{mouse.set(0,0);ptrIn=false});
+cv.addEventListener('click',e=>{if(cardOpen){closeCard();return}
+ if(st==='open'){if(hover&&hover.doc!=null)openDoc(hover.doc);return}                                   // ABOUT: 서류 꺼내 보기
+ if(st==='screen'){if(hover&&hover.wk){const r=hover.wk;if(r.type==='chip'){cat=r.c;wkY=0;wkHov=-1;wkRedraw()}   // WORK: 분류 / 프로젝트 열기
+  else openDetail({getBoundingClientRect:()=>({left:e.clientX,top:e.clientY,width:0,height:0}),dataset:{n:r.p[0],k:r.p[1]}},e)}return}
+ if(!hover){return}
  if(hover.act==='card'){openCard();return}
  if(hover.act==='lamp'){setLamp(!lampOn);return}if(hover.act==='bump'){hover.g.userData.bump=1;return}if(hover.act==='card'){openCard();return}
  if(hover.to==='work'){go(st==='home'?'work':'open');return}
@@ -557,21 +593,44 @@ const abC=document.createElement('canvas');abC.width=AW;abC.height=AH;
 const abTex=new THREE.CanvasTexture(abC);abTex.colorSpace=THREE.SRGBColorSpace;abTex.anisotropy=8;
 const ABM=new THREE.MeshBasicMaterial({map:abTex});
 let abTab='cv',abStart=0,abWas=false,abDirty=true,abDone=false;
+// ── WORK(모니터): 작업물 목록을 모니터 화면에 그린다. 마우스 위치는 화면 위 좌표(UV)로 바꿔 계산 ──
+const WKC={'UX/UI':['#3f8fd8','#fff'],'Branding':['#db4a3e','#fff'],'Web':['#f0b93f','#0f0f18']},WK_Y0=215;
+let wkY=0,wkMaxY=0,wkHov=-1,wkChipHov='',wkEdgeT=0;const WKR={chips:[],cards:[]};
+const wkList=()=>PJ.filter(p=>cat==='All'||p[1]===cat);
+function wkRedraw(){abDirty=true;if(abDone)drawAbout(1)}
+function wkHit(px,py){for(const c of WKR.chips)if(px>=c.x&&px<=c.x+c.w&&py>=c.y&&py<=c.y+c.h)return{type:'chip',c:c.c,key:'c'+c.c};
+ if(py<WK_Y0-16)return null;for(const c of WKR.cards)if(px>=c.x&&px<=c.x+c.w&&py>=c.y-10&&py<=c.y+c.h)return{type:'card',i:c.i,p:c.p,key:'k'+c.i};return null}
 function drawPage(){const g=abPage.getContext('2d');g.clearRect(0,0,AW,AH);const KR='"Noto Sans KR", sans-serif',JO='Jost, "Noto Sans KR", sans-serif';
  g.fillStyle='#f7f1e3';g.fillRect(0,0,AW,AH);
  g.fillStyle='#e6dcc6';g.fillRect(0,0,AW,72);g.fillStyle=INK;g.fillRect(0,72,AW,3);
  ['#db4a3e','#f0b93f','#3f8fd8'].forEach((c,i)=>{g.fillStyle=c;g.beginPath();g.arc(46+i*38,36,12,0,7);g.fill();g.strokeStyle=INK;g.lineWidth=2.5;g.stroke()});
- g.fillStyle='#fff';g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.roundRect(180,16,AW-220,40,20);g.fill();g.stroke();g.fillStyle=INK;g.font='500 24px '+JO;g.textAlign='left';g.textBaseline='middle';g.fillText('vin.portfolio/about',204,37);
- [['cv','이력서',40,160],['cl','자기소개서',215,230]].forEach(([k,t,x,w])=>{const on=abTab===k;g.fillStyle=on?'#fff':'#e6dcc6';g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.roundRect(x,90,w,48,[12,12,0,0]);g.fill();g.stroke();g.fillStyle=INK;g.font='500 26px '+KR;g.textAlign='center';g.fillText(t,x+w/2,115)});
- g.fillStyle='#fff';g.fillRect(40,138,AW-80,AH-178);g.strokeStyle=INK;g.lineWidth=3;g.strokeRect(40,138,AW-80,AH-178);
- let y=168;const X=84,MW=AW-168;g.textAlign='left';g.textBaseline='top';
- const wrap=(t,f)=>{g.font=f;const out=[];let line='';for(const ch of t){const n=line+ch;if(g.measureText(n).width>MW&&line){out.push(line);line=ch}else line=n}out.push(line);return out};
- DOCB[abTab].forEach(([k,t])=>{
-  if(k==='ex'){g.font='500 24px '+JO;const w=g.measureText(t).width+38;g.fillStyle='#f0b93f';g.beginPath();g.roundRect(X,y,w,38,19);g.fill();g.fillStyle=INK;g.fillText(t,X+19,y+7);y+=44}
-  else if(k==='h2'){g.fillStyle=INK;g.font='600 54px '+JO;g.fillText(t,X,y);y+=62}
-  else if(k==='h3'){y+=4;g.fillStyle=INK;g.font='700 30px '+KR;g.fillText(t,X,y);y+=38;g.fillRect(X,y,MW,3);y+=6}
-  else if(k==='li'){g.fillStyle=INK;g.font='400 29px '+KR;g.beginPath();g.arc(X+9,y+18,6,0,7);g.fill();wrap(t,'400 29px '+KR).forEach(l=>{g.fillText(l,X+34,y);y+=40})}
-  else{g.fillStyle=INK;wrap(t,'400 29px '+KR).forEach(l=>{g.fillText(l,X,y);y+=42})}});
+ g.fillStyle='#fff';g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.roundRect(180,16,AW-220,40,20);g.fill();g.stroke();g.fillStyle=INK;g.font='500 24px '+JO;g.textAlign='left';g.textBaseline='middle';g.fillText('vin.portfolio/work',204,37);
+ // 제목 + 개수
+ const L=wkList();g.textBaseline='alphabetic';g.textAlign='left';g.fillStyle=INK;g.font='600 64px '+JO;g.fillText('Work',64,160);
+ const tw=g.measureText('Work').width;g.font='500 26px '+JO;g.fillStyle='#6b6578';g.fillText(L.length+' projects',64+tw+20,160);
+ // 분류 칩(오른쪽 정렬)
+ WKR.chips=[];g.font='500 26px '+JO;let cx=AW-64;
+ [...cats].reverse().forEach(c=>{const w=g.measureText(c).width+48;cx-=w;const on=c===cat,hv=c===wkChipHov;
+  g.fillStyle=on?INK:(hv?'#e6dcc6':'#fff');g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.roundRect(cx,112,w,52,26);g.fill();g.stroke();
+  g.fillStyle=on?'#fff':INK;g.textAlign='center';g.textBaseline='middle';g.fillText(c,cx+w/2,139);WKR.chips.push({c,x:cx,y:112,w,h:52});cx-=14});
+ g.fillStyle=INK;g.fillRect(64,190,AW-128,3);
+ // 카드 격자(3열, 넘치면 스크롤). 마우스를 올린 카드는 떠오르고 그림자가 길어진다
+ const cols=3,gap=40,cw=(AW-128-gap*(cols-1))/cols,th=Math.round(cw*.56),ch=th+96;
+ const rows=Math.ceil(L.length/cols),total=rows*ch+Math.max(0,rows-1)*gap+40;wkMaxY=Math.max(0,total-(AH-WK_Y0));wkY=Math.min(wkY,wkMaxY);
+ WKR.cards=[];g.save();g.beginPath();g.rect(0,WK_Y0-18,AW,AH-WK_Y0+18);g.clip();
+ L.forEach((p,i)=>{const r=(i/cols)|0,c=i%cols,x=64+c*(cw+gap),y0=WK_Y0+r*(ch+gap)-wkY,hv=i===wkHov,y=y0-(hv?10:0);
+  WKR.cards.push({i,p,x,y:y0,w:cw,h:ch});if(y0>AH||y0+ch<WK_Y0-20)return;
+  const [bg,fg]=WKC[p[1]]||['#cfd0ee',INK];
+  g.fillStyle=INK;g.fillRect(x+(hv?13:8),y+(hv?16:10),cw,ch);
+  g.fillStyle='#fff';g.fillRect(x,y,cw,ch);g.strokeStyle=INK;g.lineWidth=3;g.strokeRect(x,y,cw,ch);
+  g.fillStyle=bg;g.fillRect(x+12,y+12,cw-24,th-12);
+  g.fillStyle=fg;g.font='500 26px '+JO;g.textAlign='center';g.textBaseline='middle';g.fillText(p[1],x+cw/2,y+12+(th-12)/2);
+  g.textAlign='left';g.textBaseline='alphabetic';g.fillStyle=INK;g.font='600 32px '+KR;
+  let nm=p[0];if(g.measureText(nm).width>cw-140){while(nm.length>1&&g.measureText(nm+'…').width>cw-140)nm=nm.slice(0,-1);nm+='…'}
+  g.fillText(nm,x+20,y+th+46);g.font='400 22px '+KR;g.fillStyle='#6b6578';g.fillText(p[1]+' · 예시 프로젝트',x+20,y+th+80);
+  g.font='500 30px '+JO;g.fillStyle=INK;g.textAlign='right';g.fillText(hv?'열기 →':'→',x+cw-20,y+th+56)});
+ g.restore();
+ if(wkMaxY>0){const vh=AH-WK_Y0,bh=Math.max(60,vh*vh/(vh+wkMaxY)),by=WK_Y0+(vh-bh)*(wkY/wkMaxY);g.fillStyle='rgba(15,15,24,.35)';g.beginPath();g.roundRect(AW-24,by,8,bh,4);g.fill()}
  abDirty=false}
 function drawAbout(p){const g=abC.getContext('2d');if(abDirty)drawPage();g.fillStyle='#0c0c12';g.fillRect(0,0,AW,AH);
  if(p<.18){const q=p/.18;g.fillStyle='#fff';g.globalAlpha=Math.min(1,q*1.5);g.fillRect(AW/2*(1-q),AH/2-3,AW*q,6);g.globalAlpha=1}
@@ -581,9 +640,22 @@ function drawAbout(p){const g=abC.getContext('2d');if(abDirty)drawPage();g.fillS
 const DLF={cv:['resume.pdf','박수빈_이력서.pdf'],cl:['cover-letter.pdf','박수빈_자기소개서.pdf']};
 const toastEl=document.createElement('div');toastEl.id='toast';toastEl.setAttribute('role','status');document.body.appendChild(toastEl);let toastT=0;
 function toast(m){toastEl.textContent=m;toastEl.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('on'),4200)}
-$('dl').onclick=async()=>{const [u,n]=DLF[abTab];try{const r=await fetch(u,{method:'HEAD',cache:'no-store'});const ct=r.headers.get('content-type')||'';if(!r.ok||/text\/html/.test(ct))throw 0;const a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();a.remove();toast(n+' 다운로드를 시작했어요')}catch(e){toast('파일을 준비 중이에요')}};
-const showDoc=k=>{abTab=k;abDirty=true;drawAbout(1);const t=k==='cv'?'이력서 다운로드':'자기소개서 다운로드';$('dl').setAttribute('aria-label',t);$('dl').dataset.tip=t};
-mon.querySelectorAll('.hit[data-d]').forEach(b=>b.onclick=()=>showDoc(b.dataset.d));
+async function dlDoc(id){const f=DLF[id];if(!f)return;const [u,n]=f;try{const r=await fetch(u,{method:'HEAD',cache:'no-store'});const ct=r.headers.get('content-type')||'';if(!r.ok||/text\/html/.test(ct))throw 0;const a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();a.remove();toast(n+' 다운로드를 시작했어요')}catch(e){toast('파일을 준비 중이에요')}}
+// ── ABOUT(서랍): 서류 꺼내 읽기 ──
+const DOCH={cv:DOCS.cv,cl:DOCS.cl,
+ edu:`<h2>학력 · 교육</h2><h3>학력</h3><ul><li>한국폴리텍대학교 시각디자인과 (졸업 예정)</li><li>사사다 패션스쿨 졸업</li></ul><h3>교육</h3><ul><li>KMA 메타버스 패션 과정 6개월 수료</li></ul>`,
+ exp:`<span class="ex">자세한 내용은 채울 예정</span><h2>경력</h2><h3>패션 디자이너 · 1년</h3><p>QC(품질 관리)와 그래픽 디자인을 함께 맡았어요.</p>`,
+ skill:`<h2>자격 · 도구</h2><h3>자격</h3><ul><li>GTQ</li><li>AI 프롬프트 활용 자격</li></ul><h3>도구</h3><p>Figma · Cinema 4D · InDesign</p>`,
+ contact:`<h2>연락처</h2><p>UX/UI Designer 박수빈</p><h3>이메일</h3><p><a href="mailto:eilibean01@gmail.com">eilibean01@gmail.com</a></p><button class="go" data-go="contact">전화기로 메시지 남기기 →</button>`};
+let docOpen=false;const docEl=$('doc'),docPP=docEl.querySelector('.pp');
+function openDoc(k){const [id,ko,en]=DOCN[k];$('docT').textContent=ko+' · '+en;$('docB').innerHTML=DOCH[id];$('docDl').hidden=!DLF[id];docEl.dataset.id=id;
+ const b=$('docB').querySelector('[data-go]');if(b)b.onclick=()=>{closeDoc();go(b.dataset.go)};
+ docOpen=true;docEl.hidden=false;docPP.scrollTop=0;
+ if(window.gsap&&!RM){gsap.killTweensOf([docEl,docPP]);gsap.fromTo(docEl,{opacity:0},{opacity:1,duration:.25});gsap.fromTo(docPP,{yPercent:55,rotate:-3,opacity:0},{yPercent:0,rotate:0,opacity:1,duration:.6,ease:'power3.out'})}
+ setTimeout(()=>{if(docOpen)$('docX').focus()},RM?0:350)}
+function closeDoc(){if(!docOpen)return;docOpen=false;const done=()=>{if(!docOpen)docEl.hidden=true};
+ if(window.gsap&&!RM){gsap.killTweensOf([docEl,docPP]);gsap.to(docPP,{yPercent:40,rotate:2,opacity:0,duration:.35,ease:'power2.in'});gsap.to(docEl,{opacity:0,duration:.35,onComplete:done})}else done()}
+$('docX').onclick=closeDoc;docEl.addEventListener('click',e=>{if(e.target===docEl)closeDoc()});$('docDl').onclick=()=>dlDoc(docEl.dataset.id);
 if(document.fonts)document.fonts.ready.then(()=>{abDirty=true;if(abWas)drawAbout(1)});
 mon.addEventListener('touchmove',e=>e.stopPropagation(),{passive:true});
 const cornersL=[[-.299,-.168],[.299,-.168],[-.299,.168],[.299,.168]].map(([x,y])=>new THREE.Vector3(x,y,0));const pv=new THREE.Vector3();
@@ -596,6 +668,7 @@ const ringsEl=$('rings');function dings(){if(st!=='contact')return;phone.updateM
 // 엔딩
 $('again').onclick=()=>{progT=prog=0;go('home')};
 drawPj();ctaEl.onclick=()=>{if(st==='pour')go('contact')};
+$('wkA11y').innerHTML=PJ.map(p=>`<button data-n="${p[0]}" data-k="${p[1]}">${p[0]} (${p[1]}) 열기</button>`).join('');[...$('wkA11y').children].forEach(b=>b.onclick=e=>openDetail(b,e));
 // ── 전화 받기 화면 ─────────────────────────────────────────────
 $('x').onclick=()=>back.onclick();
 $('form').addEventListener('submit',e=>{e.preventDefault();$('st').textContent='보내는 중…';callEl.classList.add('up');setTimeout(()=>{if(st==='call')go('end')},1100)});
@@ -623,7 +696,7 @@ function updHandset(){
  hsC.visible=len>.3;hsC.scale.y=Math.max(.05,len/(sc*HB.cordLen))}
 // ── 루프 ───────────────────────────────────────────────────────
 const clock=new THREE.Clock(),bumpBase=new Map(),vis=[],tmpQ=new THREE.Quaternion(),startQ=new THREE.Quaternion();
-const ease=x=>x*x*(3-2*x);
+const ease=x=>x*x*(3-2*x),fEu=new THREE.Euler();
 function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  if(autoP){progT=Math.min(1,progT+dt2*1.7);if(progT>=1)autoP=false}
  prog+=(progT-prog)*(RM?1:.18);if(Math.abs(progT-prog)<.001)prog=progT;
@@ -634,6 +707,9 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  if(st==='home'||st==='work'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObjects(PICK.map(p=>p.g),true).find(h=>h.object.userData.pick);const p=hit?hit.object.userData.pick:null;
   if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?p.t:'';lbl.style.opacity=p&&moved?1:0}}
  else if(st==='contact'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObject(phone,true)[0];const p=hit?PICK[2]:null;if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?'전화 받기':'';lbl.style.opacity=p?1:0}}
+ else if(st==='open'){let p=null;if(ptrIn){ray.setFromCamera(mouse,cam);const h=ray.intersectObjects(files,true)[0];if(h){let o=h.object;while(o&&o.userData.doc==null)o=o.parent;if(o)p=DOCP[o.userData.doc]}}if(p!==hover)hover=p}
+ else if(st==='screen'){let p=null;if(abDone&&ptrIn){ray.setFromCamera(mouse,cam);const h=ray.intersectObject(scr,false)[0];if(h&&h.uv){const r=wkHit(h.uv.x*AW,(1-h.uv.y)*AH);if(r)p={t:r.type==='chip'?r.c+' 보기':'프로젝트 열기',wk:r}}}
+  const nk=p?p.wk.key:'',ok=hover&&hover.wk?hover.wk.key:'';if(nk!==ok||(!p&&hover)){hover=p;const hi=p&&p.wk.type==='card'?p.wk.i:-1,hc=p&&p.wk.type==='chip'?p.wk.c:'';if(hi!==wkHov||hc!==wkChipHov){wkHov=hi;wkChipHov=hc;wkRedraw()}}}
  else if(hover){hover=null;cv.style.cursor='default';lbl.style.opacity=0}
  {eT+=(eTarget-eT)*Math.min(1,dt2*1.1);const k=eT<.001?0:eT;tmpC.copy(C_SUN0).lerp(C_SUN1,k);sun.color.copy(tmpC);sun.intensity=2.3-.95*k;fill.intensity=.3-.15*k;hemi.intensity=1.8-1.0*k;hemi.color.copy(C_H0).lerp(C_H1,k);sun.position.lerpVectors(SUN_P0,SUN_P1,k);win.position.copy(tmpV.copy(sun.position).normalize().multiplyScalar(250));win.lookAt(0,0,0);tmpC.copy(C_BG0).lerp(C_BG1,k).convertLinearToSRGB();post.uniforms.cBg.value.set(tmpC.r,tmpC.g,tmpC.b)}
  lampV=lampOn?lampEnv(performance.now()/1000-lampT0):Math.max(0,lampV-dt2*5);spot.intensity=lampV*4200*Math.max(0,1-1.4*eT);spot.angle=.6-.24*eT;post.uniforms.wLo.value=1+.35*eT;post.uniforms.wHi.value=1.6+.5*eT;cal.position.y=130-14*eT;post.uniforms.warmK.value=lampV;
@@ -641,11 +717,9 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  {const tt=clock.elapsedTime;LV.forEach(m=>{m.rotation.z=m.userData.base+Math.sin(tt*.9+m.userData.ph)*.07})}
  if(cardOpen){bcRY+=(bcTY-bcRY)*.12;bcRX+=(bcTX-bcRX)*.12;bcSpin.style.transform=`rotateX(${bcRX}deg) rotateY(${bcRY}deg)`}
  drawers.forEach((d,i)=>{const o=(i===2&&(fileOpen||prog>.05))?34:0;d.position.z+=((d.userData.z0+o)-d.position.z)*.1});
- // 파일: 서랍 안에서 서 있다가, 스크롤하면 하나씩 화면 앞으로 날아와 덮는다
- files.forEach(f=>{f.visible=fileOpen||prog>.02;const u=f.userData,base=new THREE.Vector3(40,22,fileDrawer.position.z-5-u.k*3);
-  const local=Math.max(0,Math.min(1,(prog-u.delay)/.3)),e=ease(local);
-  f.position.lerpVectors(base,u.end,e);
-  startQ.setFromEuler(new THREE.Euler(-.3+u.jit,0,u.jit*.5));tmpQ.copy(startQ).slerp(u.endQ,e);f.quaternion.copy(tmpQ)});
+ // 서류 폴더: 서랍 안에 서 있고, 마우스를 올린 폴더는 살짝 떠오르며 안의 종이가 빼꼼 나온다
+ files.forEach(f=>{f.visible=fileOpen;const u=f.userData,tg=(st==='open'&&hover&&hover.doc===u.k)?1:0;u.h+=(tg-u.h)*(RM?1:Math.min(1,dt2*9));
+  f.position.set(40,22+u.h*3.2,fileDrawer.position.z-5-u.k*FS);f.quaternion.setFromEuler(fEu.set(-.3+u.jit,0,u.jit*.5));u.paper.position.y=u.h*7.5});
  // 전화벨: 울리는 동안 몸체가 떨림
  if(st==='contact'){startRing();const on=(t%2.4)<1.1;const s=on?Math.sin(t*70):0;phone.rotation.z=s*.018;phone.position.y=phoneY+(on?Math.abs(Math.sin(t*35))*.35:0)}else{phone.rotation.z=0;phone.position.y=phoneY}
  PICK.forEach(p=>{const g=p.g;if(g.userData.bump>0){if(!bumpBase.has(g))bumpBase.set(g,g.position.y);g.userData.bump=Math.max(0,g.userData.bump-dt2*2.5);g.position.y=bumpBase.get(g)+Math.sin(g.userData.bump*Math.PI)*3}});
@@ -664,7 +738,7 @@ function applyTheme(i){themeI=i;const T=THEMES[i];for(const k in MATS)MATS[k].co
 }
 applyTheme(0);
 if(document.fonts){document.fonts.load('600 40px Jost');document.fonts.load('500 30px "Noto Sans KR"');document.fonts.ready.then(()=>applyTheme(themeI))}
-window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={cpos,fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
+window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={files,scr,cam,AW,AH,get wk(){return WKR},cpos,fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
 fit();addEventListener('resize',fit);if(window.ResizeObserver)new ResizeObserver(()=>{if(R.domElement.width!==innerWidth*2||innerWidth/innerHeight!==cam.aspect)fit()}).observe(document.documentElement);fromHash();loop();
 const ld=$('load');ld.style.opacity=0;setTimeout(()=>ld.hidden=true,600);
 </script>
