@@ -187,6 +187,12 @@ html.cc input,html.cc textarea{cursor:text!important}
 #endmsg button{all:unset;cursor:pointer;width:44px;height:44px;display:grid;place-items:center;background:var(--ink);box-shadow:4px 5px 0 #3f8fd8}#endmsg button:focus-visible{outline:2px solid #fff;outline-offset:4px}
 #mon{background:transparent!important;animation:none!important;overflow:visible;display:none}#mon.on{display:block;animation:none!important}
 #mon{pointer-events:none}
+/* 프로젝트 표지 상세 */
+#detail:has(#dBody.cv){background:#141416}
+#dBody.cv{color:#f3f1ea}
+#dBody.cv .cvs{display:grid;place-items:center;padding:20px max(16px,3vw) 0}
+#dBody.cv .cvs img{display:block;width:100%;max-width:calc((100vh - 140px)*16/9);height:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#dBody.cv .cvm{text-align:center;padding:36px 20px 80px;font:400 15px/1.7 "Noto Sans KR",sans-serif;opacity:.7}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* ABOUT 서류 읽기 창 */
 #doc{position:fixed;inset:0;z-index:11;display:grid;place-items:center;padding:16px;background:rgba(15,15,24,.38);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
@@ -511,7 +517,7 @@ cv.addEventListener('click',e=>{if(cardOpen){closeCard();return}
  if(st==='open'){if(hover&&hover.doc!=null)openDoc(hover.doc);return}                                   // ABOUT: 서류 꺼내 보기
  if(st==='screen'){if(hover&&hover.wk){const r=hover.wk,L=wkList();wLastUser=performance.now();             // WORK: 분류 / 이전·다음 / 프로젝트 열기
   if(r.type==='chip'){wCat=r.c;wI=wOld=0;wFrom=0;wAnim=false;wkRedraw()}else if(r.type==='prev')wkGoto(wI-1);else if(r.type==='next')wkGoto(wI+1);
-  else{const p=L[wI];if(p)openDetail({getBoundingClientRect:()=>({left:e.clientX,top:e.clientY,width:0,height:0}),dataset:{n:p.t,k:p.c}},e)}}return}
+  else{const p=L[wI];if(p)openDetail({getBoundingClientRect:()=>({left:e.clientX,top:e.clientY,width:0,height:0}),dataset:{n:p.t,k:p.c,img:p.img}},e)}}return}
  if(!hover){return}
  if(hover.act==='card'){openCard();return}
  if(hover.act==='lamp'){setLamp(!lampOn);return}if(hover.act==='bump'){hover.g.userData.bump=1;return}if(hover.act==='card'){openCard();return}
@@ -555,7 +561,7 @@ br:(n,k)=>({ty:'Visual Archive',secs:[['콘셉트','concept'],['로고','logo'],
 let dSecs=[],dEls=[],dRAF=0;
 function dKind(k){return /brand|graphic/i.test(k)?'br':'ux'}
 function openDetail(a,e){const r=a.getBoundingClientRect();const x=e.clientX||r.left+r.width/2,y=e.clientY||r.top+r.height/2;dXY=`${x}px ${y}px`;
- const t=dKind(a.dataset.k),d=TPL[t](a.dataset.n,a.dataset.k);
+ const cvI=a.dataset.img,t=cvI?'cv':dKind(a.dataset.k),d=cvI?{ty:a.dataset.k,secs:[['표지','cover']],html:`<section id="cover" class="cvs"><img src="covers/${cvI}.jpg" alt="${a.dataset.n} 표지"></section><section class="cvm"><p>자세한 작업 과정은 곧 추가될 예정이에요.</p></section>`}:TPL[t](a.dataset.n,a.dataset.k);
  $('dBody').className=t;$('dBody').innerHTML=d.html;$('dTy').textContent=d.ty;$('dNm').textContent=a.dataset.n;
  dSecs=d.secs;$('dChips').innerHTML=d.secs.map(([nm,id],i)=>`<button data-id="${id}" aria-current="${i===0}"><i>0${i+1}</i><span>${nm}</span></button>`).join('');
  dEls=d.secs.map(([n,id])=>$(id));
@@ -598,11 +604,20 @@ let abTab='cv',abStart=0,abWas=false,abDirty=true,abDone=false;
 // ── WORK(모니터): 프로젝트를 한 개씩 보여 주는 화면 (시안 work page) ──
 // 가운데 눈금 막대가 굴러가며 01 → 02, 분류·이름·연도가 바뀐다. 스크롤/막대 클릭/자동(3.4초)으로 넘어감
 // 나중에 표지 이미지가 오면 가운데 빈 공간에 넣을 예정
-const WP=[{t:'프린트카페 UI 리뉴얼',c:'UXUI',y:'2026'},{t:'Tunee',c:'UXUI',y:'—'},{t:'프로젝트 이름 (예시)',c:'UXUI',y:'2026'},{t:'프로젝트 이름 (예시)',c:'WEB',y:'2026'},{t:'프로젝트 이름 (예시)',c:'WEB',y:'2026'},{t:'프로젝트 이름 (예시)',c:'BRANDING',y:'2026'},{t:'프로젝트 이름 (예시)',c:'BRANDING',y:'2026'},{t:'프로젝트 이름 (예시)',c:'GRAPHIC',y:'2026'}];
+const WP=[
+ {t:'프린트카페 UI 리뉴얼',c:'UXUI',g:'UXUI',y:'2026',img:'printcafe'},
+ {t:'Tower28 상세페이지 리디자인',c:'PROMOTION',g:'WEB',y:'2026',img:'tower28'},
+ {t:'큐시락토 상세페이지 리디자인',c:'PROMOTION',g:'WEB',y:'2026',img:'qsilacto'},
+ {t:'템페스트 리플렛 리디자인',c:'EDITORIAL',g:'GRAPHIC',y:'2025',img:'tempest'},
+ {t:'다이소 뷰티 로고디자인',c:'BRANDING',g:'BRANDING',y:'2025',img:'daiso'},
+ {t:'그루브라임 패션디자인',c:'FASHION',g:'GRAPHIC',y:'2025',img:'grooverhyme'},
+ {t:'르망고 텍스타일 디자인',c:'TEXTILE',g:'GRAPHIC',y:'2024',img:'lemango'}];
 const WCATS=['ALL','UXUI','WEB','BRANDING','GRAPHIC'],WDUR=700,wE=x=>1-Math.pow(1-x,3);
 let wEdgeT=0,wCat='ALL',wI=0,wOld=0,wFrom=0,wT0=0,wAnim=false,wDir=1,wLastUser=0,wLastChange=0,wStepT=0,wkHK='',wkChipHov='';const WKR={chips:[],cy:450};
-const wkList=()=>WP.filter(p=>wCat==='ALL'||p.c===wCat);
-$('wkA11y').innerHTML=WP.map(p=>`<button data-n="${p.t}" data-k="${p.c}">${p.t} (${p.c}, ${p.y}) 열기</button>`).join('');[...$('wkA11y').children].forEach(b=>b.onclick=e=>openDetail(b,e));
+const wkList=()=>WP.filter(p=>wCat==='ALL'||p.g===wCat);
+// 표지(작은 판)를 불러와 모니터 배경용으로 흐리고 어둡게 만든 그림을 미리 준비
+const WIMG={};WP.forEach(p=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=AW;c.height=AH;const g=c.getContext('2d');g.filter='blur(4px)';g.drawImage(im,-16,-9,AW+32,AH+18);g.filter='none';g.fillStyle='rgba(26,26,28,.62)';g.fillRect(0,0,AW,AH);WIMG[p.img]=c;if(st==='screen')wkRedraw()};im.src='covers/'+p.img+'-sm.jpg'});
+$('wkA11y').innerHTML=WP.map(p=>`<button data-n="${p.t}" data-k="${p.c}" data-img="${p.img}">${p.t} (${p.c}, ${p.y}) 열기</button>`).join('');[...$('wkA11y').children].forEach(b=>b.onclick=e=>openDetail(b,e));
 function wkRedraw(){abDirty=true;if(abDone)drawAbout(1)}
 function wPosNow(){if(!wAnim)return wI;return wFrom+(wI-wFrom)*wE(Math.min(1,(performance.now()-wT0)/WDUR))}
 function wkGoto(ni,wrap){const L=wkList();if(ni<0||ni>=L.length||ni===wI)return;wFrom=wrap?ni-1:wPosNow();wOld=wI;wDir=wrap||ni>wI?1:-1;wI=ni;wT0=performance.now();wAnim=true;wLastChange=wT0;wkRedraw()}
@@ -614,6 +629,7 @@ function wkHit(px,py){for(const c of WKR.chips)if(px>=c.x&&px<=c.x+c.w&&py>=c.y&
  if(px>=560&&px<=1560&&py>=cy-48&&py<=cy+48)return{type:'open',key:'open'};return null}
 function drawPage(){const g=abPage.getContext('2d');const KR='"Noto Sans KR", sans-serif',JO='Jost, "Noto Sans KR", sans-serif',L=wkList(),cy=WKR.cy;
  g.fillStyle='#444444';g.fillRect(0,0,AW,AH);
+ {const bg=p=>p&&WIMG[p.img],kk=wAnim?wE(Math.min(1,(performance.now()-wT0)/WDUR)):1;if(wAnim&&bg(L[wOld]))g.drawImage(bg(L[wOld]),0,0);if(bg(L[wI])){g.globalAlpha=wAnim?kk:1;g.drawImage(bg(L[wI]),0,0);g.globalAlpha=1}}
  // 분류 탭(가운데 정렬). 선택한 탭은 흰색 + 밑줄
  WKR.chips=[];g.font='500 24px '+JO;g.textBaseline='middle';g.textAlign='left';const gap=56,ws=WCATS.map(c=>g.measureText(c).width);
  let x=(AW-(ws.reduce((a,b)=>a+b,0)+gap*(WCATS.length-1)))/2;
