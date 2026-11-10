@@ -195,7 +195,8 @@ html.cc input,html.cc textarea{cursor:text!important}
  background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5);border:1px solid rgba(255,255,255,.42);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 24px rgba(0,0,0,.22);transition:background .2s,transform .2s}   /* 유리 느낌(글래스모피즘) */
 #detail.nobar #dClose:hover{background:rgba(255,255,255,.28);transform:translateX(-50%) scale(1.06)}
 #detail.nobar #dClose:focus-visible{outline:1.5px solid rgba(255,255,255,.55);outline-offset:3px}
-#detail.nobar #dClose::before{content:"✕";font-size:15px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.35)}
+#detail.nobar #dClose::before,#detail.nobar #dClose::after{content:"";position:absolute;left:50%;top:50%;width:15px;height:1.6px;border-radius:2px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transform:translate(-50%,-50%) rotate(45deg)}   /* X를 선 두 개로 그려 정확히 가운데 */
+#detail.nobar #dClose::after{transform:translate(-50%,-50%) rotate(-45deg)}
 #detail.nobar #dBody{padding-top:0!important}
 #detail.fr{overflow:hidden}#detail.fr #dChips,#detail.fr #dPct,#detail.fr #dProg{visibility:hidden}
 #dBody.fr iframe{display:block;width:100%;border:0;background:#fff}
