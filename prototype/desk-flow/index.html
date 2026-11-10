@@ -225,6 +225,14 @@ html.cc input,html.cc textarea{cursor:text!important}
 .docb .todo{margin:.5em 0;padding:8px 12px;border:1.5px dashed #b9b1a0;color:#8a8273;font-size:14px;background:#faf6ec}
 .docb .ex{display:inline-block;font:500 13px var(--display);background:#f0b93f;padding:2px 10px;border-radius:99px;margin-bottom:6px}
 .docb .go{all:unset;cursor:pointer;display:inline-block;margin-top:18px;font:500 15px var(--display);padding:11px 20px;background:var(--ink);color:#fff;box-shadow:4px 5px 0 #db4a3e}
+#doc{background:none;-webkit-backdrop-filter:none;backdrop-filter:none;display:block;padding:0}   /* 종이는 3D 화면에서 그림 */
+#doc .dbar{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;max-width:calc(100% - 24px);padding:6px 6px 6px 18px;background:rgba(255,253,247,.94);color:var(--ink);border:1.5px solid var(--ink);border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.25);font:600 14px var(--display);letter-spacing:.03em;white-space:nowrap}
+#doc .dbar #docT{overflow:hidden;text-overflow:ellipsis;margin-right:6px}
+#doc .dbar button{all:unset;cursor:pointer;flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:var(--ink);color:#fff;font-size:15px}
+#doc .dbar button:disabled{opacity:.3;cursor:default}#doc .dbar button:focus-visible{outline:2px solid #3f8fd8;outline-offset:2px}
+#doc .dpg{display:flex;align-items:center;gap:6px;font:500 13px var(--display);font-variant-numeric:tabular-nums}#doc .dpg[hidden]{display:none}
+#doc .dbar .dgo{width:auto;padding:0 14px;border-radius:99px;font:500 13px var(--display)}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 #mon .hit{all:unset;position:absolute;cursor:pointer}#mon .hit:focus-visible{outline:.15em solid #3f8fd8}
 #toast{position:fixed;left:50%;bottom:120px;transform:translate(-50%,16px);z-index:30;max-width:min(92vw,520px);background:var(--ink);color:#fff;font:400 14px/1.5 "Noto Sans KR";padding:12px 18px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;text-align:center}
 #toast.on{opacity:1;transform:translate(-50%,0)}
@@ -280,7 +288,7 @@ html.cc input,html.cc textarea{cursor:text!important}
 <button id="cta" aria-label="연락하기">연락하기 <span aria-hidden="true">→</span></button>
 <div id="mon" aria-hidden="true"></div>
 <div id="wkA11y" class="sr" hidden aria-label="작업물 목록"></div>
-<div id="doc" role="dialog" aria-modal="true" aria-labelledby="docT" hidden><div class="pp"><header><span id="docT"></span><div><button id="docDl" aria-label="다운로드" data-tip="다운로드"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg></button><button id="docX" aria-label="닫기" data-tip="닫기">✕</button></div></header><div id="docB" class="docb"></div></div></div>
+<div id="doc" role="dialog" aria-modal="true" aria-labelledby="docT" hidden><div class="dbar"><span id="docT"></span><span class="dpg" id="docPgW" hidden><button id="docPv" aria-label="이전 장" data-tip="이전 장">‹</button><span id="docPg"></span><button id="docNx" aria-label="다음 장" data-tip="다음 장">›</button></span><button id="docGo" class="dgo" hidden>전화기로 메시지 남기기 →</button><button id="docDl" aria-label="다운로드" data-tip="다운로드"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg></button><button id="docX" aria-label="닫기" data-tip="닫기">✕</button></div><div id="docB" class="docb sr"></div></div>
 <div id="endmsg"><button id="again" aria-label="처음으로 돌아가기" data-tip="처음으로 돌아가기"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v5h5"/></svg></button></div>
 <div id="bc" role="dialog" aria-label="명함"><div class="cd"><div class="spin"><div class="f a"><img src="card-front.png" alt="명함 앞면" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'<span>VISION INSIDE</span><b>박수빈</b><span>UX/UI Designer · eilibean01@gmail.com</span>'}))"></div>
  <div class="f b"><img src="card-back.png" alt="명함 뒷면" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',innerHTML:'<span></span><b>VIN</b><span>card-back.png 자리</span>'}))"></div></div></div></div>
@@ -405,9 +413,9 @@ for(let k=0;k<NF;k++){const f=new THREE.Group();const ci=k%4,[id,ko,en]=DOCN[k],
  add(tabGeo,tm,[[-8,0,8][k%3],12.5,.16],[0,0,0],f);
  // 안에 든 종이: 평소엔 폴더 뒤에 숨어 있고, hover하면 위로 빼꼼 나온다
  const pm=TM(tex(312,264,(g,w,h)=>{g.fillStyle='#fffdf7';g.fillRect(0,0,w,h);g.strokeStyle='#17151f';g.lineWidth=4;g.strokeRect(2,2,w-4,h-4);g.fillStyle='#17151f';g.textAlign='left';g.textBaseline='top';g.font='600 30px Jost, sans-serif';g.fillText(en.toUpperCase(),20,18);g.font='500 22px "Noto Sans KR", sans-serif';g.fillText(ko,20,56);g.fillStyle='#cfc6b4';for(let i=0;i<7;i++)g.fillRect(20,100+i*22,w-40-(i%3)*44,8)}),{side:THREE.DoubleSide});
- const paper=add(new THREE.PlaneGeometry(26,22),pm,[0,0,-.42],[0,0,0],f);
+ const paper=add(new THREE.PlaneGeometry(17,24.04),pm,[0,-.9,-.42],[0,0,0],f);   /* 서류 첫 장(문서 이미지)으로 바뀜 — setFolderPaper */
  f.traverse(o=>{o.castShadow=o.receiveShadow=false});   /* 폴더는 그림자 얼룩 없이 깨끗한 흰색 */
- S.add(f);f.userData={k,doc:k,h:0,paper,jit:(Math.random()-.5)*.04,delay:k/NF*.62};files.push(f)}
+ S.add(f);f.userData={k,doc:k,h:0,paper,pw:17,ph:24.04,py0:-.9,jit:(Math.random()-.5)*.04,delay:k/NF*.62};files.push(f)}
 const DOCP=DOCN.map(([id,ko],k)=>({t:ko+' 꺼내 보기',doc:k}));
 // iMac, 스탠드, 전화기, 명함, 컵, 연필꽂이, 의자, 탁상시계
 const imac=new THREE.Group();imac.position.set(0,TOP,-6);S.add(imac);
@@ -875,15 +883,112 @@ const DOCH={cv:DOCS.cv,cl:DOCS.cl,
 <h3>Q. 함께 일하면 어떤 동료인가요?</h3><p>과대표로 15명 졸업전시를 조율하면서, 소통은 내 생각을 전하는 데서 끝나지 않고 서로 이해한 내용을 맞춰 가는 과정이라는 걸 배웠어요. 의견을 경청하고 필요한 내용을 정확하게 공유하는, 함께 일하기 편한 동료가 되고 싶어요.</p>
 <h3>Q. 앞으로 만들고 싶은 것은?</h3><p>아이디어를 제안하는 데 그치지 않고, 구체적인 결과물로 보여 주는 디자이너가 되고 싶어요.</p>
 <h3>연락하기</h3><p><a href="mailto:eilibean01@gmail.com">eilibean01@gmail.com</a></p><button class="go" data-go="contact">전화기로 메시지 남기기 →</button>`};
-let docOpen=false;const docEl=$('doc'),docPP=docEl.querySelector('.pp');
-function openDoc(k){const [id,ko,en]=DOCN[k];$('docT').textContent=ko+' · '+en;$('docB').innerHTML=DOCH[id];$('docDl').hidden=!DLF[id];docEl.dataset.id=id;
- const b=$('docB').querySelector('[data-go]');if(b)b.onclick=()=>{closeDoc();go(b.dataset.go)};
- docOpen=true;docEl.hidden=false;docPP.scrollTop=0;
- if(window.gsap&&!RM){gsap.killTweensOf([docEl,docPP]);gsap.fromTo(docEl,{opacity:0},{opacity:1,duration:.25});gsap.fromTo(docPP,{yPercent:55,rotate:-3,opacity:0},{yPercent:0,rotate:0,opacity:1,duration:.6,ease:'power3.out'})}
- setTimeout(()=>{if(docOpen)$('docX').focus()},RM?0:350)}
-function closeDoc(){if(!docOpen)return;docOpen=false;const done=()=>{if(!docOpen)docEl.hidden=true};
- if(window.gsap&&!RM){gsap.killTweensOf([docEl,docPP]);gsap.to(docPP,{yPercent:40,rotate:2,opacity:0,duration:.35,ease:'power2.in'});gsap.to(docEl,{opacity:0,duration:.35,onComplete:done})}else done()}
-$('docX').onclick=closeDoc;docEl.addEventListener('click',e=>{if(e.target===docEl)closeDoc()});$('docDl').onclick=()=>dlDoc(docEl.dataset.id);
+// ── ABOUT 서류: 진짜 종이처럼 ──────────────────────────────────────────
+// 서류마다 종이 장(페이지)을 만든다. 이력서·자기소개서는 실제 문서 이미지, 나머지는 글을 종이에 조판.
+// 서랍 속 폴더 뒤에 그 서류의 첫 장이 꽂혀 있고, 클릭하면 폴더에서 스르륵 올라와 화면 가운데로 날아온다.
+const DOCIMG={cv:[['docs/resume.png','docs/resume.jpg','docs/resume-1.jpg']],cl:[['docs/cover-1.jpg'],['docs/cover-2.jpg']]};   /* 각 장: 앞의 파일부터 찾아 씀 */
+const PGW=1240,PGH=1754,PLW=2339,PLH=1654,PAPER='#fdfcf8',PINK='#1d2433';
+const PG={};   /* id → [{cv,land,tS,tO}] */
+const mkTex=(c,raw)=>{const t=new THREE.CanvasTexture(c);t.colorSpace=raw?THREE.NoColorSpace:THREE.SRGBColorSpace;t.anisotropy=8;return t};
+function pageFromImg(im){const land=im.width>im.height,c=document.createElement('canvas');c.width=land?PLW:PGW;c.height=land?PLH:PGH;const g=c.getContext('2d');
+ g.fillStyle=PAPER;g.fillRect(0,0,c.width,c.height);
+ if(Math.abs(im.width/im.height-c.width/c.height)<.02)g.drawImage(im,0,0,c.width,c.height);   /* A4 비율 문서는 꽉 차게 */
+ else{const k=Math.min(c.width/im.width,c.height/im.height),w=im.width*k,h=im.height*k;
+  const s=document.createElement('canvas');s.width=s.height=1;const sg=s.getContext('2d');sg.drawImage(im,0,0,1,1,0,0,1,1);const d=sg.getImageData(0,0,1,1).data;
+  g.fillStyle=`rgb(${d[0]},${d[1]},${d[2]})`;g.fillRect(0,0,c.width,c.height);g.imageSmoothingQuality='high';g.drawImage(im,(c.width-w)/2,(c.height-h)/2,w,h)}
+ return{cv:c,land}}
+// 글 서류를 A4 종이에 조판
+function textPages(id){const html=DOCH[id].replace(/<br\s*\/?>/gi,'\n');const root=new DOMParser().parseFromString('<div>'+html+'</div>','text/html').body.firstChild;
+ const B=[];root.childNodes.forEach(n=>{if(n.nodeType!==1)return;const tg=n.tagName.toLowerCase(),tx=n.textContent.trim();
+  if(tg==='ul')n.querySelectorAll('li').forEach(li=>B.push({t:'li',s:li.textContent.trim()}));
+  else if(tg==='h2'||tg==='h3')B.push({t:tg,s:tx});else if(tg==='p')B.push({t:n.classList.contains('todo')?'todo':n.classList.contains('quote')?'quote':'p',s:tx})});
+ const M=118,W=PGW-M*2,pages=[];let c,g,y;
+ const F={h2:'700 58px "Noto Sans KR", sans-serif',h3:'700 31px "Noto Sans KR", sans-serif',p:'400 27px "Noto Sans KR", sans-serif',li:'400 27px "Noto Sans KR", sans-serif',todo:'400 25px "Noto Sans KR", sans-serif',quote:'500 29px "Noto Sans KR", sans-serif'};
+ const LH={h2:76,h3:46,p:47,li:47,todo:42,quote:48};
+ const wrap=(s,w)=>{const out=[];s.split('\n').forEach(par=>{let line='';for(const word of par.split(' ')){const tryL=line?line+' '+word:word;if(g.measureText(tryL).width<=w){line=tryL;continue}
+   if(line)out.push(line);line='';if(g.measureText(word).width<=w){line=word;continue}for(const ch of word){if(g.measureText(line+ch).width>w){out.push(line);line=ch}else line+=ch}}out.push(line)});return out};
+ const newPage=()=>{c=document.createElement('canvas');c.width=PGW;c.height=PGH;g=c.getContext('2d');g.fillStyle=PAPER;g.fillRect(0,0,PGW,PGH);
+  g.fillStyle='#8f8a80';g.font='500 20px Jost, sans-serif';g.textBaseline='alphabetic';g.textAlign='left';g.fillText('VISION INSIDE  ·  박수빈',M,84);g.textAlign='right';g.fillText(DOCN.find(d=>d[0]===id)[2].toUpperCase(),PGW-M,84);g.textAlign='left';
+  g.strokeStyle='#d9d3c6';g.lineWidth=2;g.beginPath();g.moveTo(M,104);g.lineTo(PGW-M,104);g.stroke();pages.push(c);y=180};
+ newPage();
+ B.forEach((b,bi)=>{g.font=F[b.t];const pad=b.t==='todo'||b.t==='quote'?22:0,ind=b.t==='li'?34:0,lines=wrap(b.s,W-pad*2-ind-(b.t==='quote'?10:0)),lh=LH[b.t];
+  const before=b.t==='h2'?0:b.t==='h3'?(bi?40:0):b.t==='li'?4:14,hgt=before+lines.length*lh+pad*2+(b.t==='h3'?18:0);
+  if(y+hgt>PGH-M&&y>200){newPage()}y+=before;
+  if(b.t==='quote'){g.fillStyle='#f0e7d2';g.fillRect(M,y,W,lines.length*lh+pad*2);g.fillStyle='#2f6db5';g.fillRect(M,y,7,lines.length*lh+pad*2)}
+  if(b.t==='todo'){g.setLineDash([10,8]);g.strokeStyle='#b9b1a0';g.lineWidth=2;g.strokeRect(M+1,y+1,W-2,lines.length*lh+pad*2-2);g.setLineDash([])}
+  g.fillStyle=b.t==='todo'?'#8a8273':PINK;g.textBaseline='top';
+  lines.forEach((l,i)=>{const ly=y+pad+i*lh+(lh-parseInt(F[b.t].split(' ')[1]))/2;if(b.t==='li'&&i===0){g.beginPath();g.arc(M+10,ly+15,4.5,0,7);g.fill()}g.fillText(l,M+pad+ind+(b.t==='quote'?10:0),ly)});
+  y+=lines.length*lh+pad*2;
+  if(b.t==='h3'){y+=8;g.strokeStyle=PINK;g.lineWidth=2;g.beginPath();g.moveTo(M,y);g.lineTo(PGW-M,y);g.stroke();y+=10}
+  if(b.t==='h2')y+=18});
+ pages.forEach((p,i)=>{const gg=p.getContext('2d');gg.fillStyle='#8f8a80';gg.font='500 20px Jost, sans-serif';gg.textAlign='center';gg.textBaseline='alphabetic';gg.fillText(`${i+1} / ${pages.length}`,PGW/2,PGH-70)});
+ return pages.map(cv=>({cv,land:false}))}
+// 서랍 속 폴더 뒤의 종이: 그 서류 첫 장을 보여 준다
+function setFolderPaper(k){const id=DOCN[k][0],pg=PG[id]&&PG[id][0];if(!pg)return;const f=files[k],u=f.userData,land=pg.land,w=land?24.04:17,h=land?17:24.04;
+ u.paper.geometry.dispose();u.paper.geometry=new THREE.PlaneGeometry(w,h);u.pw=w;u.ph=h;u.py0=11.2-h/2;
+ const old=u.paper.material;u.paper.material=TM(pg.tS,{side:THREE.DoubleSide});old.dispose()}   /* 새 재질로 바꿔야 스타일 처리 캐시에도 새 그림이 들어감 */
+function setPages(id,list){const old=PG[id];PG[id]=list.map(p=>({...p,tS:mkTex(p.cv),tO:mkTex(p.cv,true)}));if(old)old.forEach(p=>{p.tO.dispose()});const k=DOCN.findIndex(d=>d[0]===id);if(k>=0)setFolderPaper(k)}
+function loadImgDoc(id){const alts=DOCIMG[id];Promise.all(alts.map(srcs=>new Promise(res=>{let i=0;const tryN=()=>{if(i>=srcs.length)return res(null);const im=new Image();im.onload=()=>res(im);im.onerror=()=>{i++;tryN()};im.src=srcs[i]};tryN()})))
+ .then(ims=>{ims=ims.filter(Boolean);if(ims.length)setPages(id,ims.map(pageFromImg))})}
+DOCN.forEach(([id])=>{if(DOCIMG[id])loadImgDoc(id);else setPages(id,textPages(id))});
+if(document.fonts)document.fonts.ready.then(()=>DOCN.forEach(([id])=>{if(!DOCIMG[id])setPages(id,textPages(id))}));
+
+// 날아오는 종이: 스타일 처리 뒤에 따로 그린다(진짜 종이 질감·은은한 명암·그림자). 폴더 안에 있을 땐 서랍에 가려짐
+const PS=new THREE.Scene();PS.matrixWorldAutoUpdate=true;
+const dimM=new THREE.MeshBasicMaterial({color:0x0b0f1a,transparent:true,opacity:0,depthTest:false,depthWrite:false}),dS=new THREE.Scene();dS.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),dimM));
+const shTex=tex(256,256,(g,w,h)=>{g.filter='blur(22px)';g.fillStyle='#000';g.fillRect(44,44,w-88,h-88)});
+const paperMat=map=>new THREE.ShaderMaterial({uniforms:{map:{value:map},tD:{value:dt},res:post.uniforms.res,near:{value:cam.near},far:{value:cam.far},occ:{value:1}},side:THREE.DoubleSide,transparent:true,depthTest:false,depthWrite:false,
+ vertexShader:'varying vec2 vU;varying vec3 vN;varying float vD;void main(){vU=uv;vN=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.);vD=-mv.z;gl_Position=projectionMatrix*mv;}',
+ fragmentShader:`precision highp float;uniform sampler2D map,tD;uniform vec2 res;uniform float near,far,occ;varying vec2 vU;varying vec3 vN;varying float vD;
+  float ld(float z){z=z*2.-1.;return 2.*near*far/(far+near-z*(far-near));}
+  float hs(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
+  void main(){if(occ>.5){float sd=ld(texture2D(tD,gl_FragCoord.xy/res).r);if(sd<vD-.6)discard;}
+   vec3 n=normalize(vN);if(!gl_FrontFacing)n=-n;float dif=max(dot(n,normalize(vec3(-.35,.5,.8))),0.);
+   vec3 c=gl_FrontFacing?texture2D(map,vU).rgb:vec3(.92,.91,.88);
+   c*=1.-.03*hs(floor(vU*vec2(1100.,1500.)));                                   /* 종이 결 */
+   float e=min(min(vU.x,1.-vU.x),min(vU.y,1.-vU.y));c*=mix(.95,1.,smoothstep(0.,.01,e));   /* 가장자리 살짝 */
+   gl_FragColor=vec4(c*(.78+.25*dif),1.);}`});
+let docSt=null;const _p=new THREE.Vector3(),_q=new THREE.Quaternion(),_s=new THREE.Vector3(),_lift=new THREE.Vector3(),_tp=new THREE.Vector3(),_o=new THREE.Vector3(),_rq=new THREE.Quaternion(),_ez=new THREE.Euler();
+const easeIO=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,cl01=x=>Math.max(0,Math.min(1,x));
+function mkSheet(pg){const w=pg.land?29.7:21,h=pg.land?21:29.7,geo=new THREE.PlaneGeometry(w,h,26,36),base=geo.attributes.position.array.slice();
+ const m=new THREE.Mesh(geo,paperMat(pg.tO));m.frustumCulled=false;const sh=new THREE.Mesh(new THREE.PlaneGeometry(w*1.16,h*1.12),new THREE.MeshBasicMaterial({map:shTex,transparent:true,opacity:0,depthTest:false,depthWrite:false,color:0x000000}));sh.frustumCulled=false;
+ PS.add(sh);PS.add(m);return{m,sh,w,h,base,off:new THREE.Vector3(),rz:0}}
+function bendSheet(s,fly,t){const a=s.m.geometry.attributes.position,b=s.base,hw=s.w/2,hh=s.h/2;
+ for(let i=0;i<a.count;i++){const x=b[i*3],y=b[i*3+1],nx=x/hw,ny=y/hh,lo=(1-ny)/2;
+  a.array[i*3+2]=.32*nx*nx+fly*(-3.4*lo*lo+.7*Math.sin(nx*2.4+t*6)*lo)}   /* 평소엔 살짝 휜 종이, 날아오는 동안엔 아래가 펄럭 */
+ a.needsUpdate=true;s.m.geometry.computeVertexNormals();s.m.geometry.computeBoundingSphere()}
+function docTargets(){const tanF=Math.tan(THREE.MathUtils.degToRad(cam.fov/2)),s0=docSt.sh[0],D=Math.max(s0.h/(.80*2*tanF),s0.w/(.90*2*tanF*cam.aspect)),vh=2*D*tanF;
+ _tp.set(0,-.025*vh,-D).applyQuaternion(cam.quaternion).add(cam.position);return{D,vh,vw:vh*cam.aspect}}
+function renderDoc(dt2,t){if(!docSt)return;const S=docSt;S.p=cl01(S.p+S.dir*(RM?1:dt2/1.05));
+ const u=files[S.k].userData;u.paper.updateWorldMatrix(true,false);u.paper.matrixWorld.decompose(_p,_q,_s);
+ const k=u.pw/S.sh[0].w;_lift.set(0,u.ph+3,0).applyQuaternion(_q).add(_p);const {vw}=docTargets(),p=S.p;
+ S.sh.forEach((s,i)=>{const d=i-S.a,tgt=d<0?_o.set(-(vw/2+s.w/2+6),-.5,-1):_o.set(.9*d,-.9*d,-.9*d);s.off.lerp(tgt,RM?1:Math.min(1,dt2*7));s.rz+=((d<0?.12:-.02*d)-s.rz)*(RM?1:Math.min(1,dt2*7));
+  const f2=easeIO(cl01((p-.38)/.62));
+  if(p<.38)s.m.position.lerpVectors(_p,_lift,easeIO(p/.38));else s.m.position.lerpVectors(_lift,_tp,f2);
+  s.m.position.add(_o.copy(s.off).multiplyScalar(f2).applyQuaternion(cam.quaternion));
+  s.m.quaternion.slerpQuaternions(_q,cam.quaternion,easeIO(cl01((p-.22)/.78)));s.m.quaternion.multiply(_rq.setFromEuler(_ez.set(0,0,s.rz*f2)));
+  const sc=k+(1-k)*easeIO(cl01((p-.3)/.7));s.m.scale.setScalar(sc);
+  bendSheet(s,Math.sin(Math.PI*p)*(S.dir>0?1:.8),t);s.m.material.uniforms.occ.value=p<.5?1:0;s.m.renderOrder=10-Math.abs(d)*2;
+  s.sh.position.copy(s.m.position).add(_o.set(.9,-1.3,-1.2).multiplyScalar(sc).applyQuaternion(cam.quaternion));s.sh.quaternion.copy(s.m.quaternion);s.sh.scale.setScalar(sc);s.sh.material.opacity=.42*Math.pow(f2,2)*(d<0?0:1);s.sh.renderOrder=s.m.renderOrder-1});
+ dimM.opacity=.5*easeIO(cl01(p/.7));
+ R.autoClear=false;R.render(dS,qC);R.render(PS,cam);R.autoClear=true;
+ if(S.dir<0&&S.p<=0){S.sh.forEach(s=>{PS.remove(s.m);PS.remove(s.sh);s.m.geometry.dispose();s.m.material.dispose();s.sh.geometry.dispose();s.sh.material.dispose()});docSt=null}}
+SYN.paper=t=>{nz(t,.32,{f:1800,f2:5200,q:.7,peak:.07,a:.03});nz(t+.05,.2,{f:900,f2:2400,q:.9,peak:.04,a:.02})};   // 종이 스르륵
+
+let docOpen=false;const docEl=$('doc');
+function docPage(a){if(!docSt)return;const n=docSt.sh.length;a=Math.max(0,Math.min(n-1,a));if(a===docSt.a)return;docSt.a=a;sfx('paper');updPg()}
+function updPg(){const n=docSt?docSt.sh.length:1;$('docPgW').hidden=n<2;if(n>1){$('docPg').textContent=`${docSt.a+1} / ${n}`;$('docPv').disabled=docSt.a===0;$('docNx').disabled=docSt.a===n-1}}
+function openDoc(k){const [id,ko,en]=DOCN[k],pgs=PG[id];if(!pgs||!pgs.length)return;if(docSt){docSt.sh.forEach(s=>{PS.remove(s.m);PS.remove(s.sh)});docSt=null}
+ $('docT').textContent=ko+' · '+en;$('docB').innerHTML=DOCH[id];$('docDl').hidden=!DLF[id];docEl.dataset.id=id;$('docGo').hidden=!/data-go=/.test(DOCH[id]);
+ docSt={k,id,p:0,dir:1,a:0,sh:pgs.map(mkSheet)};updPg();sfx('paper');
+ docOpen=true;docEl.hidden=false;if(window.gsap&&!RM)gsap.fromTo('#doc .dbar',{opacity:0,y:-12},{opacity:1,y:0,duration:.4,delay:.55,ease:'power2.out'});
+ setTimeout(()=>{if(docOpen)$('docX').focus()},RM?0:600)}
+function closeDoc(){if(!docOpen)return;docOpen=false;if(docSt){docSt.dir=-1;sfx('paper')}docEl.hidden=true}
+$('docX').onclick=closeDoc;$('docDl').onclick=()=>dlDoc(docEl.dataset.id);$('docPv').onclick=()=>docSt&&docPage(docSt.a-1);$('docNx').onclick=()=>docSt&&docPage(docSt.a+1);
+$('docGo').onclick=()=>{closeDoc();go('contact')};
+docEl.addEventListener('click',e=>{if(e.target.closest('.dbar'))return;if(!docSt)return;const s=docSt.sh[docSt.a];ray.setFromCamera(new THREE.Vector2(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1),cam);
+ if(ray.intersectObject(s.m,false).length){if(docSt.sh.length>1)docPage(docSt.a+1<docSt.sh.length?docSt.a+1:0)}else closeDoc()});   /* 종이를 누르면 다음 장, 바깥을 누르면 닫기 */
+addEventListener('keydown',e=>{if(!docOpen||!docSt)return;if(e.key==='ArrowRight')docPage(docSt.a+1);else if(e.key==='ArrowLeft')docPage(docSt.a-1)});
 if(document.fonts)document.fonts.ready.then(()=>{abDirty=true;if(abWas)drawAbout(1)});
 mon.addEventListener('touchmove',e=>e.stopPropagation(),{passive:true});
 const cornersL=[[-.299,-.168],[.299,-.168],[-.299,.168],[.299,.168]].map(([x,y])=>new THREE.Vector3(x,y,0));const pv=new THREE.Vector3();
@@ -937,7 +1042,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  if(st==='home'||st==='work'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObjects(PICK.map(p=>p.g),true).find(h=>h.object.userData.pick);const p=hit?hit.object.userData.pick:null;
   if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?p.t:'';lbl.style.opacity=p&&moved?1:0}}
  else if(st==='contact'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObject(phone,true)[0];const p=hit?PICK.find(q=>q.g===phone):null;if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?'전화 받기':'';lbl.style.opacity=p?1:0}}
- else if(st==='open'){let p=null;if(ptrIn){ray.setFromCamera(mouse,cam);const h=ray.intersectObjects(files,true)[0];if(h){let o=h.object;while(o&&o.userData.doc==null)o=o.parent;if(o)p=DOCP[o.userData.doc]}}if(p!==hover)hover=p}
+ else if(st==='open'){let p=null;if(ptrIn&&!docOpen){ray.setFromCamera(mouse,cam);const h=ray.intersectObjects(files,true)[0];if(h){let o=h.object;while(o&&o.userData.doc==null)o=o.parent;if(o)p=DOCP[o.userData.doc]}}if(p!==hover)hover=p}
  else if(st==='screen'){let p=null;if(abDone&&ptrIn){ray.setFromCamera(mouse,cam);const h=ray.intersectObject(scr,false)[0];if(h&&h.uv){const r=wkHit(h.uv.x*AW,(1-h.uv.y)*AH);if(r)p={t:r.type==='chip'?r.c+' 보기':r.type==='open'?'프로젝트 열기':r.type==='prev'?'이전 프로젝트':'다음 프로젝트',wk:r}}}
   const nk=p?p.wk.key:'',ok=hover&&hover.wk?hover.wk.key:'';if(nk!==ok||(!p&&hover)){hover=p;const hc=p&&p.wk.type==='chip'?p.wk.c:'',hk=p?p.wk.type:'';if(hk!==wkHK||hc!==wkChipHov){wkHK=hk;wkChipHov=hc;wkRedraw()}}}
  else if(hover){hover=null;cv.style.cursor='default';lbl.style.opacity=0}
@@ -951,7 +1056,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  drawers.forEach((d,i)=>{const o=(i===2&&(fileOpen||prog>.05))?d.userData.depth+3+(NF-1)*FS+5:0;   /* 서류 서랍은 폴더가 다 보일 만큼만 뺀다 */d.position.z+=((d.userData.z0+o)-d.position.z)*.1});
  // 서류 폴더: 서랍 안에 서 있고, 마우스를 올린 폴더는 살짝 떠오르며 안의 종이가 빼꼼 나온다
  files.forEach(f=>{f.visible=fileOpen;const u=f.userData,tg=(st==='open'&&hover&&hover.doc===u.k)?1:0;u.h+=(tg-u.h)*(RM?1:Math.min(1,dt2*9));
-  f.position.set(40,22+u.h*3.2,fileDrawer.position.z-fileDrawer.userData.depth-3-u.k*FS);f.quaternion.setFromEuler(fEu.set(-.3+u.jit,0,u.jit*.5));u.paper.position.y=u.h*7.5});
+  f.position.set(40,22+u.h*3.2,fileDrawer.position.z-fileDrawer.userData.depth-3-u.k*FS);f.quaternion.setFromEuler(fEu.set(-.3+u.jit,0,u.jit*.5));u.paper.position.y=u.py0+u.h*8;u.paper.visible=!(docSt&&docSt.k===u.k)});
  // 전화벨: 울리는 동안 몸체가 떨림
  if(st==='contact'){startRing();const on=(t%2.4)<1.1;const s=on?Math.sin(t*70):0;phone.rotation.z=s*.018;phone.position.y=phoneY+(on?Math.abs(Math.sin(t*35))*.35:0)}else{phone.rotation.z=0;phone.position.y=phoneY}
  PICK.forEach(p=>{const g=p.g;if(g.userData.bump>0){if(!bumpBase.has(g))bumpBase.set(g,g.position.y);g.userData.bump=Math.max(0,g.userData.bump-dt2*2.5);if(g.userData.bump===0&&p.act==='bump')sfx('cup');   /* 컵이 내려앉을 때 '팅' */g.position.y=bumpBase.get(g)+Math.sin(g.userData.bump*Math.PI)*3}});
@@ -963,6 +1068,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  R.setRenderTarget(null);R.render(qS,qC);
  if(scr.material===ABM){scrO.matrixWorld.copy(scr.matrixWorld);R.autoClear=false;R.outputColorSpace=THREE.SRGBColorSpace;R.render(sS,cam);R.outputColorSpace=THREE.LinearSRGBColorSpace;R.autoClear=true}   /* 모니터 화면은 스타일(알갱이·명암) 처리 없이 원래 그림 그대로 위에 그린다 */
  if(lampV>.001){R.autoClear=false;R.render(gS,cam);R.autoClear=true}   /* 스탠드 불빛을 마지막에 더한다 */
+ renderDoc(dt2,t);   /* 꺼낸 서류(진짜 종이)는 맨 위에 */
  updCur();requestAnimationFrame(loop)}
 const css=n=>'#'+n.toString(16).padStart(6,'0');
 const THEMES=[

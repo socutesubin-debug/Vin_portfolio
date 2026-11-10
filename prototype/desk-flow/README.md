@@ -20,3 +20,7 @@ Home → Work(모니터: 작업물 목록) → About(서랍: 이력서·자기�
 - 명함 이미지: `card-front.png`, `card-back.png` 를 넣으면 자동 적용
 - EmailJS 키는 `.env.local`에만 보관 (저장소에 올리지 않기)
 - 화면 스타일: 기본은 매트캡 v2(`matcap/v2/` 금속·플라스틱·종이). 비교용으로 주소 끝에 `?style=basic`(평면 일러스트), `?style=retro`(레트로), `?style=matcap`(매트캡 v1)
+- ABOUT 서류: 폴더 뒤에 서류 첫 장이 꽂혀 있고, 클릭하면 종이가 폴더에서 스르륵 올라와 화면 가운데로 날아옴(살짝 휜 진짜 종이, 그림자, 여러 장이면 ‹ › 또는 종이 클릭으로 넘김)
+  - 문서 이미지: `docs/resume.png`(있으면 우선) → `docs/resume-1.jpg`(개인정보 모자이크판), `docs/cover-1.jpg`·`docs/cover-2.jpg`. 가로 이미지는 가로 A4 종이로 나옴
+  - 나머지 서류(My Story 등)는 글을 A4 종이에 자동 조판
+- 인트로: 블루톤 화면에 멘트가 타이핑되고 로딩바·% 표시
