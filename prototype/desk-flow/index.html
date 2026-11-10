@@ -905,7 +905,7 @@ const DOCIMG={cv:[['docs/resume.png','docs/resume.jpg','docs/resume-1.jpg']],cl:
 const PGW=1240,PGH=1754,PLW=2339,PLH=1654,PAPER='#fdfcf8',PINK='#1d2433';
 const PG={};   /* id → [{cv,land,tS,tO}] */
 const mkTex=(c,raw)=>{const t=new THREE.CanvasTexture(c);t.colorSpace=raw?THREE.NoColorSpace:THREE.SRGBColorSpace;t.anisotropy=8;return t};
-function pageFromImg(im){const land=im.width>im.height,c=document.createElement('canvas');c.width=land?PLW:PGW;c.height=land?PLH:PGH;const g=c.getContext('2d');
+function pageFromImg(im){const land=im.width>im.height,c=document.createElement('canvas');c.width=land?PLW:PGW;c.height=land?Math.round(PLW*im.height/im.width):PGH;   /* 가로 문서는 이미지 비율 그대로(여백 없이 크게) */const g=c.getContext('2d');
  g.fillStyle=PAPER;g.fillRect(0,0,c.width,c.height);
  if(Math.abs(im.width/im.height-c.width/c.height)<.02)g.drawImage(im,0,0,c.width,c.height);   /* A4 비율 문서는 꽉 차게 */
  else{const k=Math.min(c.width/im.width,c.height/im.height),w=im.width*k,h=im.height*k;
@@ -939,7 +939,7 @@ function textPages(id){const html=DOCH[id].replace(/<br\s*\/?>/gi,'\n');const ro
  pages.forEach((p,i)=>{const gg=p.getContext('2d');gg.fillStyle='#8f8a80';gg.font='500 20px Jost, sans-serif';gg.textAlign='center';gg.textBaseline='alphabetic';gg.fillText(`${i+1} / ${pages.length}`,PGW/2,PGH-70)});
  return pages.map(cv=>({cv,land:false}))}
 // 서랍 속 폴더 뒤의 종이: 그 서류 첫 장을 보여 준다
-function setFolderPaper(k){const id=DOCN[k][0],pg=PG[id]&&PG[id][0];if(!pg)return;const f=files[k],u=f.userData,land=pg.land,w=land?24.04:17,h=land?17:24.04;
+function setFolderPaper(k){const id=DOCN[k][0],pg=PG[id]&&PG[id][0];if(!pg)return;const f=files[k],u=f.userData,land=pg.land,w=land?24.04:17,h=land?24.04*pg.cv.height/pg.cv.width:24.04;
  u.paper.geometry.dispose();u.paper.geometry=new THREE.PlaneGeometry(w,h);u.pw=w;u.ph=h;u.py0=11.2-h/2;
  const old=u.paper.material;u.paper.material=TM(pg.tS,{side:THREE.DoubleSide});old.dispose()}   /* 새 재질로 바꿔야 스타일 처리 캐시에도 새 그림이 들어감 */
 function setPages(id,list){const old=PG[id];PG[id]=list.map(p=>({...p,tS:mkTex(p.cv),tO:mkTex(p.cv,true)}));if(old)old.forEach(p=>{p.tO.dispose()});const k=DOCN.findIndex(d=>d[0]===id);if(k>=0)setFolderPaper(k)}
@@ -965,14 +965,14 @@ const paperMat=map=>new THREE.ShaderMaterial({uniforms:{map:{value:map},tD:{valu
    gl_FragColor=vec4(c*(.78+.25*dif),1.);}`});
 let docSt=null;const _p=new THREE.Vector3(),_q=new THREE.Quaternion(),_s=new THREE.Vector3(),_lift=new THREE.Vector3(),_tp=new THREE.Vector3(),_o=new THREE.Vector3(),_rq=new THREE.Quaternion(),_ez=new THREE.Euler();
 const easeIO=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,cl01=x=>Math.max(0,Math.min(1,x));
-function mkSheet(pg){const w=pg.land?29.7:21,h=pg.land?21:29.7,geo=new THREE.PlaneGeometry(w,h,26,36),base=geo.attributes.position.array.slice();
+function mkSheet(pg){const w=pg.land?29.7:21,h=pg.land?29.7*pg.cv.height/pg.cv.width:29.7,geo=new THREE.PlaneGeometry(w,h,26,36),base=geo.attributes.position.array.slice();
  const m=new THREE.Mesh(geo,paperMat(pg.tO));m.frustumCulled=false;const sh=new THREE.Mesh(new THREE.PlaneGeometry(w*1.16,h*1.12),new THREE.MeshBasicMaterial({map:shTex,transparent:true,opacity:0,depthTest:false,depthWrite:false,color:0x000000}));sh.frustumCulled=false;
  PS.add(sh);PS.add(m);return{m,sh,w,h,base,off:new THREE.Vector3(),rz:0}}
 function bendSheet(s,fly,t){const a=s.m.geometry.attributes.position,b=s.base,hw=s.w/2,hh=s.h/2;
  for(let i=0;i<a.count;i++){const x=b[i*3],y=b[i*3+1],nx=x/hw,ny=y/hh,lo=(1-ny)/2;
   a.array[i*3+2]=.32*nx*nx+fly*(-3.4*lo*lo+.7*Math.sin(nx*2.4+t*6)*lo)}   /* 평소엔 살짝 휜 종이, 날아오는 동안엔 아래가 펄럭 */
  a.needsUpdate=true;s.m.geometry.computeVertexNormals();s.m.geometry.computeBoundingSphere()}
-function docTargets(){const tanF=Math.tan(THREE.MathUtils.degToRad(cam.fov/2)),s0=docSt.sh[0],D=Math.max(s0.h/(.80*2*tanF),s0.w/(.90*2*tanF*cam.aspect)),vh=2*D*tanF;
+function docTargets(){const tanF=Math.tan(THREE.MathUtils.degToRad(cam.fov/2)),s0=docSt.sh[0],lw=s0.w>s0.h,D=Math.max(s0.h/((lw?.90:.80)*2*tanF),s0.w/((lw?.93:.90)*2*tanF*cam.aspect)),vh=2*D*tanF;
  _tp.set(0,-.025*vh,-D).applyQuaternion(cam.quaternion).add(cam.position);return{D,vh,vw:vh*cam.aspect}}
 function renderDoc(dt2,t){if(!docSt)return;const S=docSt;S.p=cl01(S.p+S.dir*(RM?1:dt2/1.05));
  const u=files[S.k].userData;u.paper.updateWorldMatrix(true,false);u.paper.matrixWorld.decompose(_p,_q,_s);
