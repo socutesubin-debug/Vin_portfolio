@@ -786,7 +786,7 @@ function wkTick(){const now=performance.now(),L=wkList();
  else if(L.length>1&&!dOpen&&!(hover&&hover.wk)&&now-wLastUser>6000&&now-wLastChange>3400)wkGoto((wI+1)%L.length,wI===L.length-1)}
 function wkHit(px,py){for(const c of WKR.chips)if(px>=c.x&&px<=c.x+c.w&&py>=c.y&&py<=c.y+c.h)return{type:'chip',c:c.c,key:'c'+c.c};
  const cy=WKR.cy;if(px>=740&&px<=860&&py>=cy-120&&py<=cy+120){if(py<cy-14)return{type:'prev',key:'prev'};if(py>cy+14)return{type:'next',key:'next'}}
- if(px>=560&&px<=1560&&py>=cy-48&&py<=cy+48)return{type:'open',key:'open'};return null}
+ if(px>=0&&px<=AW&&py>=0&&py<=AH)return{type:'open',key:'open'};return null}   /* 탭·이전/다음 막대 말고는 화면 어디를 눌러도 프로젝트 열기 */
 function drawPage(){const g=abPage.getContext('2d');const KR='"Noto Sans KR", sans-serif',JO='Jost, "Noto Sans KR", sans-serif',L=wkList(),cy=WKR.cy;
  g.setTransform(SS,0,0,SS,0,0);g.imageSmoothingQuality='high';
  g.fillStyle='#444444';g.fillRect(0,0,AW,AH);
