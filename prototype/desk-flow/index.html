@@ -622,8 +622,8 @@ const WP=[
 const WCATS=['ALL','UXUI','WEB','BRANDING','GRAPHIC'],WDUR=700,wE=x=>1-Math.pow(1-x,3);
 let wEdgeT=0,wCat='ALL',wI=0,wOld=0,wFrom=0,wT0=0,wAnim=false,wDir=1,wLastUser=0,wLastChange=0,wStepT=0,wkHK='',wkChipHov='';const WKR={chips:[],cy:450};
 const wkList=()=>WP.filter(p=>wCat==='ALL'||p.g===wCat);
-// 표지(작은 판)를 불러와 모니터 배경용으로 흐리고 어둡게 만든 그림을 미리 준비
-const WIMG={};WP.forEach(p=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=AW;c.height=AH;const g=c.getContext('2d');g.filter='blur(4px)';g.drawImage(im,-16,-9,AW+32,AH+18);g.filter='none';g.fillStyle='rgba(26,26,28,.62)';g.fillRect(0,0,AW,AH);WIMG[p.img]=c;if(st==='screen')wkRedraw()};im.src='covers/'+p.img+'-sm.jpg'});
+// 표지(작은 판)를 불러와 모니터 배경으로 선명하게 쓴다
+const WIMG={};WP.forEach(p=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=AW;c.height=AH;const g=c.getContext('2d');g.drawImage(im,0,0,AW,AH);WIMG[p.img]=c;if(st==='screen')wkRedraw()};im.src='covers/'+p.img+'-sm.jpg'});
 $('wkA11y').innerHTML=WP.map(p=>`<button data-n="${p.t}" data-k="${p.c}" data-img="${p.img}" data-url="${p.url||''}">${p.t} (${p.c}, ${p.y}) 열기</button>`).join('');[...$('wkA11y').children].forEach(b=>b.onclick=e=>openDetail(b,e));
 function wkRedraw(){abDirty=true;if(abDone)drawAbout(1)}
 function wPosNow(){if(!wAnim)return wI;return wFrom+(wI-wFrom)*wE(Math.min(1,(performance.now()-wT0)/WDUR))}
@@ -637,6 +637,9 @@ function wkHit(px,py){for(const c of WKR.chips)if(px>=c.x&&px<=c.x+c.w&&py>=c.y&
 function drawPage(){const g=abPage.getContext('2d');const KR='"Noto Sans KR", sans-serif',JO='Jost, "Noto Sans KR", sans-serif',L=wkList(),cy=WKR.cy;
  g.fillStyle='#444444';g.fillRect(0,0,AW,AH);
  {const bg=p=>p&&WIMG[p.img],kk=wAnim?wE(Math.min(1,(performance.now()-wT0)/WDUR)):1;if(wAnim&&bg(L[wOld]))g.drawImage(bg(L[wOld]),0,0);if(bg(L[wI])){g.globalAlpha=wAnim?kk:1;g.drawImage(bg(L[wI]),0,0);g.globalAlpha=1}}
+ {const cy=WKR.cy;let gr=g.createLinearGradient(0,0,0,150);gr.addColorStop(0,'rgba(0,0,0,.38)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,AW,150);   // 위쪽 탭 뒤 옅은 그림자
+  gr=g.createLinearGradient(0,cy-130,0,cy+130);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(.5,'rgba(0,0,0,.34)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,cy-130,AW,260)}   // 가운데 줄 뒤 옅은 그림자
+ g.shadowColor='rgba(0,0,0,.55)';g.shadowBlur=14;   // 글자·막대에 옅은 그림자
  // 분류 탭(가운데 정렬). 선택한 탭은 흰색 + 밑줄
  WKR.chips=[];g.font='500 24px '+JO;g.textBaseline='middle';g.textAlign='left';const gap=56,ws=WCATS.map(c=>g.measureText(c).width);
  let x=(AW-(ws.reduce((a,b)=>a+b,0)+gap*(WCATS.length-1)))/2;
@@ -654,8 +657,8 @@ function drawPage(){const g=abPage.getContext('2d');const KR='"Noto Sans KR", sa
   g.font='400 30px '+JO;g.textAlign='right';g.fillText(p.y,1543,cy+off);g.globalAlpha=1};
  if(wAnim){item(L[wOld],wOld,1-k*1.4,-wDir*34*k);item(L[wI],wI,k,wDir*34*(1-k))}else item(L[wI],wI,1,0);
  if(!L.length){g.fillStyle='rgba(255,255,255,.6)';g.font='400 26px '+KR;g.textAlign='center';g.fillText('이 분류의 프로젝트를 준비 중이에요',AW/2,cy)}
- if(wkHK==='open'&&L[wI]&&!wAnim){g.font='500 30px '+KR;const tw=g.measureText(L[wI].t).width;g.fillStyle='#fff';g.fillRect(886,cy+24,tw,2);g.font='400 28px '+JO;g.textAlign='left';g.fillText('→',886+tw+16,cy)}
- abDirty=false}
+ if(wkHK==='open'&&L[wI]&&!wAnim){g.shadowBlur=14;g.font='500 30px '+KR;const tw=g.measureText(L[wI].t).width;g.fillStyle='#fff';g.fillRect(886,cy+24,tw,2);g.font='400 28px '+JO;g.textAlign='left';g.fillText('→',886+tw+16,cy)}
+ g.shadowColor='transparent';g.shadowBlur=0;abDirty=false}
 function drawAbout(p){const g=abC.getContext('2d');if(abDirty)drawPage();g.fillStyle='#0c0c12';g.fillRect(0,0,AW,AH);
  if(p<.18){const q=p/.18;g.fillStyle='#fff';g.globalAlpha=Math.min(1,q*1.5);g.fillRect(AW/2*(1-q),AH/2-3,AW*q,6);g.globalAlpha=1}
  else if(p<.45){const q=(p-.18)/.27,hh=6+(AH-6)*q*q;g.fillStyle='#fffdf5';g.fillRect(0,AH/2-hh/2,AW,hh)}
