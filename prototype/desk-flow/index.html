@@ -17,7 +17,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);overflow:hi
 #c.b{filter:blur(16px) brightness(.9);transform:scale(1.06)}
 header{position:fixed;top:0;left:0;right:0;z-index:8;display:flex;justify-content:space-between;align-items:center;pointer-events:none;
  padding:calc(20px + env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) 0 max(24px,env(safe-area-inset-left,0px));font-family:var(--display)}
-.logo{font-weight:500;font-size:17px;letter-spacing:.02em}
+.logo{display:block;width:79px;height:22px;background:currentColor;-webkit-mask:url(logo-suvin.png) left center/contain no-repeat;mask:url(logo-suvin.png) left center/contain no-repeat;color:var(--ink);font-size:0;pointer-events:auto;cursor:pointer}   /* 이름 로고 SUVIN (글자색을 따라감) */
 nav{display:flex;gap:clamp(14px,3vw,30px);font:500 clamp(12px,1.3vw,15px) var(--display);letter-spacing:.04em;pointer-events:auto}
 nav a{color:var(--ink);text-decoration:none;padding-bottom:2px;border-bottom:2px solid transparent;cursor:pointer}
 nav a:hover,nav a:focus-visible,nav a.on{border-bottom-color:var(--ink);outline:none}
@@ -290,7 +290,7 @@ body:has(#doc:not([hidden])) header{opacity:0;pointer-events:none}   /* 서류 �
 @media (prefers-reduced-motion:reduce){#mon.on,#bc.on .cd,#rings span{animation:none!important;opacity:1}#mon *{animation:none!important;opacity:1!important}#c{transition:none}}
 </style>
 <canvas id="c" aria-label="일러스트 책상 3D. 서랍에는 소개 서류(이력서·자기소개서 등), 모니터에는 작업물이 있어요."></canvas>
-<header><div class="logo">Vision INside</div><nav aria-label="주 메뉴"><a href="#home">HOME</a><a href="#work">WORK</a><a href="#about">ABOUT</a><a href="#contact">CONTACT</a></nav></header>
+<header><a class="logo" href="#home" aria-label="SUVIN · 처음으로"></a><nav aria-label="주 메뉴"><a href="#home">HOME</a><a href="#work">WORK</a><a href="#about">ABOUT</a><a href="#contact">CONTACT</a></nav></header>
 <div id="label"></div>
 <div id="hint"></div>
 <button id="back" hidden>Back</button>
