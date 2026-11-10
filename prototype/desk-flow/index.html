@@ -294,6 +294,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {toCreasedNormals} from 'three/addons/utils/BufferGeometryUtils.js';
 const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const RETRO=new URLSearchParams(location.search).get('style')==='retro';   // 비교용 레트로 일러스트 버전 (?style=retro)
 const $=id=>document.getElementById(id);
 // ── 렌더러 / 장면 ────────────────────────────────────────────
 const cv=$('c'),R=new THREE.WebGLRenderer({canvas:cv,antialias:false});R.setPixelRatio(2);
@@ -354,6 +355,17 @@ for(let k=0;k<NF;k++){const f=new THREE.Group();const ci=k%4,[id,ko,en]=DOCN[k],
  // 안에 든 종이: 평소엔 폴더 뒤에 숨어 있고, hover하면 위로 빼꼼 나온다
  const pm=TM(tex(312,264,(g,w,h)=>{g.fillStyle='#fffdf7';g.fillRect(0,0,w,h);g.strokeStyle='#17151f';g.lineWidth=4;g.strokeRect(2,2,w-4,h-4);g.fillStyle='#17151f';g.textAlign='left';g.textBaseline='top';g.font='600 30px Jost, sans-serif';g.fillText(en.toUpperCase(),20,18);g.font='500 22px "Noto Sans KR", sans-serif';g.fillText(ko,20,56);g.fillStyle='#cfc6b4';for(let i=0;i<7;i++)g.fillRect(20,100+i*22,w-40-(i%3)*44,8)}),{side:THREE.DoubleSide});
  const paper=add(new THREE.PlaneGeometry(26,22),pm,[0,0,-.42],[0,0,0],f);
+ if(RETRO){const RF=['#2b4f9e','#cf2f2a','#2f7a4d','#8d9299','#f2c400','#f08a3c'],fc=RF[k%6],ink=(k%6>=4)?'#1b2240':'#ffffff',NV='#1b2240';
+  // 폴더 앞면: 3번처럼 큰 글씨와 흰 줄, 2번처럼 남색 굵은 테두리와 아래쪽 하프톤 점
+  f.children[0].material=TM(tex(600,500,(g,w,h)=>{g.fillStyle=fc;g.fillRect(0,0,w,h);
+   g.fillStyle=ink==='#ffffff'?'rgba(255,255,255,.2)':'rgba(27,34,64,.18)';for(let y=h*.6,r=0;y<h;y+=10,r++)for(let x=(r%2)*5;x<w;x+=10){g.beginPath();g.arc(x,y,1+2.6*((y-h*.6)/(h*.4)),0,7);g.fill()}
+   g.fillStyle=ink;for(let i=0;i<9;i++)g.fillRect(40,64+i*(i<4?13:19),230,i<4?3:4);
+   g.fillRect(w-300,46,260,4);g.font='700 34px "Noto Sans KR", sans-serif';g.textAlign='left';g.textBaseline='top';g.fillText(ko,w-300,62);
+   g.fillRect(w-300,150,260,3);g.font='500 22px Jost, sans-serif';g.fillText('No. '+num,w-300,164);
+   g.font='400 58px Jost, sans-serif';g.textBaseline='alphabetic';const ws=en.split(' ');ws.forEach((t,i)=>g.fillText(t,40,h-60-(ws.length-1-i)*62));
+   g.strokeStyle=NV;g.lineWidth=8;g.strokeRect(4,4,w-8,h-8)}));
+  // 탭: 폴더 색 + 가운데 이름
+  f.children[1].material=TM(tex(390,108,(g,w,h)=>{g.fillStyle=fc;g.fillRect(0,0,w,h);g.fillStyle=ink;g.font='700 32px "Noto Sans KR", sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(ko,w/2,h/2+8);g.strokeStyle=NV;g.lineWidth=8;g.strokeRect(0,0,w,h+20)}),{side:THREE.DoubleSide})}
  S.add(f);f.userData={k,doc:k,h:0,paper,jit:(Math.random()-.5)*.04,delay:k/NF*.62};files.push(f)}
 const DOCP=DOCN.map(([id,ko],k)=>({t:ko+' 꺼내 보기',doc:k}));
 // iMac, 스탠드, 전화기, 명함, 컵, 연필꽂이, 의자, 탁상시계
@@ -385,7 +397,7 @@ const sun=new THREE.DirectionalLight(0xfff6e8,2.3);sun.position.set(-310,190,170
 const fill=new THREE.DirectionalLight(0xe6ecff,.3);fill.position.set(160,90,250);S.add(fill);
 const hemi=new THREE.HemisphereLight(0xffffff,0xb8aab0,1.8);S.add(hemi);
 const SCRON=new THREE.MeshBasicMaterial({color:0xe6dcc6});const ENDM=new THREE.MeshBasicMaterial({map:tex(300,170,(g,w,h)=>{g.fillStyle='#fff6e0';g.fillRect(0,0,w,h);g.fillStyle='#14131c';g.font='600 22px Jost, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#3fae6a';g.beginPath();g.arc(w/2,h/2-24,26,0,7);g.fill();g.strokeStyle='#fff';g.lineWidth=6;g.lineCap='round';g.lineJoin='round';g.beginPath();g.moveTo(w/2-12,h/2-24);g.lineTo(w/2-3,h/2-14);g.lineTo(w/2+14,h/2-36);g.stroke();g.fillStyle='#14131c';g.font='600 24px Jost, sans-serif';g.fillText('Message received',w/2,h/2+30);g.font='400 15px Jost, sans-serif';g.fillText('Will reply tomorrow morning',w/2,h/2+56)})});
-let eT=0,eTarget=0,clkTimer=0;const C_SUN0=new THREE.Color(0xffffff),C_SUN1=new THREE.Color(0xff7a3a),C_H0=new THREE.Color(0xffffff),C_H1=new THREE.Color(0xff9e6e),C_BG0=new THREE.Color('#5b4fee'),C_BG1=new THREE.Color('#e9774c'),tmpC=new THREE.Color();
+let eT=0,eTarget=0,clkTimer=0;const C_SUN0=new THREE.Color(0xffffff),C_SUN1=new THREE.Color(0xff7a3a),C_H0=new THREE.Color(0xffffff),C_H1=new THREE.Color(0xff9e6e),C_BG0=new THREE.Color(RETRO?'#cbbfa7':'#5b4fee'),C_BG1=new THREE.Color('#e9774c'),tmpC=new THREE.Color();
 const SUN_P0=new THREE.Vector3(-310,190,170),SUN_P1=new THREE.Vector3(-330,95,250),tmpV=new THREE.Vector3();
 function setClock(h,m){CLKD.h=String(h).padStart(2,'0');CLKD.m=String(m).padStart(2,'0');texReg.filter(r=>r.draw.toString().includes('CLKD')).forEach(r=>{r.g.setTransform(1,0,0,1,0,0);r.g.save();r.draw(r.g,r.w,r.h);r.g.restore();r.t.needsUpdate=true})}
 function endClock(on){clearInterval(clkTimer);if(!on){setClock(9,35);return}let t=9*60+35;clkTimer=setInterval(()=>{t+=24;if(t>=1080){t=1080;clearInterval(clkTimer)}setClock((t/60)|0,t%60)},45)}
@@ -400,20 +412,23 @@ const leaves=win,LV=[];
 // ── 깔끔 스타일 후처리 ─────────────────────────────────────
 const toLin=h=>new THREE.Color(h).convertLinearToSRGB();
 const dt=new THREE.DepthTexture();const rtC=new THREE.WebGLRenderTarget(1,1,{depthTexture:dt});const rtN=new THREE.WebGLRenderTarget(1,1),rtA=new THREE.WebGLRenderTarget(1,1);const nMat=new THREE.MeshNormalMaterial();
-const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:rtN.texture},tA:{value:rtA.texture},tD:{value:dt},res:{value:new THREE.Vector2()},cDark:{value:toLin('#0f0f18')},cMid:{value:toLin('#cfd0ee')},cLight:{value:toLin('#ffffff')},cBg:{value:toLin('#5b4fee')},near:{value:10},far:{value:5000},eThr:{value:.62},warmK:{value:0},wLo:{value:1},wHi:{value:1.6},dbg:{value:0}},
+const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:rtN.texture},tA:{value:rtA.texture},tD:{value:dt},res:{value:new THREE.Vector2()},cDark:{value:toLin('#0f0f18')},cMid:{value:toLin('#cfd0ee')},cLight:{value:toLin('#ffffff')},cBg:{value:toLin('#5b4fee')},near:{value:10},far:{value:5000},eThr:{value:.62},warmK:{value:0},wLo:{value:1},wHi:{value:1.6},dbg:{value:0},soft:{value:0},grainA:{value:0},ow:{value:1.5},sh:{value:new THREE.Vector3(.8,.77,.92)}},
  vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=vec4(position.xy,0.,1.);}',
- fragmentShader:`precision highp float;varying vec2 v;uniform sampler2D tC,tN,tD,tA;uniform vec2 res;uniform vec3 cDark,cMid,cLight,cBg;uniform float near,far,eThr,warmK,wLo,wHi,dbg;
+ fragmentShader:`precision highp float;varying vec2 v;uniform sampler2D tC,tN,tD,tA;uniform vec2 res;uniform vec3 cDark,cMid,cLight,cBg;uniform float near,far,eThr,warmK,wLo,wHi,dbg,soft,grainA,ow;uniform vec3 sh;
  float ld(vec2 p){float z=texture2D(tD,p).r*2.-1.;return 2.*near*far/(far+near-z*(far-near));}
  void main(){vec3 c=texture2D(tC,v).rgb;vec3 a=pow(texture2D(tA,v).rgb,vec3(.4545));float la=dot(texture2D(tA,v).rgb,vec3(.299,.587,.114));
   float l=dot(c,vec3(.299,.587,.114))/max(la,.03);l=mix(1.,l,smoothstep(.02,.06,la));float t0=smoothstep(.12,.78,l);
   vec3 col=t0<.30?mix(cDark,a,.22):(t0<.72?a*vec3(.80,.77,.92):a);
+  if(soft>.5)col=a*mix(sh,vec3(1.),smoothstep(.05,.95,l))+vec3(.045)*smoothstep(1.,1.5,l);
   col=mix(col,col*vec3(1.,.88,.62)+vec3(.05,.025,0.),warmK*smoothstep(wLo,wHi,l)*step(.72,t0));
-  vec2 px=1.5/res;float d0=ld(v);vec3 n0=texture2D(tN,v).rgb;float e=0.;
+  vec2 px=ow/res;float d0=ld(v);vec3 n0=texture2D(tN,v).rgb;float e=0.;
   for(int i=0;i<4;i++){vec2 o=i==0?vec2(px.x,0.):i==1?vec2(-px.x,0.):i==2?vec2(0.,px.y):vec2(0.,-px.y);
    e+=step(eThr,length(texture2D(tN,v+o).rgb-n0));e+=step(.04*d0,abs(ld(v+o)-d0));}
   col=mix(col,cDark,step(.5,e));
   if(texture2D(tD,v).r>.9999)col=cBg;
+  if(grainA>0.){float n=fract(sin(dot(floor(gl_FragCoord.xy),vec2(12.9898,78.233)))*43758.5453);float m=fract(sin(dot(floor(gl_FragCoord.xy/3.),vec2(39.34,11.13)))*24634.63);col+=(n-.5)*grainA+(m-.5)*grainA*.5;}
   if(dbg>.5)col=vec3(l/3.);gl_FragColor=vec4(col,1.);}`});
+if(RETRO)Object.assign(post.uniforms,{soft:{value:1},grainA:{value:.075},ow:{value:2.3},eThr:{value:.5},sh:{value:new THREE.Vector3(.70,.62,.56)},cDark:{value:toLin('#1c1a1f')},cBg:{value:toLin('#cbbfa7')}});
 const aCache=new Map();const albOf=m=>{let a=aCache.get(m);if(!a){a=new THREE.MeshBasicMaterial({color:m.color.clone(),map:m.map||null,side:m.side});aCache.set(m,a)}return a};
 const qS=new THREE.Scene();qS.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),post));const qC=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
 // ── 카메라 장면(상태) ───────────────────────────────────────
@@ -776,12 +791,13 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  R.setRenderTarget(null);R.render(qS,qC);updCur();requestAnimationFrame(loop)}
 const css=n=>'#'+n.toString(16).padStart(6,'0');
 const THEMES=[
- {n:'크림·레드·블루',W:0xf3e9d4,FL:0x85707c,RD:0xdb4a3e,BL:0x3f8fd8,YL:0xf0b93f,CM:0x3f86cc,DF:0x62a6e6}];
+ {n:'크림·레드·블루',W:0xf3e9d4,FL:0x85707c,RD:0xdb4a3e,BL:0x3f8fd8,YL:0xf0b93f,CM:0x3f86cc,DF:0x62a6e6},
+ {n:'레트로 일러스트',W:0xe4d9c5,FL:0x6f6358,RD:0xa8361f,BL:0x78b5ae,YL:0xd39f3a,CM:0x46566a,DF:0x5d7088}];
 const MATS={W,FL,RD,BL,YL,CM,DF};let themeI=0;
 function applyTheme(i){themeI=i;const T=THEMES[i];for(const k in MATS)MATS[k].color.set(T[k]);CRM=css(T.W);RED=css(T.RD);BLU=css(T.BL);YEL=css(T.YL);
  texReg.forEach(r=>{r.g.setTransform(1,0,0,1,0,0);r.g.save();r.draw(r.g,r.w,r.h);r.g.restore();r.t.needsUpdate=true});aCache.clear();
 }
-applyTheme(0);
+applyTheme(RETRO?1:0);
 if(document.fonts){document.fonts.load('600 40px Jost');document.fonts.load('500 30px "Noto Sans KR"');document.fonts.ready.then(()=>applyTheme(themeI))}
 window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={files,scr,cam,AW,AH,get wk(){return WKR},cpos,fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
 fit();addEventListener('resize',fit);if(window.ResizeObserver)new ResizeObserver(()=>{if(R.domElement.width!==innerWidth*2||innerWidth/innerHeight!==cam.aspect)fit()}).observe(document.documentElement);fromHash();loop();
