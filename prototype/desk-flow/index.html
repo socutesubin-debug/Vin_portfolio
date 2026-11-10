@@ -294,7 +294,8 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {toCreasedNormals} from 'three/addons/utils/BufferGeometryUtils.js';
 const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
-const RETRO=new URLSearchParams(location.search).get('style')==='retro';   // 비교용 레트로 일러스트 버전 (?style=retro)
+const RETRO=new URLSearchParams(location.search).get('style')==='retro';
+const MATCAP=new URLSearchParams(location.search).get('style')==='matcap';   /* 매트캡 버전 (?style=matcap) */   // 비교용 레트로 일러스트 버전 (?style=retro)
 const $=id=>document.getElementById(id);
 // ── 렌더러 / 장면 ────────────────────────────────────────────
 const cv=$('c'),R=new THREE.WebGLRenderer({canvas:cv,antialias:false});R.setPixelRatio(2);
@@ -413,10 +414,10 @@ const WB=(x,y,w,h)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),winM);m
 const leaves=win,LV=[];
 // ── 깔끔 스타일 후처리 ─────────────────────────────────────
 const toLin=h=>new THREE.Color(h).convertLinearToSRGB();
-const dt=new THREE.DepthTexture();const rtC=new THREE.WebGLRenderTarget(1,1,{depthTexture:dt});const rtN=new THREE.WebGLRenderTarget(1,1),rtA=new THREE.WebGLRenderTarget(1,1);const nMat=new THREE.MeshNormalMaterial();
-const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:rtN.texture},tA:{value:rtA.texture},tD:{value:dt},res:{value:new THREE.Vector2()},cDark:{value:toLin('#0f0f18')},cMid:{value:toLin('#cfd0ee')},cLight:{value:toLin('#ffffff')},cBg:{value:toLin('#5b4fee')},near:{value:10},far:{value:5000},eThr:{value:.62},warmK:{value:0},wLo:{value:1},wHi:{value:1.6},dbg:{value:0},soft:{value:0},grainA:{value:0},ow:{value:1.5},sh:{value:new THREE.Vector3(.8,.77,.92)}},
+const dt=new THREE.DepthTexture();const rtC=new THREE.WebGLRenderTarget(1,1,{depthTexture:dt});const rtN=new THREE.WebGLRenderTarget(1,1),rtA=new THREE.WebGLRenderTarget(1,1),rtM=new THREE.WebGLRenderTarget(1,1);const nMat=new THREE.MeshNormalMaterial();
+const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:rtN.texture},tA:{value:rtA.texture},tD:{value:dt},res:{value:new THREE.Vector2()},cDark:{value:toLin('#0f0f18')},cMid:{value:toLin('#cfd0ee')},cLight:{value:toLin('#ffffff')},cBg:{value:toLin('#5b4fee')},near:{value:10},far:{value:5000},eThr:{value:.62},warmK:{value:0},wLo:{value:1},wHi:{value:1.6},dbg:{value:0},tM:{value:rtM.texture},mc:{value:0},soft:{value:0},grainA:{value:0},ow:{value:1.5},sh:{value:new THREE.Vector3(.8,.77,.92)}},
  vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=vec4(position.xy,0.,1.);}',
- fragmentShader:`precision highp float;varying vec2 v;uniform sampler2D tC,tN,tD,tA;uniform vec2 res;uniform vec3 cDark,cMid,cLight,cBg;uniform float near,far,eThr,warmK,wLo,wHi,dbg,soft,grainA,ow;uniform vec3 sh;
+ fragmentShader:`precision highp float;varying vec2 v;uniform sampler2D tC,tN,tD,tA,tM;uniform vec2 res;uniform vec3 cDark,cMid,cLight,cBg;uniform float near,far,eThr,warmK,wLo,wHi,dbg,soft,grainA,ow,mc;uniform vec3 sh;
  float ld(vec2 p){float z=texture2D(tD,p).r*2.-1.;return 2.*near*far/(far+near-z*(far-near));}
  void main(){vec3 c=texture2D(tC,v).rgb;vec3 a=pow(texture2D(tA,v).rgb,vec3(.4545));float la=dot(texture2D(tA,v).rgb,vec3(.299,.587,.114));
   float l=dot(c,vec3(.299,.587,.114))/max(la,.03);l=mix(1.,l,smoothstep(.02,.06,la));float t0=smoothstep(.12,.78,l);
@@ -425,6 +426,8 @@ const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:
    col+=vec3(1.,.97,.9)*clamp(l-1.,0.,.6)*.4;                                                 // 광택 하이라이트
    col=mix(col,vec3(dot(col,vec3(.299,.587,.114))),.1)*vec3(1.03,1.,.95);                    // 살짝 차분하고 따뜻하게
    col*=1.07-.1*clamp(dot(v-vec2(.1,.95),vec2(.7071,-.7071)),0.,1.);}                          // 창문 쪽(왼쪽 위)이 조금 더 밝게
+  if(mc>.5){vec3 W3=vec3(.299,.587,.114);float ms=dot(pow(texture2D(tM,v).rgb,vec3(.4545)),W3)/max(dot(a,W3),.03);vec3 m=a*clamp(ms/.74,0.,1.2)*vec3(1.02,1.,.97);float ls=clamp(l,0.,1.);   // 매트캡(물건 볼륨) × 그림자(창문·물체)
+   col=m*mix(sh,vec3(1.),ls*ls*(3.-2.*ls))+vec3(1.,.97,.9)*clamp(l-1.,0.,.5)*.3;}
   col=mix(col,col*vec3(1.,.88,.62)+vec3(.05,.025,0.),warmK*smoothstep(wLo,wHi,l)*step(.72,t0));
   vec2 px=ow/res;float d0=ld(v);vec3 n0=texture2D(tN,v).rgb;float e=0.;
   for(int i=0;i<4;i++){vec2 o=i==0?vec2(px.x,0.):i==1?vec2(-px.x,0.):i==2?vec2(0.,px.y):vec2(0.,-px.y);
@@ -433,8 +436,11 @@ const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:
   if(texture2D(tD,v).r>.9999)col=cBg;
   if(grainA>0.){float n=fract(sin(dot(floor(gl_FragCoord.xy),vec2(12.9898,78.233)))*43758.5453);float m=fract(sin(dot(floor(gl_FragCoord.xy/3.),vec2(39.34,11.13)))*24634.63);col+=(n-.5)*grainA+(m-.5)*grainA*.5;}
   if(dbg>.5)col=vec3(l/3.);gl_FragColor=vec4(col,1.);}`});
+if(MATCAP)Object.assign(post.uniforms,{mc:{value:1},grainA:{value:.035},ow:{value:1.5},sh:{value:new THREE.Vector3(.86,.83,.88)}});
 if(RETRO)Object.assign(post.uniforms,{soft:{value:1},grainA:{value:.06},ow:{value:1.6},eThr:{value:.5},sh:{value:new THREE.Vector3(.86,.80,.75)},cDark:{value:toLin('#221e1c')},cBg:{value:toLin('#d8cdb7')}});
 const aCache=new Map();const albOf=m=>{let a=aCache.get(m);if(!a){a=new THREE.MeshBasicMaterial({color:m.color.clone(),map:m.map||null,side:m.side});aCache.set(m,a)}return a};
+const MCT=MATCAP?new THREE.TextureLoader().load('matcap/pearl.jpg',t=>{t.colorSpace=THREE.SRGBColorSpace}):null,mCache=new Map();
+const mcOf=m=>{if(m.isMeshBasicMaterial)return m;let x=mCache.get(m);if(!x){x=new THREE.MeshMatcapMaterial({color:m.color.clone(),map:m.map||null,matcap:MCT,side:m.side});mCache.set(m,x)}return x};
 const qS=new THREE.Scene();qS.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),post));const qC=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
 // ── 카메라 장면(상태) ───────────────────────────────────────
 const portrait=()=>innerWidth/innerHeight<.9;
@@ -451,7 +457,7 @@ let st='home',prog=0,progT=0,lampOn=false,lampV=0,lampT0=0,lampFirst=true;
 function setLamp(o){if(o===lampOn)return;lampOn=o;lampT0=performance.now()/1000+(lampFirst&&o?.9:0);if(o)lampFirst=false}
 const lampEnv=t=>{if(t<.1)return 0;if(t<.18)return .5;if(t<.26)return .06;if(t<.33)return .7;if(t<.4)return .2;const x=Math.min(1,(t-.4)/.9);return .2+.8*(1-Math.pow(1-x,3))};
 const h0=camFor('home');const cpos=h0.p.clone(),clook=h0.l.clone(),tpos=h0.p.clone(),tlook=h0.l.clone();const sm=new THREE.Vector2();
-function fit(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);rtC.setSize(w*2,h*2);rtN.setSize(w*2,h*2);rtA.setSize(w*2,h*2);post.uniforms.res.value.set(w*2,h*2);cam.aspect=w/h;cam.fov=portrait()?62:40;cam.updateProjectionMatrix();retarget(true)}
+function fit(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);rtC.setSize(w*2,h*2);rtN.setSize(w*2,h*2);rtA.setSize(w*2,h*2);if(MATCAP)rtM.setSize(w*2,h*2);post.uniforms.res.value.set(w*2,h*2);cam.aspect=w/h;cam.fov=portrait()?62:40;cam.updateProjectionMatrix();retarget(true)}
 // 파일이 날아가 닿을 자리(열린 서랍 카메라 앞)를 한 번 계산
 const oc=camFor('open'),tc=new THREE.PerspectiveCamera(40,1.6,10,5000);tc.position.copy(V(CAMS.open[0]));tc.lookAt(V(CAMS.open[1]));tc.updateMatrixWorld();
 const fwd=new THREE.Vector3(),rgt=new THREE.Vector3(),up=new THREE.Vector3();tc.matrixWorld.extractBasis(rgt,up,fwd);fwd.negate();
@@ -791,7 +797,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  R.setRenderTarget(rtC);R.render(S,cam);
  {const hid=[];fx.forEach(o=>{if(o!==scr&&o.visible){o.visible=false;hid.push(o)}});const sw=[];
   S.traverse(o=>{if(o.isMesh&&o.visible&&o.material&&o.material.colorWrite!==false){sw.push([o,o.material]);o.material=albOf(o.material)}});
-  R.setRenderTarget(rtA);R.render(S,cam);sw.forEach(([o,m])=>o.material=m);hid.forEach(o=>o.visible=true)}
+  R.setRenderTarget(rtA);R.render(S,cam);if(MATCAP){sw.forEach(([o,m])=>o.material=mcOf(m));R.setRenderTarget(rtM);R.render(S,cam)}sw.forEach(([o,m])=>o.material=m);hid.forEach(o=>o.visible=true)}
  vis.length=0;fx.forEach(o=>{if(o.visible){o.visible=false;vis.push(o)}});S.overrideMaterial=nMat;R.setRenderTarget(rtN);R.render(S,cam);S.overrideMaterial=null;vis.forEach(o=>o.visible=true);
  R.setRenderTarget(null);R.render(qS,qC);updCur();requestAnimationFrame(loop)}
 const css=n=>'#'+n.toString(16).padStart(6,'0');
