@@ -255,7 +255,15 @@ html.cc input,html.cc textarea{cursor:text!important}
 #form .foot p{margin:0;font-size:12px;opacity:.75;line-height:1.4}
 #send{all:unset;cursor:pointer;background:var(--ink);color:#fff;padding:8px 18px;border-radius:999px;font:500 13px var(--display)}
 #send:focus-visible,#form header button:focus-visible{outline:2px solid var(--bg);outline-offset:2px}
-#load{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:var(--bg);color:#fff;font:500 12px var(--display);letter-spacing:.2em;transition:opacity .6s}
+#load{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:24px;background:linear-gradient(160deg,#24549a 0%,#2f6db5 55%,#3f86cc 100%);color:#fff}   /* 인트로: 블루톤 */
+#load .li{width:min(560px,100%)}
+#ldT{margin:0 0 34px;min-height:3.2em;font:500 clamp(21px,2.6vw,32px)/1.6 "Noto Sans KR",sans-serif;letter-spacing:-.01em;word-break:keep-all}
+#ldT .caret{display:inline-block;width:2px;height:1.05em;margin-left:3px;vertical-align:-.15em;background:#fff;animation:ldBlink .9s steps(1) infinite}
+@keyframes ldBlink{50%{opacity:0}}
+#load .lb{display:flex;align-items:center;gap:14px}
+#load .lbar{flex:1;height:3px;background:rgba(255,255,255,.22);border-radius:3px;overflow:hidden}
+#ldF{display:block;height:100%;width:0;background:#fff;border-radius:3px}
+#ldP{min-width:3.4em;text-align:right;font:500 14px var(--display);letter-spacing:.08em;font-variant-numeric:tabular-nums}
 @media (max-width:700px){#grid{grid-template-columns:1fr}#form{right:50%;transform:translate(50%,-40%)}}
 @media (prefers-reduced-motion:reduce){#mon.on,#bc.on .cd,#rings span{animation:none!important;opacity:1}#mon *{animation:none!important;opacity:1!important}#c{transition:none}}
 </style>
@@ -287,9 +295,25 @@ html.cc input,html.cc textarea{cursor:text!important}
   <div class="row"><label for="msg">message</label><textarea id="msg" rows="5" placeholder="안녕하세요! 좋은 하루 보내시길 바랍니다."></textarea></div>
   <div class="foot"><p id="st">시험판이라 아직 전송되지 않아요.</p><button id="send" type="submit">Send</button></div></form>
 </section>
-<div id="load">LOADING</div>
-<script src="models.js"></script>
+<div id="load" role="status"><div class="li"><p id="ldT" aria-label="작업실을 정리 중이에요. 제 세계에 오신 것을 환영합니다."><span class="l1" aria-hidden="true"></span><br><span class="l2" aria-hidden="true"></span><i class="caret" aria-hidden="true"></i></p>
+<div class="lb"><div class="lbar" role="progressbar" aria-label="불러오는 중" aria-valuemin="0" aria-valuemax="100"><i id="ldF"></i></div><span id="ldP">0%</span></div></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+/* 인트로: 멘트가 한 글자씩 타이핑되고, 아래 로딩바가 %와 함께 찬다. 다 불러오고 타이핑도 끝나면 사라짐 */
+(function(){var L1='작업실을 정리 중이에요.',L2='제 세계에 오신 것을 환영합니다.',RMo=matchMedia('(prefers-reduced-motion:reduce)').matches;
+ var el=document.getElementById('load'),s1=el.querySelector('.l1'),s2=el.querySelector('.l2'),fill=document.getElementById('ldF'),pct=document.getElementById('ldP'),bar=el.querySelector('.lbar');
+ var ld=window.__ld={p:0,target:0,typed:false,done:false,gone:false,t0:performance.now(),set:function(v){if(v>this.target)this.target=v},finish:function(){this.done=true;this.target=1}};
+ if(window.gsap&&!RMo){var a={n:0},b={n:0};gsap.timeline({delay:.35,onComplete:function(){ld.typed=true}})
+   .to(a,{n:L1.length,duration:L1.length*.075,ease:'none',onUpdate:function(){s1.textContent=L1.slice(0,Math.round(a.n))}})
+   .to(b,{n:L2.length,duration:L2.length*.07,ease:'none',onUpdate:function(){s2.textContent=L2.slice(0,Math.round(b.n))}},'+=.4')}
+ else{s1.textContent=L1;s2.textContent=L2;ld.typed=true}
+ function tick(){if(ld.gone)return;var t=(performance.now()-ld.t0)/1000;if(!ld.done)ld.set(.6*(1-Math.exp(-t/2.2)));   /* 큰 모델 파일을 읽는 동안은 천천히 차오름 */
+  ld.p+=(ld.target-ld.p)*(ld.done?.12:.06);if(ld.target-ld.p<.002)ld.p=ld.target;var v=Math.min(100,Math.floor(ld.p*100+.001));fill.style.width=(ld.p*100)+'%';pct.textContent=v+'%';bar.setAttribute('aria-valuenow',v);
+  if(ld.done&&ld.p>=1&&ld.typed){ld.gone=true;setTimeout(function(){if(window.gsap&&!RMo)gsap.to(el,{opacity:0,duration:.7,ease:'power2.out',onComplete:function(){el.hidden=true}});else el.hidden=true},650);return}
+  requestAnimationFrame(tick)}
+ requestAnimationFrame(tick)})();
+</script>
+<script src="models.js"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
@@ -313,6 +337,7 @@ const b64=s=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;
 const loader=new GLTFLoader();
 const load=(k,mt)=>new Promise((res,rej)=>loader.parse(b64(window.VIN_MODELS[k]),'',g=>{const root=g.scene;
  root.traverse(o=>{if(o.isMesh){let geo=o.geometry;geo.deleteAttribute('normal');geo=toCreasedNormals(geo,Math.PI/4);o.geometry=geo;o.material=mt;o.castShadow=o.receiveShadow=true}});res(root)},rej));
+window.__ld&&__ld.set(.62);THREE.DefaultLoadingManager.onProgress=(u,a,b)=>{window.__ld&&__ld.set(.68+.27*a/b)};   /* 로딩바: 모델·텍스처를 불러온 만큼 */
 const [mStand,mPhone,mTable,mChair,mHand]=await Promise.all([['stand',RD],['phone',BL],['table',W],['chair',YL],['handset',BL]].map(([k,m])=>load(k,m)));
 mChair.traverse(o=>{if(o.isMesh&&/base/i.test(o.name))o.material=G});
 // 새 모델(models/*.glb, 원본은 public/models/src): 원래 색·텍스처는 그대로 두고, 화면 스타일에 맞게 '밝기만 계산하는 재질'로 바꾼다
@@ -952,5 +977,5 @@ applyTheme(RETRO?1:MATCAP?2:0);
 if(document.fonts){document.fonts.load('600 40px Jost');document.fonts.load('500 30px "Noto Sans KR"');document.fonts.ready.then(()=>applyTheme(themeI))}
 window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={keysN:KEYS?KEYS.comps.length:0,typeBurst,sfx,files,scr,cam,AW,AH,get wk(){return WKR},cpos,fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
 fit();addEventListener('resize',fit);if(window.ResizeObserver)new ResizeObserver(()=>{if(R.domElement.width!==innerWidth*2||innerWidth/innerHeight!==cam.aspect)fit()}).observe(document.documentElement);fromHash();loop();
-const ld=$('load');ld.style.opacity=0;setTimeout(()=>ld.hidden=true,600);
+if(window.__ld)__ld.finish();else{const ld=$('load');ld.hidden=true}   /* 다 불러옴 → 인트로가 100% 찍고 사라짐 */
 </script>
