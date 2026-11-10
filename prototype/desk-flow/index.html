@@ -260,8 +260,6 @@ body:has(#doc:not([hidden])) header{opacity:0;pointer-events:none}   /* 서류 �
 /* 전화 받기 */
 #call{position:fixed;inset:0;z-index:6;opacity:0;pointer-events:none;transition:opacity .4s}
 #call.on{opacity:1;pointer-events:auto}
-#callBlur{position:absolute;inset:0;background:rgba(246,247,250,.22);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
- -webkit-mask-image:radial-gradient(ellipse var(--hw,160px) var(--hh,70%) at var(--hx,25%) var(--hy,30%),transparent 62%,#000 100%);mask-image:radial-gradient(ellipse var(--hw,160px) var(--hh,70%) at var(--hx,25%) var(--hy,30%),transparent 62%,#000 100%)}   /* 옅은 배경 블러 — 수화기 둘레만 비워 선명하게 */
 #form{position:absolute;left:min(58%,calc(100% - 456px));top:46%;transform:translateY(-50%);width:min(440px,calc(100vw - 32px));background:#fff;color:#1d1d1f;border-radius:12px;overflow:hidden;box-shadow:0 0 0 .5px rgba(0,0,0,.22),0 22px 60px rgba(0,0,0,.28),0 4px 14px rgba(0,0,0,.12);font:400 14px -apple-system,BlinkMacSystemFont,"SF Pro Text","Noto Sans KR",sans-serif;letter-spacing:-.01em}   /* macOS 메일 작성 창 */
 #form .mbar{all:unset;position:relative;display:flex;align-items:center;justify-content:space-between;height:44px;padding:0 12px 0 14px;background:linear-gradient(#f6f6f6,#ececec);border-bottom:1px solid #d6d6d6}
 #form .tl{display:flex;gap:8px}#form .tl i,#form .tl button{all:unset;display:block;width:12px;height:12px;border-radius:50%;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.18)}
@@ -273,8 +271,10 @@ body:has(#doc:not([hidden])) header{opacity:0;pointer-events:none}   /* 서류 �
 #form .tok{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:99px;background:#e5efff;color:#0a64d8;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#form .tok small{font-size:12px;opacity:.75}
 #form input,#form textarea{all:unset;box-sizing:border-box;width:100%;font:inherit;color:#1d1d1f}#form input::placeholder,#form textarea::placeholder{color:#b0b0b5}
 #form textarea{display:block;padding:14px 16px 8px;min-height:150px;white-space:pre-wrap;line-height:1.6}
-#form #st{margin:0;padding:8px 16px 12px;font-size:11.5px;color:#86868b}
-#send{all:unset;cursor:pointer;width:32px;height:28px;display:grid;place-items:center;border-radius:6px;color:#0a64d8}#send:hover{background:rgba(0,0,0,.06)}
+#form .sp{width:44px}   /* 제목 가운데 맞춤용 빈자리 */
+#form .mfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 14px 14px 16px}
+#form #st{margin:0;font-size:12px;color:#86868b}
+#send{all:unset;cursor:pointer;flex:none;width:46px;height:46px;display:grid;place-items:center;border-radius:50%;background:#0a84ff;color:#fff;box-shadow:0 6px 16px rgba(10,132,255,.35);transition:transform .15s,background .15s}#send:hover{background:#0071e3;transform:scale(1.06)}#send svg{margin:2px 2px 0 0}   /* 보내기: 아래 오른쪽 파란 동그라미 */
 #send:focus-visible,#form .tl button:focus-visible{outline:2px solid #0a64d8;outline-offset:2px}
 #load{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:24px;background:linear-gradient(160deg,#24549a 0%,#2f6db5 55%,#3f86cc 100%);color:#fff}   /* 인트로: 블루톤 */
 #load .li{width:min(400px,100%)}
@@ -310,13 +310,12 @@ body:has(#doc:not([hidden])) header{opacity:0;pointer-events:none}   /* 서류 �
 <section id="detail" aria-label="프로젝트 상세"><div id="dBar"><button id="dClose">✕ 닫기</button><div class="ty"><span id="dTy"></span><b id="dNm"></b></div><nav id="dChips" aria-label="섹션 이동"></nav><div id="dRight"><span id="dPct" aria-live="off">0%</span></div><div id="dProg"></div></div><div id="dBody"></div></section>
 <div id="dusk"></div>
 <section id="call" aria-label="메시지 남기기">
- <div id="callBlur" aria-hidden="true"></div>
- <form id="form" novalidate><header class="mbar"><div class="tl"><button type="button" id="x" aria-label="닫기" data-tip="닫기"></button><i></i><i></i></div><span class="mt">새로운 메시지</span><button id="send" type="submit" aria-label="보내기" data-tip="보내기"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg></button></header>
+ <form id="form" novalidate><header class="mbar"><div class="tl"><button type="button" id="x" aria-label="닫기" data-tip="닫기"></button><i></i><i></i></div><span class="mt">새로운 메시지</span><i class="sp"></i></header>
   <div class="mf"><span class="lb">받는 사람:</span><span class="tok">박수빈 <small>&lt;eilibean01@gmail.com&gt;</small></span></div>
   <div class="mf"><label class="lb" for="from">보낸 사람:</label><input id="from" type="email" placeholder="답장 받을 이메일"></div>
   <div class="mf"><label class="lb" for="subj">제목:</label><input id="subj" type="text" placeholder="포트폴리오 잘 봤어요"></div>
   <textarea id="msg" rows="7" aria-label="메시지" placeholder="안녕하세요! 좋은 하루 보내시길 바랍니다."></textarea>
-  <p id="st">시험판이라 아직 전송되지 않아요.</p></form>
+  <div class="mfoot"><p id="st" role="status"></p><button id="send" type="submit" aria-label="보내기" data-tip="보내기"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg></button></div></form>
 </section>
 <div id="load" role="status"><div class="li"><p id="ldT" aria-label="작업실을 정리 중이에요. 제 세계에 오신 것을 환영합니다."><span class="l1" aria-hidden="true"></span><br><span class="l2" aria-hidden="true"></span><i class="caret" aria-hidden="true"></i></p>
 <div class="lb"><div class="lbar" role="progressbar" aria-label="불러오는 중" aria-valuemin="0" aria-valuemax="100"><i id="ldF"></i></div><span id="ldP">0%</span></div></div></div>
@@ -590,7 +589,7 @@ let st='home',prog=0,progT=0,lampOn=false,lampV=0,lampT0=0,lampFirst=true;
 function setLamp(o){if(o===lampOn)return;lampOn=o;lampT0=performance.now()/1000+(lampFirst&&o?.9:0);if(o)lampFirst=false}
 const lampEnv=t=>{if(t<.1)return 0;if(t<.18)return .5;if(t<.26)return .06;if(t<.33)return .7;if(t<.4)return .2;const x=Math.min(1,(t-.4)/.9);return .2+.8*(1-Math.pow(1-x,3))};
 const h0=camFor('home');const cpos=h0.p.clone(),clook=h0.l.clone(),tpos=h0.p.clone(),tlook=h0.l.clone();const sm=new THREE.Vector2();
-function fit(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);rtC.setSize(w*2,h*2);rtN.setSize(w*2,h*2);rtA.setSize(w*2,h*2);if(MATCAP)rtM.setSize(w*2,h*2);post.uniforms.res.value.set(w*2,h*2);cam.aspect=w/h;cam.fov=portrait()?62:40;cam.updateProjectionMatrix();retarget(true)}
+function fit(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);rtC.setSize(w*2,h*2);rtN.setSize(w*2,h*2);rtA.setSize(w*2,h*2);if(MATCAP)rtM.setSize(w*2,h*2);post.uniforms.res.value.set(w*2,h*2);rtF.setSize(w*2,h*2);rtMk.setSize(w,h);rtB1.setSize(w,h);rtB2.setSize(w,h);cam.aspect=w/h;cam.fov=portrait()?62:40;cam.updateProjectionMatrix();retarget(true)}
 // 파일이 날아가 닿을 자리(열린 서랍 카메라 앞)를 한 번 계산
 const oc=camFor('open'),tc=new THREE.PerspectiveCamera(40,1.6,10,5000);tc.position.copy(V(CAMS.open[0]));tc.lookAt(V(CAMS.open[1]));tc.updateMatrixWorld();
 const fwd=new THREE.Vector3(),rgt=new THREE.Vector3(),up=new THREE.Vector3();tc.matrixWorld.extractBasis(rgt,up,fwd);fwd.negate();
@@ -1050,7 +1049,7 @@ let hsOn=false,hsT0=0,hsUp=false,hsUpT0=0;
 function updHandset(){
  if(st!=='call'){if(hsOn){hsOn=false;hsUp=false;hsA.visible=false}return}
  const now=performance.now();if(!hsOn){hsOn=true;hsT0=now}
- const D=60,halfH=D*Math.tan(cam.fov*Math.PI/360),halfW=halfH*cam.aspect;
+ const D=32,halfH=D*Math.tan(cam.fov*Math.PI/360),halfW=halfH*cam.aspect;
  const sc=(.37*2*halfH)/HB.bodyH,bodyW=HB.bodyH*sc;                // 수화기 길이 = 화면 높이의 37%
  const A=halfH+1.5,L=A-halfH*.4,len0=-bodyW*1.15;                  // 줄 걸린 곳(화면 위쪽 밖) / 정착했을 때 줄 길이
  const tau=(now-hsT0)/1000;let len=L,rot=0;
@@ -1060,11 +1059,28 @@ function updHandset(){
  hsA.visible=true;hsA.position.set((portrait()?-.55:-.36)*halfW,A,-D);   /* 연필꽂이 쯤 */hsA.rotation.z=rot;
  hsG.scale.setScalar(sc);hsG.position.y=-len;
  hsC.visible=len>.3;hsC.scale.y=Math.max(.05,len/(sc*HB.cordLen));
- {const x=((portrait()?-.55:-.36)+1)/2*innerWidth,bot=(halfH+len+HB.bodyH*sc-A)/(2*halfH)*innerHeight;   /* 블러에서 수화기·줄 자리만 비우기 */
-  const cs=callEl.style;cs.setProperty('--hx',x.toFixed(0)+'px');const b2=Math.max(0,bot);cs.setProperty('--hy',(b2*.6).toFixed(0)+'px');cs.setProperty('--hw',(bodyW*.6/(2*halfW)*innerWidth).toFixed(0)+'px');cs.setProperty('--hh',(b2*.84).toFixed(0)+'px')}}
+}
 // 매트캡 재질 구분: 금속(스탠드·서랍장·시계) · 플라스틱(모니터·전화기·수화기·컵·연필꽂이·의자) · 나머지는 종이
 if(MATCAP){const MK=(g,k)=>g&&g.traverse(o=>{if(o.isMesh)o.userData.mk=(o.material&&o.material.map)?'paper':k});
  MK(lamp,'metal');MK(imac,'plastic');MK(cab,'metal');MK(clk,'metal');MK(phone,'plastic');MK(hsA,'plastic');MK(mug,'plastic');MK(cup,'plastic');MK(chair,'plastic')}
+// ── 통화(CONTACT) 배경 흐림: 화면 전체를 고르게 흐리고 살짝 어둡게, 수화기만 또렷하게 ──
+const rtF=new THREE.WebGLRenderTarget(1,1),rtMk=new THREE.WebGLRenderTarget(1,1),rtB1=new THREE.WebGLRenderTarget(1,1),rtB2=new THREE.WebGLRenderTarget(1,1);let callV=0;
+const qV='varying vec2 v;void main(){v=uv;gl_Position=vec4(position.xy,0.,1.);}';
+const blurM=new THREE.ShaderMaterial({uniforms:{t:{value:null},d:{value:new THREE.Vector2()}},vertexShader:qV,depthTest:false,depthWrite:false,
+ fragmentShader:'precision highp float;uniform sampler2D t;uniform vec2 d;varying vec2 v;void main(){vec4 c=texture2D(t,v)*.2270270;c+=(texture2D(t,v+d*1.3846154)+texture2D(t,v-d*1.3846154))*.3162162;c+=(texture2D(t,v+d*3.2307692)+texture2D(t,v-d*3.2307692))*.0702703;gl_FragColor=c;}'});
+const compM=new THREE.ShaderMaterial({uniforms:{tF:{value:rtF.texture},tB:{value:rtB2.texture},tM:{value:rtMk.texture},k:{value:0},px:{value:new THREE.Vector2()}},vertexShader:qV,depthTest:false,depthWrite:false,
+ fragmentShader:`precision highp float;uniform sampler2D tF,tB,tM;uniform float k;uniform vec2 px;varying vec2 v;
+  void main(){vec3 f=texture2D(tF,v).rgb,b=texture2D(tB,v).rgb*mix(1.,.8,k);
+   float m=texture2D(tM,v).r;m=max(m,max(max(texture2D(tM,v+vec2(px.x,0.)).r,texture2D(tM,v-vec2(px.x,0.)).r),max(texture2D(tM,v+vec2(0.,px.y)).r,texture2D(tM,v-vec2(0.,px.y)).r)));   /* 수화기 테두리 선까지 살짝 넓게 */
+   gl_FragColor=vec4(mix(mix(f,b,k),f,m),1.);}`});
+const bS=new THREE.Scene(),bQ=new THREE.Mesh(new THREE.PlaneGeometry(2,2),blurM);bS.add(bQ);const whiteM=new THREE.MeshBasicMaterial({color:0xffffff}),_cc=new THREE.Color();
+function callBlur(){const W=rtB1.width,H=rtB1.height;
+ hsA.traverse(o=>o.layers.enable(1));                                   // 수화기 모양(마스크)
+ const bg=S.background;S.background=null;R.getClearColor(_cc);const ca=R.getClearAlpha();R.setClearColor(0x000000,1);cam.layers.set(1);S.overrideMaterial=whiteM;
+ R.setRenderTarget(rtMk);R.clear();R.render(S,cam);S.overrideMaterial=null;cam.layers.set(0);S.background=bg;R.setClearColor(_cc,ca);
+ const pass=(src,dst,x,y)=>{blurM.uniforms.t.value=src.texture;blurM.uniforms.d.value.set(x/W,y/H);bQ.material=blurM;R.setRenderTarget(dst);R.render(bS,qC)};
+ pass(rtF,rtB1,1.2*callV,0);pass(rtB1,rtB2,0,1.2*callV);[1.6,2.2,2.8].forEach(q=>{pass(rtB2,rtB1,q*callV,0);pass(rtB1,rtB2,0,q*callV)});   // 가로·세로 두 번씩
+ compM.uniforms.k.value=callV;compM.uniforms.px.value.set(1.5/rtMk.width,1.5/rtMk.height);bQ.material=compM;R.setRenderTarget(null);R.render(bS,qC)}
 // ── 루프 ───────────────────────────────────────────────────────
 const clock=new THREE.Clock(),bumpBase=new Map(),vis=[],tmpQ=new THREE.Quaternion(),startQ=new THREE.Quaternion();
 const ease=x=>x*x*(3-2*x),fEu=new THREE.Euler();
@@ -1101,9 +1117,11 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
   S.traverse(o=>{if(o.isMesh&&o.visible&&o.material&&o.material.colorWrite!==false){sw.push([o,o.material]);o.material=albOf(o.material)}});
   R.setRenderTarget(rtA);R.render(S,cam);if(MATCAP){sw.forEach(([o,m])=>o.material=mcOf(m,o.userData.mk||'paper'));R.setRenderTarget(rtM);R.render(S,cam)}sw.forEach(([o,m])=>o.material=m);hid.forEach(o=>o.visible=true)}
  vis.length=0;fx.forEach(o=>{if(o.visible){o.visible=false;vis.push(o)}});S.overrideMaterial=nMat;R.setRenderTarget(rtN);R.render(S,cam);S.overrideMaterial=null;vis.forEach(o=>o.visible=true);
- R.setRenderTarget(null);R.render(qS,qC);
+ callV+=((st==='call'?1:0)-callV)*(RM?1:Math.min(1,dt2*4));if(st!=='call'&&callV<.005)callV=0;
+ R.setRenderTarget(callV>0?rtF:null);R.render(qS,qC);
+ if(callV>0){if(lampV>.001){R.autoClear=false;R.render(gS,cam);R.autoClear=true}callBlur()}   /* 통화 중: 흐린 배경 + 또렷한 수화기 */
  if(scr.material===ABM){scrO.matrixWorld.copy(scr.matrixWorld);R.autoClear=false;R.outputColorSpace=THREE.SRGBColorSpace;R.render(sS,cam);R.outputColorSpace=THREE.LinearSRGBColorSpace;R.autoClear=true}   /* 모니터 화면은 스타일(알갱이·명암) 처리 없이 원래 그림 그대로 위에 그린다 */
- if(lampV>.001){R.autoClear=false;R.render(gS,cam);R.autoClear=true}   /* 스탠드 불빛을 마지막에 더한다 */
+ if(lampV>.001&&!callV){R.autoClear=false;R.render(gS,cam);R.autoClear=true}   /* 스탠드 불빛을 마지막에 더한다 */
  renderDoc(dt2,t);   /* 꺼낸 서류(진짜 종이)는 맨 위에 */
  updCur();requestAnimationFrame(loop)}
 const css=n=>'#'+n.toString(16).padStart(6,'0');
