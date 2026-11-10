@@ -347,7 +347,7 @@ const table=new THREE.Group();table.add(mTable);table.scale.setScalar(100);S.add
 const cab=new THREE.Group();cab.position.set(40,0,0);S.add(cab);
 const CH=TOP-6,CM=LM(0x3f86cc),DF=LM(0x62a6e6);   /* CM·DF: 예전 상자 서랍장 색(테마 목록에만 남음) */
 const cabM=fitModel(nCab,{rotY:-Math.PI/2,size:CH,axis:'y'});cab.add(cabM);cab.updateMatrixWorld(true);   /* 높이를 책상 밑 69cm에 맞춤 */
-const DRT=5.5;   /* 서랍 앞부분 두께(cm) */
+const DRT=3.5;   /* 서랍 앞부분 두께(cm) */
 const CW=(()=>{const b=new THREE.Box3().setFromObject(cabM);return b.max.x-b.min.x})(),drawers=[],_lv=new THREE.Vector3();
 ['drawer_0','drawer_1','drawer_2'].forEach((nm,i)=>{const m=cabM.getObjectByName(nm),b=new THREE.Box3().setFromObject(m);
  const d=new THREE.Group();d.position.copy(cab.worldToLocal(_lv.set((b.min.x+b.max.x)/2,(b.min.y+b.max.y)/2,b.max.z)));d.position.x=0;cab.add(d);d.updateMatrixWorld(true);
@@ -380,9 +380,6 @@ for(let k=0;k<NF;k++){const f=new THREE.Group();const ci=k%4,[id,ko,en]=DOCN[k],
  const paper=add(new THREE.PlaneGeometry(26,22),pm,[0,0,-.42],[0,0,0],f);
  f.traverse(o=>{o.castShadow=o.receiveShadow=false});   /* 폴더는 그림자 얼룩 없이 깨끗한 흰색 */
  S.add(f);f.userData={k,doc:k,h:0,paper,jit:(Math.random()-.5)*.04,delay:k/NF*.62};files.push(f)}
-{const dv=new THREE.Group();dv.position.set(0,5.5,-fileDrawer.userData.depth-1.5);dv.rotation.x=-.3;fileDrawer.add(dv);   /* 서랍과 함께 움직이는 맨 앞 구분 카드 */
- add(BX(30,15,.4),TM(tex(600,300,(g,w,h)=>paperFill(g,w,h,'#1f1e27',77))),[0,-2.5,0],[0,0,0],dv);
- add(tabGeo,TM(tex(390,108,(g,w,h)=>{paperFill(g,w,h,'#1f1e27',78);g.fillStyle='#fbf8f0';g.textBaseline='middle';g.font='600 26px Jost, sans-serif';g.letterSpacing='5px';g.textAlign='left';g.fillText('ABOUT',40,h/2+10);g.letterSpacing='0px';g.textAlign='right';g.font='500 26px Jost, sans-serif';g.fillText(String(NF).padStart(2,'0'),w-34,h/2+10)}),{side:THREE.DoubleSide}),[9.5,5,.21],[0,0,0],dv);dv.traverse(o=>{o.castShadow=o.receiveShadow=false})}
 const DOCP=DOCN.map(([id,ko],k)=>({t:ko+' 꺼내 보기',doc:k}));
 // iMac, 스탠드, 전화기, 명함, 컵, 연필꽂이, 의자, 탁상시계
 const imac=new THREE.Group();imac.position.set(0,TOP,-6);S.add(imac);
@@ -756,10 +753,13 @@ cl:`<span class="ex">예시 자기소개서</span><h2>보이는 것 너머를 �
 const mon=$('mon');
 const DOCB={cv:[['ex','예시 이력서'],['h2','박수빈'],['p','UX/UI Designer · eilibean01@gmail.com'],['h3','학력'],['li','한국폴리텍대학교 시각디자인과 (졸업 예정)'],['li','사사다 패션스쿨 졸업'],['h3','경력'],['li','패션 디자이너 · 1년 (QC, 그래픽 디자인 병행)'],['h3','교육'],['li','KMA 메타버스 패션 과정 6개월 수료'],['h3','자격'],['li','GTQ'],['li','AI 프롬프트 활용 자격'],['h3','도구'],['p','Figma · Cinema 4D · InDesign']],
 cl:[['ex','예시 자기소개서'],['h2','보이는 것 너머를 설계합니다'],['h3','지원 동기'],['p','여기에 지원 동기를 적어요. 패션에서 사람의 몸을 위해 옷을 설계했듯, 이제는 사람의 행동을 위해 화면을 설계하고 싶다는 이야기를 담으면 좋아요.'],['h3','강점'],['p','여기에 강점을 적어요. 예: 패션 현장에서 익힌 디테일 감각과 QC 경험, 15명 졸업전시를 총괄한 조율 능력.'],['h3','대표 경험'],['p','여기에 대표 프로젝트(Tunee 등)를 문제 → 과정 → 결과 순서로 짧게 적어요.'],['h3','입사 후 포부'],['p','여기에 입사 후 하고 싶은 일을 적어요.']]};
-const AW=1600,AH=900,abPage=document.createElement('canvas');abPage.width=AW;abPage.height=AH;
-const abC=document.createElement('canvas');abC.width=AW;abC.height=AH;
+// 모니터 화면 그림: 좌표는 1600×900 기준으로 그리고, 실제 픽셀은 SS배(큰 화면에서 2560×1440)로 선명하게
+const AW=1600,AH=900,SS=Math.min(innerWidth,innerHeight*1.78)*Math.min(devicePixelRatio||1,2)>=1800?1.6:1,abPage=document.createElement('canvas');abPage.width=AW*SS;abPage.height=AH*SS;
+const abC=document.createElement('canvas');abC.width=AW*SS;abC.height=AH*SS;
 const abTex=new THREE.CanvasTexture(abC);abTex.colorSpace=THREE.SRGBColorSpace;abTex.anisotropy=8;
 const ABM=new THREE.MeshBasicMaterial({map:abTex});
+const sS=new THREE.Scene(),scrO=new THREE.Mesh(scr.geometry,new THREE.MeshBasicMaterial({map:abTex,toneMapped:false,depthTest:false,depthWrite:false}));scrO.matrixAutoUpdate=false;scrO.frustumCulled=false;sS.add(scrO);
+if(sS.matrixWorldAutoUpdate!==undefined)sS.matrixWorldAutoUpdate=false;
 let abTab='cv',abStart=0,abWas=false,abDirty=true,abDone=false;
 // ── WORK(모니터): 프로젝트를 한 개씩 보여 주는 화면 (시안 work page) ──
 // 가운데 눈금 막대가 굴러가며 01 → 02, 분류·이름·연도가 바뀐다. 스크롤/막대 클릭/자동(3.4초)으로 넘어감
@@ -775,8 +775,9 @@ const WP=[
 const WCATS=['ALL','UXUI','WEB','BRANDING','GRAPHIC'],WDUR=700,wE=x=>1-Math.pow(1-x,3);
 let wEdgeT=0,wCat='ALL',wI=0,wOld=0,wFrom=0,wT0=0,wAnim=false,wDir=1,wLastUser=0,wLastChange=0,wStepT=0,wkHK='',wkChipHov='';const WKR={chips:[],cy:450};
 const wkList=()=>WP.filter(p=>wCat==='ALL'||p.g===wCat);
-// 표지(작은 판)를 불러와 모니터 배경으로 선명하게 쓴다
-const WIMG={};WP.forEach(p=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=AW;c.height=AH;const g=c.getContext('2d');g.drawImage(im,0,0,AW,AH);WIMG[p.img]=c;if(st==='screen')wkRedraw()};im.src='covers/'+p.img+'-sm.jpg'});
+// 표지: 작은 판(1280px)으로 먼저 빨리 띄우고, 페이지가 다 열린 뒤 큰 판(2560px)으로 바꿔 선명하게
+const WIMG={};WP.forEach(p=>{const load=(src,then)=>{const im=new Image();im.onload=()=>{WIMG[p.img]=im;if(st==='screen')wkRedraw();then&&then()};im.src=src};
+ load('covers/'+p.img+'-sm.jpg',()=>{if(SS>1)setTimeout(()=>load('covers/'+p.img+'.jpg'),1500)})});
 $('wkA11y').innerHTML=WP.map(p=>`<button data-n="${p.t}" data-k="${p.c}" data-img="${p.img}" data-url="${p.url||''}">${p.t} (${p.c}, ${p.y}) 열기</button>`).join('');[...$('wkA11y').children].forEach(b=>b.onclick=e=>openDetail(b,e));
 function wkRedraw(){abDirty=true;if(abDone)drawAbout(1)}
 function wPosNow(){if(!wAnim)return wI;return wFrom+(wI-wFrom)*wE(Math.min(1,(performance.now()-wT0)/WDUR))}
@@ -788,8 +789,9 @@ function wkHit(px,py){for(const c of WKR.chips)if(px>=c.x&&px<=c.x+c.w&&py>=c.y&
  const cy=WKR.cy;if(px>=740&&px<=860&&py>=cy-120&&py<=cy+120){if(py<cy-14)return{type:'prev',key:'prev'};if(py>cy+14)return{type:'next',key:'next'}}
  if(px>=560&&px<=1560&&py>=cy-48&&py<=cy+48)return{type:'open',key:'open'};return null}
 function drawPage(){const g=abPage.getContext('2d');const KR='"Noto Sans KR", sans-serif',JO='Jost, "Noto Sans KR", sans-serif',L=wkList(),cy=WKR.cy;
+ g.setTransform(SS,0,0,SS,0,0);g.imageSmoothingQuality='high';
  g.fillStyle='#444444';g.fillRect(0,0,AW,AH);
- {const bg=p=>p&&WIMG[p.img],kk=wAnim?wE(Math.min(1,(performance.now()-wT0)/WDUR)):1;if(wAnim&&bg(L[wOld]))g.drawImage(bg(L[wOld]),0,0);if(bg(L[wI])){g.globalAlpha=wAnim?kk:1;g.drawImage(bg(L[wI]),0,0);g.globalAlpha=1}}
+ {const bg=p=>p&&WIMG[p.img],kk=wAnim?wE(Math.min(1,(performance.now()-wT0)/WDUR)):1;if(wAnim&&bg(L[wOld]))g.drawImage(bg(L[wOld]),0,0,AW,AH);if(bg(L[wI])){g.globalAlpha=wAnim?kk:1;g.drawImage(bg(L[wI]),0,0,AW,AH);g.globalAlpha=1}}
  g.fillStyle='rgba(24,24,28,.24)';g.fillRect(0,0,AW,AH);   /* 표지 전체에 옅은 그레이톤 그림자(글자가 잘 보이게) */
  {const cy=WKR.cy;let gr=g.createLinearGradient(0,0,0,150);gr.addColorStop(0,'rgba(0,0,0,.38)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,AW,150);   // 위쪽 탭 뒤 옅은 그림자
   gr=g.createLinearGradient(0,cy-130,0,cy+130);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(.5,'rgba(0,0,0,.34)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,cy-130,AW,260)}   // 가운데 줄 뒤 옅은 그림자
@@ -813,10 +815,10 @@ function drawPage(){const g=abPage.getContext('2d');const KR='"Noto Sans KR", sa
  if(!L.length){g.fillStyle='rgba(255,255,255,.6)';g.font='400 26px '+KR;g.textAlign='center';g.fillText('이 분류의 프로젝트를 준비 중이에요',AW/2,cy)}
  if(wkHK==='open'&&L[wI]&&!wAnim){g.shadowBlur=14;g.font='500 30px '+KR;const tw=g.measureText(L[wI].t).width;g.fillStyle='#fff';g.fillRect(886,cy+24,tw,2);g.font='400 28px '+JO;g.textAlign='left';g.fillText('→',886+tw+16,cy)}
  g.shadowColor='transparent';g.shadowBlur=0;abDirty=false}
-function drawAbout(p){const g=abC.getContext('2d');if(abDirty)drawPage();g.fillStyle='#0c0c12';g.fillRect(0,0,AW,AH);
+function drawAbout(p){const g=abC.getContext('2d');if(abDirty)drawPage();g.setTransform(SS,0,0,SS,0,0);g.fillStyle='#0c0c12';g.fillRect(0,0,AW,AH);
  if(p<.18){const q=p/.18;g.fillStyle='#fff';g.globalAlpha=Math.min(1,q*1.5);g.fillRect(AW/2*(1-q),AH/2-3,AW*q,6);g.globalAlpha=1}
  else if(p<.45){const q=(p-.18)/.27,hh=6+(AH-6)*q*q;g.fillStyle='#fffdf5';g.fillRect(0,AH/2-hh/2,AW,hh)}
- else{g.fillStyle='#f7f1e3';g.fillRect(0,0,AW,AH);g.globalAlpha=Math.min(1,(p-.45)/.4);g.drawImage(abPage,0,0);g.globalAlpha=1}
+ else{g.fillStyle='#f7f1e3';g.fillRect(0,0,AW,AH);g.globalAlpha=Math.min(1,(p-.45)/.4);g.drawImage(abPage,0,0,AW,AH);g.globalAlpha=1}
  abTex.needsUpdate=true}
 const DLF={cv:['resume.pdf','박수빈_이력서.pdf'],cl:['cover-letter.pdf','박수빈_자기소개서.pdf']};
 const toastEl=document.createElement('div');toastEl.id='toast';toastEl.setAttribute('role','status');document.body.appendChild(toastEl);let toastT=0;
@@ -914,6 +916,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
   R.setRenderTarget(rtA);R.render(S,cam);if(MATCAP){sw.forEach(([o,m])=>o.material=mcOf(m,o.userData.mk||'paper'));R.setRenderTarget(rtM);R.render(S,cam)}sw.forEach(([o,m])=>o.material=m);hid.forEach(o=>o.visible=true)}
  vis.length=0;fx.forEach(o=>{if(o.visible){o.visible=false;vis.push(o)}});S.overrideMaterial=nMat;R.setRenderTarget(rtN);R.render(S,cam);S.overrideMaterial=null;vis.forEach(o=>o.visible=true);
  R.setRenderTarget(null);R.render(qS,qC);
+ if(scr.material===ABM){scrO.matrixWorld.copy(scr.matrixWorld);R.autoClear=false;R.render(sS,cam);R.autoClear=true}   /* 모니터 화면은 스타일(알갱이·명암) 처리 없이 원래 그림 그대로 위에 그린다 */
  if(lampV>.001){R.autoClear=false;R.render(gS,cam);R.autoClear=true}   /* 스탠드 불빛을 마지막에 더한다 */
  updCur();requestAnimationFrame(loop)}
 const css=n=>'#'+n.toString(16).padStart(6,'0');
