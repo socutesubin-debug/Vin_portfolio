@@ -421,7 +421,12 @@ const portrait=()=>innerWidth/innerHeight<.9;
 const V=(a)=>new THREE.Vector3(...a);
 const CAMS={end:[[-8,114,138],[-8,100,-6]],home:[[0,104,160],[0,98,-6]],screen:[[0,106,44],[0,105,-6]],work:[[40,46,150],[40,38,20]],open:[[40,104,86],[40,22,46]],contact:[[6,98,68],[50,82,4]]};
 CAMS.pour=CAMS.open;CAMS.call=CAMS.contact;
-const camFor=s=>{let [p,l]=CAMS[s].map(V);if(portrait()){p=l.clone().add(p.clone().sub(l).multiplyScalar(1.5));p.y+=6}return {p,l}};
+// WORK 모니터: 화면 정중앙 바로 앞에서 화면과 수직으로(완전 정면) 보도록 카메라 위치를 계산. 창 크기에 맞춰 거리 조절
+const _sc=new THREE.Vector3(),_sn=new THREE.Vector3(),_sq=new THREE.Quaternion(),_ss=new THREE.Vector3();
+function scrPose(){scr.updateWorldMatrix(true,false);scr.matrixWorld.decompose(_sc,_sq,_ss);_sn.set(0,0,1).applyQuaternion(_sq).normalize();if(_sn.z<0)_sn.negate();
+ const w=.598*Math.abs(_ss.x),h=.336*Math.abs(_ss.y),t=Math.tan(cam.fov*Math.PI/360),d=Math.max(w/(.86*2*t*cam.aspect),h/(.8*2*t));
+ return {p:_sc.clone().addScaledVector(_sn,d),l:_sc.clone()}}
+const camFor=s=>{if(s==='screen')return scrPose();let [p,l]=CAMS[s].map(V);if(portrait()){p=l.clone().add(p.clone().sub(l).multiplyScalar(1.5));p.y+=6}return {p,l}};
 let st='home',prog=0,progT=0,lampOn=false,lampV=0,lampT0=0,lampFirst=true;
 function setLamp(o){if(o===lampOn)return;lampOn=o;lampT0=performance.now()/1000+(lampFirst&&o?.9:0);if(o)lampFirst=false}
 const lampEnv=t=>{if(t<.1)return 0;if(t<.18)return .5;if(t<.26)return .06;if(t<.33)return .7;if(t<.4)return .2;const x=Math.min(1,(t-.4)/.9);return .2+.8*(1-Math.pow(1-x,3))};
@@ -742,7 +747,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  if(st==='pour'){const was=pj.classList.contains('on');syncOverlay()}
  const fileOpen=st==='open'||st==='pour';
  sm.lerp(mouse,RM?0:.05);camStep(dt2);
- const k=st==='home'?1:.3;cam.position.copy(cpos);cam.position.x+=sm.x*7*k;cam.position.y+=sm.y*3*k;cam.lookAt(clook.x+sm.x*18*k,clook.y+sm.y*7*k,clook.z);updHandset();
+ const k=st==='home'?1:st==='screen'?0:.3;/* 모니터(WORK)에서는 마우스 기울기 없이 정면 고정 */cam.position.copy(cpos);cam.position.x+=sm.x*7*k;cam.position.y+=sm.y*3*k;cam.lookAt(clook.x+sm.x*18*k,clook.y+sm.y*7*k,clook.z);updHandset();
  if(st==='home'||st==='work'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObjects(PICK.map(p=>p.g),true).find(h=>h.object.userData.pick);const p=hit?hit.object.userData.pick:null;
   if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?p.t:'';lbl.style.opacity=p&&moved?1:0}}
  else if(st==='contact'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObject(phone,true)[0];const p=hit?PICK[2]:null;if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?'전화 받기':'';lbl.style.opacity=p?1:0}}
