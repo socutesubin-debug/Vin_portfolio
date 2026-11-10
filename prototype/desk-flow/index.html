@@ -442,7 +442,7 @@ function go(s,opts={}){domEl=null;const was=st;st=s;lockUntil=performance.now()+
  if(s==='pour'&&opts.full){progT=1}else if(s==='pour'&&was!=='pour'&&progT<.02){progT=.0}
  if(s==='open'||s==='work'||s==='home'||s==='screen'){if(s!=='pour')progT=Math.min(progT,0)}
  retarget(opts.instant);
- back.hidden=s==='home';$('dl').hidden=true;$('wkA11y').hidden=s!=='screen';wkHov=-1;wkChipHov='';back.textContent=s==='call'?'Back':'Back';hint.textContent=HINT[s]||'';
+ back.hidden=s==='home';$('dl').hidden=true;$('wkA11y').hidden=s!=='screen';wkHK='';wkChipHov='';if(s==='screen')wLastChange=performance.now();back.textContent=s==='call'?'Back':'Back';hint.textContent=HINT[s]||'';
  document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+(NAV[s]==='home'?'home':NAV[s])));
  const h=HASH[s];if(!opts.fromHash&&('#'+h)!==location.hash){try{history.replaceState(null,'',h?'#'+h:location.pathname+location.search)}catch(e){}}
  callEl.classList.toggle('on',s==='call');callEl.classList.remove('up');$('dusk').classList.toggle('on',s==='end');$('endmsg').classList.toggle('on',s==='end');setLamp(true);eTarget=s==='end'?1:0;scr.material=s==='end'?ENDM:BLACK;if(s==='end'){setTimeout(()=>{if(st==='end')endClock(true)},900)}else if(was==='end')endClock(false);if(s==='open')openT=performance.now();if(s!=='pour')autoP=false;
@@ -477,10 +477,11 @@ function step(dy,e){
  if(st==='pour'&&pj.classList.contains('on')){const atBot=pj.scrollTop+pj.clientHeight>=pj.scrollHeight-2;
   if(dy>0&&atBot){e&&e.preventDefault&&e.preventDefault();const now=performance.now();if(now-accT>300)acc=0;accT=now;acc+=dy;if(acc>160&&ctaEl.classList.contains('show')&&now-ctaT>700){acc=0;go('contact')}return}
   if(dy>0||pj.scrollTop>0)return}
- // WORK(모니터): 목록이 넘치면 먼저 목록을 스크롤하고, 끝에 닿은 뒤 한 번 더 굴리면 다음/이전 섹션
- if(st==='screen'&&abDone&&wkMaxY>0){e&&e.preventDefault&&e.preventDefault();const now=performance.now();
-  if((dy>0&&wkY<wkMaxY-.5)||(dy<0&&wkY>.5)){wkY=Math.max(0,Math.min(wkMaxY,wkY+dy*1.4));wkRedraw();wkEdgeT=now;acc=0;return}
-  if(now-wkEdgeT<450)return}
+ // WORK(모니터): 스크롤 한 번에 프로젝트 한 칸. 첫/마지막 프로젝트에서 잠깐 멈춘 뒤 더 굴리면 이전/다음 섹션
+ if(st==='screen'&&abDone){e&&e.preventDefault&&e.preventDefault();const now=performance.now();if(now-accT>300)acc=0;accT=now;acc+=dy;
+  if(Math.abs(acc)<60)return;const d=acc>0?1:-1;acc=0;wLastUser=now;if(now-wStepT<550)return;
+  const ni=wI+d;if(ni>=0&&ni<wkList().length){wkGoto(ni);wStepT=now;return}
+  if(now-wStepT<900)return;if(!wEdgeT||now-wEdgeT>3000){wEdgeT=now;return}if(now-wEdgeT<450)return;wEdgeT=0;go(d>0?'work':'home');return}   // 끝에서는 한 번 멈췄다가, 한 번 더 굴려야 넘어감
  e&&e.preventDefault&&e.preventDefault();
  const now=performance.now();if(now-accT>300)acc=0;accT=now;acc+=dy;
  if(st==='pour'){autoP=false;progT=Math.max(0,Math.min(1,progT+dy*.0008));if(progT<=0&&dy<0){go('open')}return}
@@ -508,8 +509,9 @@ if(matchMedia('(pointer:fine)').matches){document.documentElement.classList.add(
 cv.addEventListener('pointerleave',()=>{mouse.set(0,0);ptrIn=false});
 cv.addEventListener('click',e=>{if(cardOpen){closeCard();return}
  if(st==='open'){if(hover&&hover.doc!=null)openDoc(hover.doc);return}                                   // ABOUT: 서류 꺼내 보기
- if(st==='screen'){if(hover&&hover.wk){const r=hover.wk;if(r.type==='chip'){cat=r.c;wkY=0;wkHov=-1;wkRedraw()}   // WORK: 분류 / 프로젝트 열기
-  else openDetail({getBoundingClientRect:()=>({left:e.clientX,top:e.clientY,width:0,height:0}),dataset:{n:r.p[0],k:r.p[1]}},e)}return}
+ if(st==='screen'){if(hover&&hover.wk){const r=hover.wk,L=wkList();wLastUser=performance.now();             // WORK: 분류 / 이전·다음 / 프로젝트 열기
+  if(r.type==='chip'){wCat=r.c;wI=wOld=0;wFrom=0;wAnim=false;wkRedraw()}else if(r.type==='prev')wkGoto(wI-1);else if(r.type==='next')wkGoto(wI+1);
+  else{const p=L[wI];if(p)openDetail({getBoundingClientRect:()=>({left:e.clientX,top:e.clientY,width:0,height:0}),dataset:{n:p.t,k:p.c}},e)}}return}
  if(!hover){return}
  if(hover.act==='card'){openCard();return}
  if(hover.act==='lamp'){setLamp(!lampOn);return}if(hover.act==='bump'){hover.g.userData.bump=1;return}if(hover.act==='card'){openCard();return}
@@ -551,7 +553,7 @@ br:(n,k)=>({ty:'Visual Archive',secs:[['콘셉트','concept'],['로고','logo'],
 <section id="apply" class="sec"><div class="dw"><div class="dk">04 Application</div><h2>일상에 놓인 브랜드</h2><div class="gal"><div class="ph b g1">APPLICATION 01</div><div class="ph y g2">APPLICATION 02</div><div class="ph r g3">APPLICATION 03</div><div class="ph g4">APPLICATION 04</div><div class="ph k g5">APPLICATION 05 · WIDE</div></div></div></section>
 <section id="closing" class="sec closing"><div class="dw"><div class="dk" style="justify-content:center">05 Closing</div><h2>Thank you.</h2><p>프로젝트를 마무리하며 남기고 싶은 한마디를 적어요.</p></div></section>`})};
 let dSecs=[],dEls=[],dRAF=0;
-function dKind(k){return k==='Branding'?'br':'ux'}
+function dKind(k){return /brand|graphic/i.test(k)?'br':'ux'}
 function openDetail(a,e){const r=a.getBoundingClientRect();const x=e.clientX||r.left+r.width/2,y=e.clientY||r.top+r.height/2;dXY=`${x}px ${y}px`;
  const t=dKind(a.dataset.k),d=TPL[t](a.dataset.n,a.dataset.k);
  $('dBody').className=t;$('dBody').innerHTML=d.html;$('dTy').textContent=d.ty;$('dNm').textContent=a.dataset.n;
@@ -593,44 +595,43 @@ const abC=document.createElement('canvas');abC.width=AW;abC.height=AH;
 const abTex=new THREE.CanvasTexture(abC);abTex.colorSpace=THREE.SRGBColorSpace;abTex.anisotropy=8;
 const ABM=new THREE.MeshBasicMaterial({map:abTex});
 let abTab='cv',abStart=0,abWas=false,abDirty=true,abDone=false;
-// ── WORK(모니터): 작업물 목록을 모니터 화면에 그린다. 마우스 위치는 화면 위 좌표(UV)로 바꿔 계산 ──
-const WKC={'UX/UI':['#3f8fd8','#fff'],'Branding':['#db4a3e','#fff'],'Web':['#f0b93f','#0f0f18']},WK_Y0=215;
-let wkY=0,wkMaxY=0,wkHov=-1,wkChipHov='',wkEdgeT=0;const WKR={chips:[],cards:[]};
-const wkList=()=>PJ.filter(p=>cat==='All'||p[1]===cat);
+// ── WORK(모니터): 프로젝트를 한 개씩 보여 주는 화면 (시안 work page) ──
+// 가운데 눈금 막대가 굴러가며 01 → 02, 분류·이름·연도가 바뀐다. 스크롤/막대 클릭/자동(3.4초)으로 넘어감
+// 나중에 표지 이미지가 오면 가운데 빈 공간에 넣을 예정
+const WP=[{t:'프린트카페 UI 리뉴얼',c:'UXUI',y:'2026'},{t:'Tunee',c:'UXUI',y:'—'},{t:'프로젝트 이름 (예시)',c:'UXUI',y:'2026'},{t:'프로젝트 이름 (예시)',c:'WEB',y:'2026'},{t:'프로젝트 이름 (예시)',c:'WEB',y:'2026'},{t:'프로젝트 이름 (예시)',c:'BRANDING',y:'2026'},{t:'프로젝트 이름 (예시)',c:'BRANDING',y:'2026'},{t:'프로젝트 이름 (예시)',c:'GRAPHIC',y:'2026'}];
+const WCATS=['ALL','UXUI','WEB','BRANDING','GRAPHIC'],WDUR=700,wE=x=>1-Math.pow(1-x,3);
+let wEdgeT=0,wCat='ALL',wI=0,wOld=0,wFrom=0,wT0=0,wAnim=false,wDir=1,wLastUser=0,wLastChange=0,wStepT=0,wkHK='',wkChipHov='';const WKR={chips:[],cy:450};
+const wkList=()=>WP.filter(p=>wCat==='ALL'||p.c===wCat);
+$('wkA11y').innerHTML=WP.map(p=>`<button data-n="${p.t}" data-k="${p.c}">${p.t} (${p.c}, ${p.y}) 열기</button>`).join('');[...$('wkA11y').children].forEach(b=>b.onclick=e=>openDetail(b,e));
 function wkRedraw(){abDirty=true;if(abDone)drawAbout(1)}
+function wPosNow(){if(!wAnim)return wI;return wFrom+(wI-wFrom)*wE(Math.min(1,(performance.now()-wT0)/WDUR))}
+function wkGoto(ni,wrap){const L=wkList();if(ni<0||ni>=L.length||ni===wI)return;wFrom=wrap?ni-1:wPosNow();wOld=wI;wDir=wrap||ni>wI?1:-1;wI=ni;wT0=performance.now();wAnim=true;wLastChange=wT0;wkRedraw()}
+function wkTick(){const now=performance.now(),L=wkList();
+ if(wAnim){if(now-wT0>=WDUR)wAnim=false;wkRedraw()}
+ else if(L.length>1&&!dOpen&&!(hover&&hover.wk)&&now-wLastUser>6000&&now-wLastChange>3400)wkGoto((wI+1)%L.length,wI===L.length-1)}
 function wkHit(px,py){for(const c of WKR.chips)if(px>=c.x&&px<=c.x+c.w&&py>=c.y&&py<=c.y+c.h)return{type:'chip',c:c.c,key:'c'+c.c};
- if(py<WK_Y0-16)return null;for(const c of WKR.cards)if(px>=c.x&&px<=c.x+c.w&&py>=c.y-10&&py<=c.y+c.h)return{type:'card',i:c.i,p:c.p,key:'k'+c.i};return null}
-function drawPage(){const g=abPage.getContext('2d');g.clearRect(0,0,AW,AH);const KR='"Noto Sans KR", sans-serif',JO='Jost, "Noto Sans KR", sans-serif';
- g.fillStyle='#f7f1e3';g.fillRect(0,0,AW,AH);
- g.fillStyle='#e6dcc6';g.fillRect(0,0,AW,72);g.fillStyle=INK;g.fillRect(0,72,AW,3);
- ['#db4a3e','#f0b93f','#3f8fd8'].forEach((c,i)=>{g.fillStyle=c;g.beginPath();g.arc(46+i*38,36,12,0,7);g.fill();g.strokeStyle=INK;g.lineWidth=2.5;g.stroke()});
- g.fillStyle='#fff';g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.roundRect(180,16,AW-220,40,20);g.fill();g.stroke();g.fillStyle=INK;g.font='500 24px '+JO;g.textAlign='left';g.textBaseline='middle';g.fillText('vin.portfolio/work',204,37);
- // 제목 + 개수
- const L=wkList();g.textBaseline='alphabetic';g.textAlign='left';g.fillStyle=INK;g.font='600 64px '+JO;g.fillText('Work',64,160);
- const tw=g.measureText('Work').width;g.font='500 26px '+JO;g.fillStyle='#6b6578';g.fillText(L.length+' projects',64+tw+20,160);
- // 분류 칩(오른쪽 정렬)
- WKR.chips=[];g.font='500 26px '+JO;let cx=AW-64;
- [...cats].reverse().forEach(c=>{const w=g.measureText(c).width+48;cx-=w;const on=c===cat,hv=c===wkChipHov;
-  g.fillStyle=on?INK:(hv?'#e6dcc6':'#fff');g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.roundRect(cx,112,w,52,26);g.fill();g.stroke();
-  g.fillStyle=on?'#fff':INK;g.textAlign='center';g.textBaseline='middle';g.fillText(c,cx+w/2,139);WKR.chips.push({c,x:cx,y:112,w,h:52});cx-=14});
- g.fillStyle=INK;g.fillRect(64,190,AW-128,3);
- // 카드 격자(3열, 넘치면 스크롤). 마우스를 올린 카드는 떠오르고 그림자가 길어진다
- const cols=3,gap=40,cw=(AW-128-gap*(cols-1))/cols,th=Math.round(cw*.56),ch=th+96;
- const rows=Math.ceil(L.length/cols),total=rows*ch+Math.max(0,rows-1)*gap+40;wkMaxY=Math.max(0,total-(AH-WK_Y0));wkY=Math.min(wkY,wkMaxY);
- WKR.cards=[];g.save();g.beginPath();g.rect(0,WK_Y0-18,AW,AH-WK_Y0+18);g.clip();
- L.forEach((p,i)=>{const r=(i/cols)|0,c=i%cols,x=64+c*(cw+gap),y0=WK_Y0+r*(ch+gap)-wkY,hv=i===wkHov,y=y0-(hv?10:0);
-  WKR.cards.push({i,p,x,y:y0,w:cw,h:ch});if(y0>AH||y0+ch<WK_Y0-20)return;
-  const [bg,fg]=WKC[p[1]]||['#cfd0ee',INK];
-  g.fillStyle=INK;g.fillRect(x+(hv?13:8),y+(hv?16:10),cw,ch);
-  g.fillStyle='#fff';g.fillRect(x,y,cw,ch);g.strokeStyle=INK;g.lineWidth=3;g.strokeRect(x,y,cw,ch);
-  g.fillStyle=bg;g.fillRect(x+12,y+12,cw-24,th-12);
-  g.fillStyle=fg;g.font='500 26px '+JO;g.textAlign='center';g.textBaseline='middle';g.fillText(p[1],x+cw/2,y+12+(th-12)/2);
-  g.textAlign='left';g.textBaseline='alphabetic';g.fillStyle=INK;g.font='600 32px '+KR;
-  let nm=p[0];if(g.measureText(nm).width>cw-140){while(nm.length>1&&g.measureText(nm+'…').width>cw-140)nm=nm.slice(0,-1);nm+='…'}
-  g.fillText(nm,x+20,y+th+46);g.font='400 22px '+KR;g.fillStyle='#6b6578';g.fillText(p[1]+' · 예시 프로젝트',x+20,y+th+80);
-  g.font='500 30px '+JO;g.fillStyle=INK;g.textAlign='right';g.fillText(hv?'열기 →':'→',x+cw-20,y+th+56)});
- g.restore();
- if(wkMaxY>0){const vh=AH-WK_Y0,bh=Math.max(60,vh*vh/(vh+wkMaxY)),by=WK_Y0+(vh-bh)*(wkY/wkMaxY);g.fillStyle='rgba(15,15,24,.35)';g.beginPath();g.roundRect(AW-24,by,8,bh,4);g.fill()}
+ const cy=WKR.cy;if(px>=740&&px<=860&&py>=cy-120&&py<=cy+120){if(py<cy-14)return{type:'prev',key:'prev'};if(py>cy+14)return{type:'next',key:'next'}}
+ if(px>=560&&px<=1560&&py>=cy-48&&py<=cy+48)return{type:'open',key:'open'};return null}
+function drawPage(){const g=abPage.getContext('2d');const KR='"Noto Sans KR", sans-serif',JO='Jost, "Noto Sans KR", sans-serif',L=wkList(),cy=WKR.cy;
+ g.fillStyle='#444444';g.fillRect(0,0,AW,AH);
+ // 분류 탭(가운데 정렬). 선택한 탭은 흰색 + 밑줄
+ WKR.chips=[];g.font='500 24px '+JO;g.textBaseline='middle';g.textAlign='left';const gap=56,ws=WCATS.map(c=>g.measureText(c).width);
+ let x=(AW-(ws.reduce((a,b)=>a+b,0)+gap*(WCATS.length-1)))/2;
+ WCATS.forEach((c,i)=>{const on=c===wCat,hv=c===wkChipHov;g.fillStyle=on?'#fff':hv?'rgba(255,255,255,.85)':'rgba(255,255,255,.5)';g.fillText(c,x,62);if(on)g.fillRect(x,80,ws[i],2);WKR.chips.push({c,x:x-14,y:36,w:ws[i]+28,h:52});x+=ws[i]+gap});
+ const k=wAnim?wE(Math.min(1,(performance.now()-wT0)/WDUR)):1,pos=wAnim?wFrom+(wI-wFrom)*k:wI;
+ // 가운데 눈금 막대: 현재 위치는 길고 밝게, 위아래는 짧고 흐리게. 프로젝트가 바뀌면 굴러간다
+ const sp=26,cx=800;for(let j=-6;j<=6;j++){const n=Math.round(pos)+j,dist=Math.abs(n-pos);if(dist>4.2)continue;const t=Math.min(1,dist),w=92-34*t,h=5-t,a=dist>3?Math.max(0,1-(dist-3)/1.2):1;
+  g.fillStyle=`rgba(232,232,232,${(1-.42*t)*a})`;g.fillRect(cx-w/2,cy+(n-pos)*sp-h/2,w,h)}
+ if(wkHK==='prev'||wkHK==='next'){g.fillStyle='rgba(255,255,255,.9)';g.font='400 22px '+JO;g.textAlign='center';g.fillText(wkHK==='prev'?'▲':'▼',cx,wkHK==='prev'?cy-4.6*sp:cy+4.6*sp)}
+ // 번호 · 분류 · 이름 · 연도 (바뀔 때 이전 내용은 위로, 새 내용은 아래에서 올라오며 바뀜)
+ const item=(p,i,al,off)=>{if(!p||al<=0)return;g.globalAlpha=al;g.fillStyle='#fff';g.textBaseline='middle';
+  g.font='400 30px '+JO;g.textAlign='left';g.fillText(String(i+1).padStart(2,'0'),57,cy+off);
+  g.font='500 28px '+JO;g.textAlign='right';g.fillText(p.c,712,cy+off);
+  g.font='500 30px '+KR;g.textAlign='left';g.fillText(p.t,886,cy+off);
+  g.font='400 30px '+JO;g.textAlign='right';g.fillText(p.y,1543,cy+off);g.globalAlpha=1};
+ if(wAnim){item(L[wOld],wOld,1-k*1.4,-wDir*34*k);item(L[wI],wI,k,wDir*34*(1-k))}else item(L[wI],wI,1,0);
+ if(!L.length){g.fillStyle='rgba(255,255,255,.6)';g.font='400 26px '+KR;g.textAlign='center';g.fillText('이 분류의 프로젝트를 준비 중이에요',AW/2,cy)}
+ if(wkHK==='open'&&L[wI]&&!wAnim){g.font='500 30px '+KR;const tw=g.measureText(L[wI].t).width;g.fillStyle='#fff';g.fillRect(886,cy+24,tw,2);g.font='400 28px '+JO;g.textAlign='left';g.fillText('→',886+tw+16,cy)}
  abDirty=false}
 function drawAbout(p){const g=abC.getContext('2d');if(abDirty)drawPage();g.fillStyle='#0c0c12';g.fillRect(0,0,AW,AH);
  if(p<.18){const q=p/.18;g.fillStyle='#fff';g.globalAlpha=Math.min(1,q*1.5);g.fillRect(AW/2*(1-q),AH/2-3,AW*q,6);g.globalAlpha=1}
@@ -668,7 +669,6 @@ const ringsEl=$('rings');function dings(){if(st!=='contact')return;phone.updateM
 // 엔딩
 $('again').onclick=()=>{progT=prog=0;go('home')};
 drawPj();ctaEl.onclick=()=>{if(st==='pour')go('contact')};
-$('wkA11y').innerHTML=PJ.map(p=>`<button data-n="${p[0]}" data-k="${p[1]}">${p[0]} (${p[1]}) 열기</button>`).join('');[...$('wkA11y').children].forEach(b=>b.onclick=e=>openDetail(b,e));
 // ── 전화 받기 화면 ─────────────────────────────────────────────
 $('x').onclick=()=>back.onclick();
 $('form').addEventListener('submit',e=>{e.preventDefault();$('st').textContent='보내는 중…';callEl.classList.add('up');setTimeout(()=>{if(st==='call')go('end')},1100)});
@@ -708,12 +708,13 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
   if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?p.t:'';lbl.style.opacity=p&&moved?1:0}}
  else if(st==='contact'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObject(phone,true)[0];const p=hit?PICK[2]:null;if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?'전화 받기':'';lbl.style.opacity=p?1:0}}
  else if(st==='open'){let p=null;if(ptrIn){ray.setFromCamera(mouse,cam);const h=ray.intersectObjects(files,true)[0];if(h){let o=h.object;while(o&&o.userData.doc==null)o=o.parent;if(o)p=DOCP[o.userData.doc]}}if(p!==hover)hover=p}
- else if(st==='screen'){let p=null;if(abDone&&ptrIn){ray.setFromCamera(mouse,cam);const h=ray.intersectObject(scr,false)[0];if(h&&h.uv){const r=wkHit(h.uv.x*AW,(1-h.uv.y)*AH);if(r)p={t:r.type==='chip'?r.c+' 보기':'프로젝트 열기',wk:r}}}
-  const nk=p?p.wk.key:'',ok=hover&&hover.wk?hover.wk.key:'';if(nk!==ok||(!p&&hover)){hover=p;const hi=p&&p.wk.type==='card'?p.wk.i:-1,hc=p&&p.wk.type==='chip'?p.wk.c:'';if(hi!==wkHov||hc!==wkChipHov){wkHov=hi;wkChipHov=hc;wkRedraw()}}}
+ else if(st==='screen'){let p=null;if(abDone&&ptrIn){ray.setFromCamera(mouse,cam);const h=ray.intersectObject(scr,false)[0];if(h&&h.uv){const r=wkHit(h.uv.x*AW,(1-h.uv.y)*AH);if(r)p={t:r.type==='chip'?r.c+' 보기':r.type==='open'?'프로젝트 열기':r.type==='prev'?'이전 프로젝트':'다음 프로젝트',wk:r}}}
+  const nk=p?p.wk.key:'',ok=hover&&hover.wk?hover.wk.key:'';if(nk!==ok||(!p&&hover)){hover=p;const hc=p&&p.wk.type==='chip'?p.wk.c:'',hk=p?p.wk.type:'';if(hk!==wkHK||hc!==wkChipHov){wkHK=hk;wkChipHov=hc;wkRedraw()}}}
  else if(hover){hover=null;cv.style.cursor='default';lbl.style.opacity=0}
  {eT+=(eTarget-eT)*Math.min(1,dt2*1.1);const k=eT<.001?0:eT;tmpC.copy(C_SUN0).lerp(C_SUN1,k);sun.color.copy(tmpC);sun.intensity=2.3-.95*k;fill.intensity=.3-.15*k;hemi.intensity=1.8-1.0*k;hemi.color.copy(C_H0).lerp(C_H1,k);sun.position.lerpVectors(SUN_P0,SUN_P1,k);win.position.copy(tmpV.copy(sun.position).normalize().multiplyScalar(250));win.lookAt(0,0,0);tmpC.copy(C_BG0).lerp(C_BG1,k).convertLinearToSRGB();post.uniforms.cBg.value.set(tmpC.r,tmpC.g,tmpC.b)}
  lampV=lampOn?lampEnv(performance.now()/1000-lampT0):Math.max(0,lampV-dt2*5);spot.intensity=lampV*4200*Math.max(0,1-1.4*eT);spot.angle=.6-.24*eT;post.uniforms.wLo.value=1+.35*eT;post.uniforms.wHi.value=1.6+.5*eT;cal.position.y=130-14*eT;post.uniforms.warmK.value=lampV;
  {const onScr=st==='screen'&&cpos.distanceTo(tpos)<16;if(onScr&&!abWas){abStart=performance.now();abDirty=true;abDone=false}abWas=onScr;scr.material=onScr?ABM:(st==='end'?ENDM:BLACK);if(onScr){const ap=Math.min(1,(performance.now()-abStart)/1400);if(!abDone){drawAbout(ap);if(ap>=1)abDone=true}}if(onScr){placeMon();if(!mon.classList.contains('on'))mon.classList.add('on')}else if(mon.classList.contains('on'))mon.classList.remove('on')}
+ if(st==='screen'&&abDone)wkTick();
  {const tt=clock.elapsedTime;LV.forEach(m=>{m.rotation.z=m.userData.base+Math.sin(tt*.9+m.userData.ph)*.07})}
  if(cardOpen){bcRY+=(bcTY-bcRY)*.12;bcRX+=(bcTX-bcRX)*.12;bcSpin.style.transform=`rotateX(${bcRX}deg) rotateY(${bcRY}deg)`}
  drawers.forEach((d,i)=>{const o=(i===2&&(fileOpen||prog>.05))?34:0;d.position.z+=((d.userData.z0+o)-d.position.z)*.1});
