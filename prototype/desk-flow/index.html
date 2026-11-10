@@ -210,15 +210,11 @@ html.cc input,html.cc textarea{cursor:text!important}
 #dBody.cv .cvs.rv img{animation:none;opacity:0;transform:translateY(70px) scale(.985);transition:opacity 1s ease,transform 1.1s cubic-bezier(.2,.8,.2,1)}#dBody.cv .cvs.rv.in img{opacity:1;transform:none}   /* 스크롤하면 한 장씩 떠오르며 등장 */
 @media (prefers-reduced-motion:reduce){#dBody.cv .cvs.rv img{opacity:1;transform:none;transition:none}}
 #dBody.cv .cvm{text-align:center;padding:clamp(60px,10vh,120px) 20px clamp(60px,12vh,140px);font:400 15px/1.7 "Noto Sans KR",sans-serif}
-#dBody .nx{all:unset;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;gap:10px;color:#f3f1ea;padding:10px 20px}
-#dBody .nx .nl{font:500 12px var(--display);letter-spacing:.32em;opacity:.55}
-#dBody .nx b{font:600 clamp(26px,3.6vw,46px)/1.25 "Noto Sans KR",sans-serif;letter-spacing:-.02em;transition:opacity .2s}
-#dBody .nx .nc{font:500 12px var(--display);letter-spacing:.16em;padding:3px 12px;border:1px solid rgba(255,255,255,.35);border-radius:99px;opacity:.75}
-#dBody .nx .na{margin-top:14px;font-size:22px;animation:nxBob 1.6s ease-in-out infinite}
-#dBody .nx .nb{display:block;width:min(240px,60vw);height:2px;background:rgba(255,255,255,.16);border-radius:2px;overflow:hidden}#dBody .nx .nb i{display:block;height:100%;background:#fff;transform:scaleX(0);transform-origin:left;transition:transform .15s}
-#dBody .nx:hover b{opacity:.8}#dBody .nx:focus-visible{outline:2px solid #3f8fd8;outline-offset:6px;border-radius:8px}
-#dBody .nh{margin:14px 0 0;font-size:12.5px;opacity:.45}
-@keyframes nxBob{50%{transform:translateY(6px)}}@media (prefers-reduced-motion:reduce){#dBody .nx .na{animation:none}}
+#dBody .nx{all:unset;cursor:pointer;position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:12px;max-width:calc(100vw - 40px);padding:13px 22px;border:1px solid rgba(255,255,255,.3);border-radius:999px;color:#f3f1ea;font:500 15px "Noto Sans KR",sans-serif;letter-spacing:-.01em;transition:background .2s,border-color .2s}   /* 다음 프로젝트: 알약 버튼 */
+#dBody .nx .nb{position:absolute;inset:0;background:rgba(255,255,255,.14);transform:scaleX(0);transform-origin:left;transition:transform .15s}   /* 끝에서 더 스크롤하면 차오름 */
+#dBody .nx>span,#dBody .nx>b{position:relative}#dBody .nx .nl{opacity:.6;white-space:nowrap}#dBody .nx .sp{width:1px;height:14px;background:rgba(255,255,255,.3)}
+#dBody .nx b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#dBody .nx .na{transition:transform .2s}
+#dBody .nx:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.55)}#dBody .nx:hover .na{transform:translateX(4px)}#dBody .nx:focus-visible{outline:2px solid #3f8fd8;outline-offset:4px}
 #dBody.cv .cvs img{animation:cvIn 1s .35s cubic-bezier(.2,.8,.2,1) both}#dBody.cv .cvm{animation:cvIn2 .8s .9s ease-out both}   /* 들어가면 텍스트 표지가 살짝 떠오르며 등장 */
 @keyframes cvIn{from{opacity:0;transform:translateY(28px) scale(.985)}to{opacity:1;transform:none}}@keyframes cvIn2{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){#dBody.cv .cvs img,#dBody.cv .cvm{animation:none}}
@@ -786,10 +782,10 @@ function openProj(p,e,swap){dCur=p;e=e||{clientX:innerWidth/2,clientY:innerHeigh
 // 맨 아래 '다음 프로젝트': 누르거나, 끝에서 계속 스크롤하면 넘어감
 function nextProj(){const L=wkList().length?wkList():WP,i=L.indexOf(dCur);return L[(i+1)%L.length]}
 function addNext(){const m=$('dBody').querySelector('.cvm');if(!m||!dCur)return;const n=nextProj();if(!n||n===dCur)return;
- m.innerHTML=`<button class="nx" type="button"><span class="nl">NEXT PROJECT</span><b>${n.t}</b><span class="nc">${n.c}</span><span class="na" aria-hidden="true">↓</span><i class="nb"><i></i></i></button><p class="nh">클릭하거나 계속 스크롤하면 다음 프로젝트로 넘어가요</p>`;
+ m.innerHTML=`<button class="nx" type="button" aria-label="다음 프로젝트: ${n.t}"><i class="nb" aria-hidden="true"></i><span class="nl">다음 프로젝트</span><span class="sp" aria-hidden="true"></span><b>${n.t}</b><span class="na" aria-hidden="true">→</span></button>`;
  m.querySelector('.nx').onclick=goNext;nxPull=0;nxBar()}
 let nxPull=0,nxT=0,nxBusy=false;const NX_MAX=520;
-function nxBar(){const b=$('dBody').querySelector('.nx .nb i');if(b)b.style.transform=`scaleX(${Math.min(1,nxPull/NX_MAX)})`}
+function nxBar(){const b=$('dBody').querySelector('.nx .nb');if(b)b.style.transform=`scaleX(${Math.min(1,nxPull/NX_MAX)})`}
 function goNext(){if(nxBusy||!dOpen)return;const n=nextProj();if(!n)return;nxBusy=true;nxPull=0;const L=wkList();const j=L.indexOf(n);if(j>=0){wI=wOld=j;wAnim=false;wkRedraw()}   /* 모니터도 같은 프로젝트로 */
  const go_=()=>{openProj(n,null,true);det.scrollTop=0;if(window.gsap&&!RM)gsap.fromTo('#dBody',{opacity:0,y:50},{opacity:1,y:0,duration:.6,ease:'power3.out',onComplete:()=>{nxBusy=false}});else nxBusy=false};
  if(window.gsap&&!RM)gsap.to('#dBody',{opacity:0,y:-60,duration:.4,ease:'power2.in',onComplete:go_});else go_()}
