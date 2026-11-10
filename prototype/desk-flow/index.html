@@ -447,7 +447,8 @@ function mcLoad(url,ok,bad){const im=new Image();im.onload=()=>{const N=256,c=do
  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;ok(t)};im.onerror=bad;im.src=url}
 if(MATCAP){mcLoad('matcap/pearl.jpg',t=>{['metal','plastic','paper'].forEach(k=>{if(!MCK[k]||MCK[k].isFallback){t.isFallback=true;MCK[k]=t}});mCache.clear()},()=>{});
  ['metal','plastic','paper'].forEach(k=>{const ok=t=>{MCK[k]=t;mCache.clear()};mcLoad('matcap/'+k+'.jpg',ok,()=>mcLoad('matcap/'+k+'.png',ok,()=>{}))})}
-const mcOf=(m,k)=>{if(m.isMeshBasicMaterial)return m;const key=m.uuid+k;let x=mCache.get(key);if(!x){x=new THREE.MeshMatcapMaterial({color:m.color.clone(),map:m.map||null,matcap:MCK[k]||MCK.paper,side:m.side});mCache.set(key,x)}return x};
+const mcOf=(m,k)=>{if(m.isMeshBasicMaterial){let b=mCache.get(m.uuid);if(!b){b=m.clone();b.color=m.color.clone().multiplyScalar(Math.pow(.66,2.2));mCache.set(m.uuid,b)}return b}   /* 모니터 화면처럼 스스로 빛나는 면은 밝기 보정이 상쇄되도록(원래 밝기 그대로) */
+ const key=m.uuid+k;let x=mCache.get(key);if(!x){x=new THREE.MeshMatcapMaterial({color:m.color.clone(),map:m.map||null,matcap:MCK[k]||MCK.paper,side:m.side});mCache.set(key,x)}return x};
 const qS=new THREE.Scene();qS.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),post));const qC=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
 // ── 카메라 장면(상태) ───────────────────────────────────────
 const portrait=()=>innerWidth/innerHeight<.9;
