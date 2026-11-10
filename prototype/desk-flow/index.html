@@ -689,6 +689,7 @@ function wkHit(px,py){for(const c of WKR.chips)if(px>=c.x&&px<=c.x+c.w&&py>=c.y&
 function drawPage(){const g=abPage.getContext('2d');const KR='"Noto Sans KR", sans-serif',JO='Jost, "Noto Sans KR", sans-serif',L=wkList(),cy=WKR.cy;
  g.fillStyle='#444444';g.fillRect(0,0,AW,AH);
  {const bg=p=>p&&WIMG[p.img],kk=wAnim?wE(Math.min(1,(performance.now()-wT0)/WDUR)):1;if(wAnim&&bg(L[wOld]))g.drawImage(bg(L[wOld]),0,0);if(bg(L[wI])){g.globalAlpha=wAnim?kk:1;g.drawImage(bg(L[wI]),0,0);g.globalAlpha=1}}
+ g.fillStyle='rgba(24,24,28,.24)';g.fillRect(0,0,AW,AH);   /* 표지 전체에 옅은 그레이톤 그림자(글자가 잘 보이게) */
  {const cy=WKR.cy;let gr=g.createLinearGradient(0,0,0,150);gr.addColorStop(0,'rgba(0,0,0,.38)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,AW,150);   // 위쪽 탭 뒤 옅은 그림자
   gr=g.createLinearGradient(0,cy-130,0,cy+130);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(.5,'rgba(0,0,0,.34)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,cy-130,AW,260)}   // 가운데 줄 뒤 옅은 그림자
  g.shadowColor='rgba(0,0,0,.55)';g.shadowBlur=14;   // 글자·막대에 옅은 그림자
