@@ -188,13 +188,19 @@ html.cc input,html.cc textarea{cursor:text!important}
 #mon{background:transparent!important;animation:none!important;overflow:visible;display:none}#mon.on{display:block;animation:none!important}
 #mon{pointer-events:none}
 /* 케이스 스터디 페이지를 상세 화면 안에 */
+/* 프로젝트 상세: 위쪽 막대 없이 작품만 보이게. 닫기는 오른쪽 아래 둥근 ✕ (Esc로도 닫힘) */
+#detail.nobar #dBar{background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border:0;box-shadow:none;padding:0;pointer-events:none}
+#detail.nobar #dBar>*:not(#dRight),#detail.nobar #dRight>*:not(#dClose){display:none}
+#detail.nobar #dClose{pointer-events:auto;position:fixed;right:max(20px,2.5vw);bottom:calc(20px + env(safe-area-inset-bottom,0px));width:48px;height:48px;padding:0;display:grid;place-items:center;font-size:0;border-radius:50%;background:rgba(15,15,24,.82);box-shadow:0 0 0 2px #fff,0 8px 24px rgba(0,0,0,.3)}
+#detail.nobar #dClose::before{content:"✕";font-size:18px;color:#fff}
+#detail.nobar #dBody{padding-top:0!important}
 #detail.fr{overflow:hidden}#detail.fr #dChips,#detail.fr #dPct,#detail.fr #dProg{visibility:hidden}
 #dBody.fr iframe{display:block;width:100%;border:0;background:#fff}
 /* 프로젝트 표지 상세 */
 #detail:has(#dBody.cv){background:#141416}
 #dBody.cv{color:#f3f1ea}
 #dBody.cv .cvs{display:grid;place-items:center;padding:20px max(16px,3vw) 0}
-#dBody.cv .cvs img{display:block;width:100%;max-width:calc((100vh - 140px)*16/9);height:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#dBody.cv .cvs img{display:block;width:100%;max-width:calc((100vh - 40px)*16/9);height:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 #dBody.cv .cvm{text-align:center;padding:36px 20px 80px;font:400 15px/1.7 "Noto Sans KR",sans-serif;opacity:.7}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* ABOUT 서류 읽기 창 */
@@ -564,14 +570,14 @@ br:(n,k)=>({ty:'Visual Archive',secs:[['콘셉트','concept'],['로고','logo'],
 let dSecs=[],dEls=[],dRAF=0;
 // 케이스 스터디(별도 페이지) 칸 높이 = 화면 높이 - 위쪽 막대
 function fitFrame(){const f=$('dFrame');if(!f)return;f.onmouseenter=()=>{cur.style.opacity=0;lbl.style.opacity=0};   // 케이스 스터디 위에서는 내 커서 숨김
- const h=$('dBar').offsetHeight;$('dBody').style.paddingTop=h+'px';f.style.height=(innerHeight-h)+'px'}
+ const h=det.classList.contains('nobar')?0:$('dBar').offsetHeight;$('dBody').style.paddingTop=h+'px';f.style.height=(innerHeight-h)+'px'}
 addEventListener('resize',()=>{if(dOpen)fitFrame()});
 function dKind(k){return /brand|graphic/i.test(k)?'br':'ux'}
 function openDetail(a,e){const r=a.getBoundingClientRect();const x=e.clientX||r.left+r.width/2,y=e.clientY||r.top+r.height/2;dXY=`${x}px ${y}px`;
  const cvU=a.dataset.url,cvI=a.dataset.img,t=cvU?'fr':cvI?'cv':dKind(a.dataset.k),d=cvU?{ty:a.dataset.k,secs:[],html:`<iframe id="dFrame" src="${cvU}" title="${a.dataset.n} 케이스 스터디"></iframe>`}:cvI?{ty:a.dataset.k,secs:[['표지','cover']],html:`<section id="cover" class="cvs"><img src="covers/${cvI}.jpg" alt="${a.dataset.n} 표지"></section><section class="cvm"><p>자세한 작업 과정은 곧 추가될 예정이에요.</p></section>`}:TPL[t](a.dataset.n,a.dataset.k);
  $('dBody').className=t;$('dBody').innerHTML=d.html;$('dTy').textContent=d.ty;$('dNm').textContent=a.dataset.n;
  dSecs=d.secs;$('dChips').innerHTML=d.secs.map(([nm,id],i)=>`<button data-id="${id}" aria-current="${i===0}"><i>0${i+1}</i><span>${nm}</span></button>`).join('');
- dEls=d.secs.map(([n,id])=>$(id));det.classList.toggle('fr',t==='fr');if(t==='fr')fitFrame();else $('dBody').style.paddingTop='';
+ dEls=d.secs.map(([n,id])=>$(id));det.classList.toggle('fr',t==='fr');det.classList.toggle('nobar',t==='fr'||t==='cv');if(t==='fr')fitFrame();else $('dBody').style.paddingTop='';
  [...$('dChips').children].forEach(b=>b.onclick=()=>{const el=$(b.dataset.id);det.scrollTo({top:el.offsetTop-(innerWidth<760?96:70),behavior:RM?'auto':'smooth'})});
  dOpen=true;det.scrollTop=0;dUpd();
  if(window.gsap&&!RM){gsap.fromTo(det,{clipPath:`circle(0px at ${dXY})`,visibility:'visible'},{clipPath:`circle(150% at ${dXY})`,duration:.9,ease:'power3.inOut',onComplete:()=>$('dClose').focus()})}else{det.style.visibility='visible';det.style.clipPath='none'}}
@@ -580,7 +586,7 @@ function dUpd(){dRAF=0;const max=det.scrollHeight-det.clientHeight,p=max>0?Math.
  const bs=[...$('dChips').children];bs.forEach((b,i)=>{const on=i===cur;if(b.getAttribute('aria-current')!==String(on)){b.setAttribute('aria-current',on);if(on&&innerWidth<760)b.scrollIntoView({inline:'center',block:'nearest'})}})}
 det.addEventListener('scroll',()=>{if(!dRAF)dRAF=requestAnimationFrame(dUpd)},{passive:true});
 function closeDetail(){dOpen=false;if(window.gsap&&!RM){gsap.to(det,{clipPath:`circle(0px at ${dXY})`,duration:.7,ease:'power3.inOut',onComplete:()=>{det.style.visibility='hidden'}})}else{det.style.visibility='hidden'}}
-$('dClose').onclick=closeDetail;
+$('dClose').onclick=closeDetail;$('dClose').dataset.tip='닫기';
 // 명함
 let cardOpen=false;const bcEl=$('bc');
 function openCard(){bcRX=bcRY=bcTX=bcTY=0;bcSpin.style.transform='none';cardOpen=true;bcEl.classList.add('on');hint.style.visibility='hidden';syncOverlay()}
