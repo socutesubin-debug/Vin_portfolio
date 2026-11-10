@@ -1027,12 +1027,15 @@ $('x').onclick=()=>back.onclick();
 let sending=false;
 $('form').addEventListener('submit',async e=>{e.preventDefault();if(sending)return;const stE=$('st'),from=$('from').value.trim(),msg=$('msg').value.trim();
  stE.classList.remove('err');const bad=(t,el)=>{stE.textContent=t;stE.classList.add('err');el&&el.focus()};
+ const finish=t=>{stE.textContent=t;$('from').value=$('subj').value=$('msg').value='';callEl.classList.add('up');setTimeout(()=>{if(st==='call')go('end')},1100)};
+ if(!from&&!msg)return finish('');   /* 아무것도 안 쓰고 보내기 → 바로 마지막 장면 */
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(from))return bad('답장 받을 이메일을 확인해 주세요',$('from'));
  if(msg.length<2)return bad('메시지를 적어 주세요',$('msg'));
  sending=true;$('send').disabled=true;stE.textContent='보내는 중…';
  let ok=false,code='';try{const r=await fetch('/api/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from,subject:$('subj').value.trim(),message:msg,website:$('hp').value})});
   const j=await r.json().catch(()=>({}));ok=r.ok&&j.ok;code=j.error||String(r.status)}catch(err){code='net'}
  sending=false;$('send').disabled=false;
+ if(!ok&&(code==='config'||code==='404'||code==='405'||code==='net'))return finish('');   /* 메일 연결 전: 그냥 마지막 장면으로 */
  if(!ok)return bad(code==='config'||code==='404'||code==='405'?'메일 연결을 준비 중이에요. eilibean01@gmail.com 으로 보내 주세요':'보내지 못했어요. 잠시 뒤 다시 눌러 주세요');
  stE.textContent='보냈어요!';$('from').value=$('subj').value=$('msg').value='';callEl.classList.add('up');setTimeout(()=>{if(st==='call')go('end')},1100)});
 
