@@ -301,7 +301,7 @@ const cv=$('c'),R=new THREE.WebGLRenderer({canvas:cv,antialias:false});R.setPixe
 R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;R.outputColorSpace=THREE.LinearSRGBColorSpace;R.toneMapping=THREE.NoToneMapping;
 const S=new THREE.Scene();S.background=new THREE.Color(0x000000);
 const cam=new THREE.PerspectiveCamera(40,1,10,5000);
-const LM=h=>new THREE.MeshLambertMaterial({color:h});const W=LM(0xf3e9d4),G=LM(0xcfc6b4),Dk=LM(0x17151f),RD=LM(0xdb4a3e),BL=LM(0x3f8fd8),YL=LM(0xf0b93f),FL=LM(0x85707c),BLACK=new THREE.MeshBasicMaterial({color:0x000000});
+const LM=h=>RETRO?new THREE.MeshPhongMaterial({color:h,shininess:42,specular:0x4a4640}):new THREE.MeshLambertMaterial({color:h});/* 레트로: 표면 광택 */const W=LM(0xf3e9d4),G=LM(0xcfc6b4),Dk=LM(0x17151f),RD=LM(0xdb4a3e),BL=LM(0x3f8fd8),YL=LM(0xf0b93f),FL=LM(0x85707c),BLACK=new THREE.MeshBasicMaterial({color:0x000000});
 const fx=[];
 const add=(g,m,p,r=[0,0,0],par=S)=>{const o=new THREE.Mesh(g,m);o.position.set(...p);o.rotation.set(...r);o.castShadow=o.receiveShadow=true;par.add(o);return o};
 const BX=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
@@ -313,7 +313,7 @@ const [mStand,mImac,mPhone,mTable,mChair,mHand]=await Promise.all([['stand',RD],
 mChair.traverse(o=>{if(o.isMesh&&/base/i.test(o.name))o.material=G});
 const TOP=75;
 const texReg=[];const tex=(w,h,draw)=>{const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.save();draw(g,w,h);g.restore();const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;texReg.push({t,g,w,h,draw});return t};
-const TM=(t,o={})=>new THREE.MeshLambertMaterial({map:t,...o});
+const TM=(t,o={})=>RETRO?new THREE.MeshPhongMaterial({map:t,shininess:24,specular:0x2a2826,...o}):new THREE.MeshLambertMaterial({map:t,...o});
 let INK='#17151f',CRM='#f3e9d4',RED='#db4a3e',BLU='#3f8fd8',YEL='#f0b93f';
 // 방: 바닥, 뒷벽
 add(new THREE.PlaneGeometry(900,900),FL,[0,0,100],[-Math.PI/2,0,0]).castShadow=false;
@@ -397,7 +397,7 @@ const sun=new THREE.DirectionalLight(0xfff6e8,2.3);sun.position.set(-310,190,170
 const fill=new THREE.DirectionalLight(0xe6ecff,.3);fill.position.set(160,90,250);S.add(fill);
 const hemi=new THREE.HemisphereLight(0xffffff,0xb8aab0,1.8);S.add(hemi);
 const SCRON=new THREE.MeshBasicMaterial({color:0xe6dcc6});const ENDM=new THREE.MeshBasicMaterial({map:tex(300,170,(g,w,h)=>{g.fillStyle='#fff6e0';g.fillRect(0,0,w,h);g.fillStyle='#14131c';g.font='600 22px Jost, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#3fae6a';g.beginPath();g.arc(w/2,h/2-24,26,0,7);g.fill();g.strokeStyle='#fff';g.lineWidth=6;g.lineCap='round';g.lineJoin='round';g.beginPath();g.moveTo(w/2-12,h/2-24);g.lineTo(w/2-3,h/2-14);g.lineTo(w/2+14,h/2-36);g.stroke();g.fillStyle='#14131c';g.font='600 24px Jost, sans-serif';g.fillText('Message received',w/2,h/2+30);g.font='400 15px Jost, sans-serif';g.fillText('Will reply tomorrow morning',w/2,h/2+56)})});
-let eT=0,eTarget=0,clkTimer=0;const C_SUN0=new THREE.Color(0xffffff),C_SUN1=new THREE.Color(0xff7a3a),C_H0=new THREE.Color(0xffffff),C_H1=new THREE.Color(0xff9e6e),C_BG0=new THREE.Color(RETRO?'#cbbfa7':'#5b4fee'),C_BG1=new THREE.Color('#e9774c'),tmpC=new THREE.Color();
+let eT=0,eTarget=0,clkTimer=0;const C_SUN0=new THREE.Color(0xffffff),C_SUN1=new THREE.Color(0xff7a3a),C_H0=new THREE.Color(0xffffff),C_H1=new THREE.Color(0xff9e6e),C_BG0=new THREE.Color(RETRO?'#d8cdb7':'#5b4fee'),C_BG1=new THREE.Color('#e9774c'),tmpC=new THREE.Color();
 const SUN_P0=new THREE.Vector3(-310,190,170),SUN_P1=new THREE.Vector3(-330,95,250),tmpV=new THREE.Vector3();
 function setClock(h,m){CLKD.h=String(h).padStart(2,'0');CLKD.m=String(m).padStart(2,'0');texReg.filter(r=>r.draw.toString().includes('CLKD')).forEach(r=>{r.g.setTransform(1,0,0,1,0,0);r.g.save();r.draw(r.g,r.w,r.h);r.g.restore();r.t.needsUpdate=true})}
 function endClock(on){clearInterval(clkTimer);if(!on){setClock(9,35);return}let t=9*60+35;clkTimer=setInterval(()=>{t+=24;if(t>=1080){t=1080;clearInterval(clkTimer)}setClock((t/60)|0,t%60)},45)}
@@ -419,7 +419,10 @@ const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:
  void main(){vec3 c=texture2D(tC,v).rgb;vec3 a=pow(texture2D(tA,v).rgb,vec3(.4545));float la=dot(texture2D(tA,v).rgb,vec3(.299,.587,.114));
   float l=dot(c,vec3(.299,.587,.114))/max(la,.03);l=mix(1.,l,smoothstep(.02,.06,la));float t0=smoothstep(.12,.78,l);
   vec3 col=t0<.30?mix(cDark,a,.22):(t0<.72?a*vec3(.80,.77,.92):a);
-  if(soft>.5)col=a*mix(sh,vec3(1.),smoothstep(.05,.95,l))+vec3(.045)*smoothstep(1.,1.5,l);
+  if(soft>.5){float ls=clamp(l,0.,1.);col=a*mix(sh,vec3(1.),ls*ls*(3.-2.*ls));          // 단계 없는 연속 음영
+   col+=vec3(1.,.97,.9)*clamp(l-1.,0.,.6)*.4;                                                 // 광택 하이라이트
+   col=mix(col,vec3(dot(col,vec3(.299,.587,.114))),.1)*vec3(1.03,1.,.95);                    // 살짝 차분하고 따뜻하게
+   col*=1.07-.1*clamp(dot(v-vec2(.1,.95),vec2(.7071,-.7071)),0.,1.);}                          // 창문 쪽(왼쪽 위)이 조금 더 밝게
   col=mix(col,col*vec3(1.,.88,.62)+vec3(.05,.025,0.),warmK*smoothstep(wLo,wHi,l)*step(.72,t0));
   vec2 px=ow/res;float d0=ld(v);vec3 n0=texture2D(tN,v).rgb;float e=0.;
   for(int i=0;i<4;i++){vec2 o=i==0?vec2(px.x,0.):i==1?vec2(-px.x,0.):i==2?vec2(0.,px.y):vec2(0.,-px.y);
@@ -428,7 +431,7 @@ const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:
   if(texture2D(tD,v).r>.9999)col=cBg;
   if(grainA>0.){float n=fract(sin(dot(floor(gl_FragCoord.xy),vec2(12.9898,78.233)))*43758.5453);float m=fract(sin(dot(floor(gl_FragCoord.xy/3.),vec2(39.34,11.13)))*24634.63);col+=(n-.5)*grainA+(m-.5)*grainA*.5;}
   if(dbg>.5)col=vec3(l/3.);gl_FragColor=vec4(col,1.);}`});
-if(RETRO)Object.assign(post.uniforms,{soft:{value:1},grainA:{value:.075},ow:{value:2.3},eThr:{value:.5},sh:{value:new THREE.Vector3(.70,.62,.56)},cDark:{value:toLin('#1c1a1f')},cBg:{value:toLin('#cbbfa7')}});
+if(RETRO)Object.assign(post.uniforms,{soft:{value:1},grainA:{value:.06},ow:{value:1.6},eThr:{value:.5},sh:{value:new THREE.Vector3(.86,.80,.75)},cDark:{value:toLin('#221e1c')},cBg:{value:toLin('#d8cdb7')}});
 const aCache=new Map();const albOf=m=>{let a=aCache.get(m);if(!a){a=new THREE.MeshBasicMaterial({color:m.color.clone(),map:m.map||null,side:m.side});aCache.set(m,a)}return a};
 const qS=new THREE.Scene();qS.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),post));const qC=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
 // ── 카메라 장면(상태) ───────────────────────────────────────
@@ -771,7 +774,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
   const nk=p?p.wk.key:'',ok=hover&&hover.wk?hover.wk.key:'';if(nk!==ok||(!p&&hover)){hover=p;const hc=p&&p.wk.type==='chip'?p.wk.c:'',hk=p?p.wk.type:'';if(hk!==wkHK||hc!==wkChipHov){wkHK=hk;wkChipHov=hc;wkRedraw()}}}
  else if(hover){hover=null;cv.style.cursor='default';lbl.style.opacity=0}
  {eT+=(eTarget-eT)*Math.min(1,dt2*1.1);const k=eT<.001?0:eT;tmpC.copy(C_SUN0).lerp(C_SUN1,k);sun.color.copy(tmpC);sun.intensity=2.3-.95*k;fill.intensity=.3-.15*k;hemi.intensity=1.8-1.0*k;hemi.color.copy(C_H0).lerp(C_H1,k);sun.position.lerpVectors(SUN_P0,SUN_P1,k);win.position.copy(tmpV.copy(sun.position).normalize().multiplyScalar(250));win.lookAt(0,0,0);tmpC.copy(C_BG0).lerp(C_BG1,k).convertLinearToSRGB();post.uniforms.cBg.value.set(tmpC.r,tmpC.g,tmpC.b)}
- lampV=lampOn?lampEnv(performance.now()/1000-lampT0):Math.max(0,lampV-dt2*5);spot.intensity=lampV*4200*Math.max(0,1-1.4*eT);spot.angle=.6-.24*eT;post.uniforms.wLo.value=1+.35*eT;post.uniforms.wHi.value=1.6+.5*eT;cal.position.y=130-14*eT;post.uniforms.warmK.value=lampV;
+ lampV=lampOn?lampEnv(performance.now()/1000-lampT0):Math.max(0,lampV-dt2*5);spot.intensity=lampV*(RETRO?2600:4200)*Math.max(0,1-1.4*eT);spot.angle=.6-.24*eT;post.uniforms.wLo.value=1+.35*eT;post.uniforms.wHi.value=1.6+.5*eT;cal.position.y=130-14*eT;post.uniforms.warmK.value=lampV;
  {const onScr=st==='screen'&&cpos.distanceTo(tpos)<16;if(onScr&&!abWas){abStart=performance.now();abDirty=true;abDone=false}abWas=onScr;scr.material=onScr?ABM:(st==='end'?ENDM:BLACK);if(onScr){const ap=Math.min(1,(performance.now()-abStart)/1400);if(!abDone){drawAbout(ap);if(ap>=1)abDone=true}}if(onScr){placeMon();if(!mon.classList.contains('on'))mon.classList.add('on')}else if(mon.classList.contains('on'))mon.classList.remove('on')}
  if(st==='screen'&&abDone)wkTick();
  {const tt=clock.elapsedTime;LV.forEach(m=>{m.rotation.z=m.userData.base+Math.sin(tt*.9+m.userData.ph)*.07})}
@@ -792,7 +795,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
 const css=n=>'#'+n.toString(16).padStart(6,'0');
 const THEMES=[
  {n:'크림·레드·블루',W:0xf3e9d4,FL:0x85707c,RD:0xdb4a3e,BL:0x3f8fd8,YL:0xf0b93f,CM:0x3f86cc,DF:0x62a6e6},
- {n:'레트로 일러스트',W:0xe4d9c5,FL:0x6f6358,RD:0xa8361f,BL:0x78b5ae,YL:0xd39f3a,CM:0x46566a,DF:0x5d7088}];
+ {n:'레트로 일러스트',W:0xebe2d1,FL:0x9d8f7e,RD:0xb03a24,BL:0x86c2bb,YL:0xd9a845,CM:0x56677c,DF:0x6c8098}];
 const MATS={W,FL,RD,BL,YL,CM,DF};let themeI=0;
 function applyTheme(i){themeI=i;const T=THEMES[i];for(const k in MATS)MATS[k].color.set(T[k]);CRM=css(T.W);RED=css(T.RD);BLU=css(T.BL);YEL=css(T.YL);
  texReg.forEach(r=>{r.g.setTransform(1,0,0,1,0,0);r.g.save();r.draw(r.g,r.w,r.h);r.g.restore();r.t.needsUpdate=true});aCache.clear();
