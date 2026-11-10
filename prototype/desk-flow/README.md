@@ -24,3 +24,7 @@ Home → Work(모니터: 작업물 목록) → About(서랍: 이력서·자기�
   - 문서 이미지: `docs/resume.png`(있으면 우선) → `docs/resume-1.jpg`(개인정보 모자이크판), `docs/cover-1.jpg`·`docs/cover-2.jpg`. 가로 이미지는 가로 A4 종이로 나옴
   - 나머지 서류(My Story 등)는 글을 A4 종이에 자동 조판
 - 인트로: 블루톤 화면에 멘트가 타이핑되고 로딩바·% 표시
+- CONTACT 메일 보내기: `api/send.js`(Vercel 서버 함수)가 EmailJS로 실제 메일을 보냄. 키는 코드에 없음
+  - 필요한 값 4개: `EMAILJS_SERVICE_ID`, `EMAILJS_TEMPLATE_ID`, `EMAILJS_PUBLIC_KEY`, `EMAILJS_PRIVATE_KEY` → Vercel 프로젝트 Settings → Environment Variables, 내 컴퓨터는 `.env.local`(저장소에 안 올라감)
+  - EmailJS 템플릿에서 쓸 수 있는 이름: `{{from_email}}` `{{reply_to}}` `{{subject}}` `{{message}}` `{{sent_at}}`
+  - EmailJS Account → Security에서 "Allow EmailJS API for non-browser applications" 켜기

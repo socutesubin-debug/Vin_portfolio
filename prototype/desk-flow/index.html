@@ -274,7 +274,7 @@ body:has(#doc:not([hidden])) header{opacity:0;pointer-events:none}   /* 서류 �
 #form textarea{display:block;padding:14px 16px 8px;min-height:150px;white-space:pre-wrap;line-height:1.6}
 #form .sp{width:44px}   /* 제목 가운데 맞춤용 빈자리 */
 #form .mfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 14px 14px 16px}
-#form #st{margin:0;font-size:12px;color:#86868b}
+#form #st{margin:0;font-size:12px;color:#86868b}#form #st.err{color:#d93025}#send:disabled{opacity:.5;cursor:default}
 #send{all:unset;cursor:pointer;flex:none;width:46px;height:46px;display:grid;place-items:center;border-radius:50%;background:#0a84ff;color:#fff;box-shadow:0 6px 16px rgba(10,132,255,.35);transition:transform .15s,background .15s}#send:hover{background:#0071e3;transform:scale(1.06)}#send svg{margin:2px 2px 0 0}   /* 보내기: 아래 오른쪽 파란 동그라미 */
 #send:focus-visible,#form .tl button:focus-visible{outline:2px solid #0a64d8;outline-offset:2px}
 #load{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:24px;background:linear-gradient(160deg,#24549a 0%,#2f6db5 55%,#3f86cc 100%);color:#fff}   /* 인트로: 블루톤 */
@@ -315,7 +315,7 @@ body:has(#doc:not([hidden])) header{opacity:0;pointer-events:none}   /* 서류 �
   <div class="mf"><span class="lb">받는 사람:</span><span class="tok">박수빈 <small>&lt;eilibean01@gmail.com&gt;</small></span></div>
   <div class="mf"><label class="lb" for="from">보낸 사람:</label><input id="from" type="email" placeholder="답장 받을 이메일"></div>
   <div class="mf"><label class="lb" for="subj">제목:</label><input id="subj" type="text" placeholder="포트폴리오 잘 봤어요"></div>
-  <textarea id="msg" rows="7" aria-label="메시지" placeholder="안녕하세요! 좋은 하루 보내시길 바랍니다."></textarea>
+  <input id="hp" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"><textarea id="msg" rows="7" aria-label="메시지" placeholder="안녕하세요! 좋은 하루 보내시길 바랍니다."></textarea>
   <div class="mfoot"><p id="st" role="status"></p><button id="send" type="submit" aria-label="보내기" data-tip="보내기"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg></button></div></form>
 </section>
 <div id="load" role="status"><div class="li"><p id="ldT" aria-label="작업실을 정리 중이에요. 제 세계에 오신 것을 환영합니다."><span class="l1" aria-hidden="true"></span><br><span class="l2" aria-hidden="true"></span><i class="caret" aria-hidden="true"></i></p>
@@ -1037,7 +1037,18 @@ $('again').onclick=()=>{progT=prog=0;go('home')};
 drawPj();ctaEl.onclick=()=>{if(st==='pour')go('contact')};
 // ── 전화 받기 화면 ─────────────────────────────────────────────
 $('x').onclick=()=>back.onclick();
-$('form').addEventListener('submit',e=>{e.preventDefault();$('st').textContent='보내는 중…';callEl.classList.add('up');setTimeout(()=>{if(st==='call')go('end')},1100)});
+// 메일 보내기: 서버 함수(/api/send)가 EmailJS로 박수빈에게 실제 메일을 보냄. 성공하면 수화기를 내려놓고 마지막 화면으로
+let sending=false;
+$('form').addEventListener('submit',async e=>{e.preventDefault();if(sending)return;const stE=$('st'),from=$('from').value.trim(),msg=$('msg').value.trim();
+ stE.classList.remove('err');const bad=(t,el)=>{stE.textContent=t;stE.classList.add('err');el&&el.focus()};
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(from))return bad('답장 받을 이메일을 확인해 주세요',$('from'));
+ if(msg.length<2)return bad('메시지를 적어 주세요',$('msg'));
+ sending=true;$('send').disabled=true;stE.textContent='보내는 중…';
+ let ok=false,code='';try{const r=await fetch('/api/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from,subject:$('subj').value.trim(),message:msg,website:$('hp').value})});
+  const j=await r.json().catch(()=>({}));ok=r.ok&&j.ok;code=j.error||String(r.status)}catch(err){code='net'}
+ sending=false;$('send').disabled=false;
+ if(!ok)return bad(code==='config'||code==='404'||code==='405'?'메일 연결을 준비 중이에요. eilibean01@gmail.com 으로 보내 주세요':'보내지 못했어요. 잠시 뒤 다시 눌러 주세요');
+ stE.textContent='보냈어요!';$('from').value=$('subj').value=$('msg').value='';callEl.classList.add('up');setTimeout(()=>{if(st==='call')go('end')},1100)});
 
 // ── 수화기(전화 받기): 카메라에 붙은 3D 모델. 줄(용수철)이 늘어났다 줄어들며 띠~용~ 떨어져 등장 ──
 const hsA=new THREE.Group(),hsG=new THREE.Group(),hsC=new THREE.Group();hsA.visible=false;S.add(cam);cam.add(hsA);hsA.add(hsG);hsG.rotation.y=.35;
