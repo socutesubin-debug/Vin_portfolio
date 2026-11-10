@@ -2395,13 +2395,14 @@ addEventListener('scroll',function(){if(!tk){tk=1;requestAnimationFrame(f)}},{pa
 </script>
 <script>
 /* PinLock: 섹션 상단이 화면 맨 위에 닿으면 재생이 끝날 때까지 아래로 스크롤을 막아요. 위로는 언제든 갈 수 있어요. */
-function PinLock(sec,active){var on=false,ty=0;
+function PinLock(sec,active,next){var on=false,ty=0,cool=0;
+  function nudge(){var t=performance.now();if(t<cool)return;cool=t+1100;next&&next()}
   function y0(){return sec.getBoundingClientRect().top+scrollY}
   function blocking(){var r=sec.getBoundingClientRect();return active()&&r.top<=1&&r.bottom>innerHeight*.5}
-  addEventListener('wheel',function(e){if(e.deltaY>0&&blocking())e.preventDefault()},{passive:false});
+  addEventListener('wheel',function(e){if(e.deltaY>0&&blocking()){e.preventDefault();if(e.deltaY>4)nudge()}},{passive:false});
   addEventListener('touchstart',function(e){ty=e.touches[0].clientY},{passive:true});
-  addEventListener('touchmove',function(e){if(ty-e.touches[0].clientY>0&&blocking())e.preventDefault()},{passive:false});
-  addEventListener('keydown',function(e){if(/^(ArrowDown|PageDown|End| |Spacebar)$/.test(e.key)&&blocking()&&!/INPUT|TEXTAREA/.test((e.target||{}).tagName||''))e.preventDefault()});
+  addEventListener('touchmove',function(e){var d=ty-e.touches[0].clientY;if(d>0&&blocking()){e.preventDefault();if(d>40){ty=e.touches[0].clientY;nudge()}}},{passive:false});
+  addEventListener('keydown',function(e){if(/^(ArrowDown|PageDown|End| |Spacebar)$/.test(e.key)&&blocking()&&!/INPUT|TEXTAREA/.test((e.target||{}).tagName||'')){e.preventDefault();nudge()}});
   addEventListener('scroll',function(){if(!active())return;var r=sec.getBoundingClientRect();
     if(r.top<0&&r.bottom>0){scrollTo({top:y0(),behavior:'instant'})}},{passive:true});
   return {release:function(){on=false}}}
@@ -2415,7 +2416,7 @@ function PinLock(sec,active){var on=false,ty=0;
   var T=[].slice.call(pn.querySelectorAll('.pn-t')),S=[].slice.call(pn.querySelectorAll('.pn-s')),D=[].slice.call(pn.querySelectorAll('.pn-dots li')),
       ph=document.getElementById('pnPhone'),cur=document.getElementById('pnCur'),rip=document.getElementById('pnRip'),hs=document.getElementById('pnTap'),
       rm=matchMedia('(prefers-reduced-motion: reduce)').matches,ch=0,si=0,busy=false,tm=[],tk=0;
-  function setScr(i){var p=si;si=i;S.forEach(function(e,k){e.classList.toggle('on',k===i);e.classList.toggle('out',k===p&&k!==i)});
+  var scrT=0;function setScr(i){var p=si;si=i;scrT=performance.now();S.forEach(function(e,k){e.classList.toggle('on',k===i);e.classList.toggle('out',k===p&&k!==i)});
     uxHide();if(i===3)tm.push(setTimeout(uxShow,rm?0:250));if(i===4)tm.push(setTimeout(ux2Show,rm?0:450));if(i===6)tm.push(setTimeout(function(){if(si===6)pn.classList.add('ux3')},rm?0:500));for(var c=0;c<END.length&&END[c]<i;c++);if(c!==ch&&c<END.length)setCh(c);var t=TAP[i];hs.hidden=!t;S[i].appendChild(hs);S[i].scrollTop=0;bar();place()}
   function imgH(e){var im=e.querySelector('img');return e.clientWidth*(im.getAttribute('height')/im.getAttribute('width'))}
   function place(){var t=TAP[si];if(!t)return;var e=S[si];if(t[2]==='img'){var h=imgH(e);hs.style.cssText='left:'+(t[0]-30)+'%;top:'+(h*t[1]/100-e.clientHeight*.03)+'px;width:60%;height:'+(e.clientHeight*.06)+'px'}else hs.style.cssText='left:'+(t[0]-9)+'%;top:'+(t[1]-2.6)+'%;width:18%;height:5.2%'}
@@ -2442,7 +2443,9 @@ function PinLock(sec,active){var on=false,ty=0;
         if(AUTO[si]){setScr(si+1);next()}else step(next)},rm?300:DW[si]))})()}
   hs.addEventListener('click',function(){if(busy||si>=S.length-1)return;clear();seq++;step(play)});
   var pin=pn.querySelector('.pn-pin');
-  var lock=PinLock(pn,function(){return !done&&getComputedStyle(pin).display!=='none'});
+  /* 스크롤(휠·터치·키)하면 기다리지 않고 다음 화면으로 */
+  function skip(){if(!started||busy||performance.now()-scrT<(si===3||si===4?2400:900))return;if(si>=S.length-1){seq++;done=true;return}clear();seq++;if(AUTO[si]){setScr(si+1);play()}else step(play)}
+  var lock=PinLock(pn,function(){return !done&&getComputedStyle(pin).display!=='none'},skip);
   function f(){tk=0;if(getComputedStyle(pin).display==='none')return;var r=pn.getBoundingClientRect();
     if(r.top>innerHeight*.6){if(started&&!done){started=false;seq++;clear();uxHide();setCh(0);setScr(0)}return}
     if(!started&&r.top<innerHeight*.35){started=true;clear();setCh(0);setScr(0);play()}}
@@ -2505,7 +2508,7 @@ function PinLock(sec,active){var on=false,ty=0;
       rm=matchMedia('(prefers-reduced-motion: reduce)').matches,i=0,stage=0,tm=[],tk=0;
   var TAP=[[90.8,68.5],[50,34.5]];
   function lay(){var W=P[0].offsetWidth;P.forEach(function(p,k){var d=k-i,x=d===0?0:Math.sign(d)*(W*.5+48+W*.35)+(d-Math.sign(d))*(W*.7+40);
-    p.style.transform='translateX('+x+'px) scale('+(d?0.7:1)+')';p.style.filter=d?'brightness(.45) saturate(.7) drop-shadow(0 30px 40px rgba(0,0,0,.5))':'drop-shadow(0 40px 60px rgba(0,0,0,.55))';p.style.zIndex=10-Math.abs(d);p.style.opacity=Math.abs(d)>2?0:1});
+    p.style.transform='translateX('+x+'px) scale('+(d?0.7:1)+')';p.style.filter=d?'brightness(.45) saturate(.7) drop-shadow(0 30px 40px rgba(0,0,0,.5))':'drop-shadow(0 40px 60px rgba(0,0,0,.55))';p.style.zIndex=10-Math.abs(d);p.style.opacity=Math.abs(d)>2||(d<0&&innerWidth>900)?0:1});
     C.forEach(function(c,k){c.classList.toggle('on',k===i)})}
   function at(ms,f){tm.push(setTimeout(f,ms))}
   function clear(){tm.forEach(clearTimeout);tm=[];cur.style.transition='none';cur.style.opacity=0}
@@ -2528,7 +2531,7 @@ function PinLock(sec,active){var on=false,ty=0;
   var N=6,wide=function(){return innerWidth>900};
   function cls(n){sec.classList.toggle('pass',n>=4);var z=wide()&&n>=4;sec.classList.toggle('szoom',z);sec.classList.toggle('z1',z&&n===4);sec.classList.toggle('z1m',z&&n===4);sec.classList.toggle('z2',z&&n===5)}
   function setS(n){clear();i=Math.min(n,2);lay();scroll3(n>=3);cls(n)}
-  function apply(n){var prev=stage;stage=n;
+  var stT=0;function apply(n){var prev=stage;stage=n;stT=performance.now();
     if(rm||n!==prev+1){setS(n);return}
     clear();
     if(n===1){tap(0,function(){i=1;lay()})}
@@ -2541,7 +2544,8 @@ function PinLock(sec,active){var on=false,ty=0;
   function stopPlay(){ptm.forEach(clearTimeout);ptm=[]}
   function play(){stopPlay();(function next(){ptm.push(setTimeout(function(){
       if(stage>=N-1){done=true;lock.release();return}apply(stage+1);next()},rm?300:DWS[stage]))})()}
-  var lock=PinLock(sec,function(){return !done});
+  function skip(){if(!started||performance.now()-stT<(stage>=3?2000:1000))return;stopPlay();if(stage>=N-1){done=true;return}apply(stage+1);play()}
+  var lock=PinLock(sec,function(){return !done},skip);
   function f(){tk=0;var r=sec.getBoundingClientRect();
     if(r.top>innerHeight*.6){if(started&&!done){started=false;stopPlay();stage=0;setS(0)}return}
     if(!started&&r.top<innerHeight*.35){started=true;stage=0;setS(0);play()}}
