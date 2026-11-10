@@ -972,7 +972,7 @@ function bendSheet(s,fly,t){const a=s.m.geometry.attributes.position,b=s.base,hw
  for(let i=0;i<a.count;i++){const x=b[i*3],y=b[i*3+1],nx=x/hw,ny=y/hh,lo=(1-ny)/2;
   a.array[i*3+2]=.32*nx*nx+fly*(-3.4*lo*lo+.7*Math.sin(nx*2.4+t*6)*lo)}   /* 평소엔 살짝 휜 종이, 날아오는 동안엔 아래가 펄럭 */
  a.needsUpdate=true;s.m.geometry.computeVertexNormals();s.m.geometry.computeBoundingSphere()}
-function docTargets(){const tanF=Math.tan(THREE.MathUtils.degToRad(cam.fov/2)),s0=docSt.sh[0],lw=s0.w>s0.h,D=Math.max(s0.h/((lw?.90:.80)*2*tanF),s0.w/((lw?.93:.90)*2*tanF*cam.aspect)),vh=2*D*tanF;
+function docTargets(){const tanF=Math.tan(THREE.MathUtils.degToRad(cam.fov/2)),s0=docSt.sh[0],lw=s0.w>s0.h,D=Math.max(s0.h/((lw?.72:.80)*2*tanF),s0.w/((lw?.744:.90)*2*tanF*cam.aspect)),vh=2*D*tanF;
  _tp.set(0,-.025*vh,-D).applyQuaternion(cam.quaternion).add(cam.position);return{D,vh,vw:vh*cam.aspect}}
 function renderDoc(dt2,t){if(!docSt)return;const S=docSt;S.p=cl01(S.p+S.dir*(RM?1:dt2/1.05));
  const u=files[S.k].userData;u.paper.updateWorldMatrix(true,false);u.paper.matrixWorld.decompose(_p,_q,_s);
