@@ -347,10 +347,12 @@ const table=new THREE.Group();table.add(mTable);table.scale.setScalar(100);S.add
 const cab=new THREE.Group();cab.position.set(40,0,0);S.add(cab);
 const CH=TOP-6,CM=LM(0x3f86cc),DF=LM(0x62a6e6);   /* CM·DF: 예전 상자 서랍장 색(테마 목록에만 남음) */
 const cabM=fitModel(nCab,{rotY:-Math.PI/2,size:CH,axis:'y'});cab.add(cabM);cab.updateMatrixWorld(true);   /* 높이를 책상 밑 69cm에 맞춤 */
+const DRT=5.5;   /* 서랍 앞부분 두께(cm) */
 const CW=(()=>{const b=new THREE.Box3().setFromObject(cabM);return b.max.x-b.min.x})(),drawers=[],_lv=new THREE.Vector3();
 ['drawer_0','drawer_1','drawer_2'].forEach((nm,i)=>{const m=cabM.getObjectByName(nm),b=new THREE.Box3().setFromObject(m);
- const d=new THREE.Group();d.position.copy(cab.worldToLocal(_lv.set((b.min.x+b.max.x)/2,(b.min.y+b.max.y)/2,b.max.z)));d.position.x=0;cab.add(d);d.updateMatrixWorld(true);d.attach(m);
- const h=b.max.y-b.min.y,dp=b.max.z-b.min.z;d.userData.z0=d.position.z;d.userData.i=i;d.userData.h=h;d.userData.depth=dp;   /* dp: 모델 서랍 앞부분 두께(손잡이 포함 약 16cm) */
+ const d=new THREE.Group();d.position.copy(cab.worldToLocal(_lv.set((b.min.x+b.max.x)/2,(b.min.y+b.max.y)/2,b.max.z)));d.position.x=0;cab.add(d);d.updateMatrixWorld(true);
+ const th=new THREE.Group();d.add(th);th.attach(m);th.scale.z=DRT/(b.max.z-b.min.z);m.material=CM;   /* 모델 서랍 앞부분(약 16cm)을 DRT 두께로 얇게, 색은 블루톤 */
+ const h=b.max.y-b.min.y,dp=DRT;d.userData.z0=d.position.z;d.userData.i=i;d.userData.h=h;d.userData.depth=dp;
  if(i===2){ // 파일 서랍: 두꺼운 앞부분 뒤로 안쪽 바닥·옆판·뒷판을 덧붙인다(모델에는 앞부분만 있음)
   const w=CW-8,ih=h-6,L=40,zc=-dp-L/2;add(BX(w,1.2,L),W,[0,-h/2+2.5,zc],[0,0,0],d);[-1,1].forEach(s=>add(BX(1.2,ih,L),W,[s*(w/2-.6),-1,zc],[0,0,0],d));add(BX(w,ih,1.2),W,[0,-1,-dp-L],[0,0,0],d)}
  drawers.push(d)});
@@ -388,15 +390,18 @@ const im=fitModel(nImac,{rotY:-Math.PI/2,size:54.7});imac.add(im);   /* 24인치
 const kbd=fitModel(nKb,{size:41.9});kbd.position.set(-4,0,20);imac.add(kbd);   /* 매직 키보드(숫자 키패드): 폭 41.9cm */
 const mse=fitModel(nMouse,{rotY:-Math.PI/2,size:11.4,axis:'z'});mse.position.set(24,0,19);imac.add(mse);   /* 매직 마우스: 길이 11.4cm, 로고가 손바닥 쪽 */
 // 모니터 화면 판(scr): WORK 화면 HTML을 맞추는 기준. 모델의 화면 면(Screen_Screen)을 찾아 같은 크기·방향으로 바로 앞에 덧댄다
+// 본체 색: 모델의 하늘색(턱·받침·뒷면)을 위쪽 흰 테두리와 같은 흰색으로
+nImac.traverse(o=>{if(o.isMesh&&/LightBlue|DarkBlue|Screen_White/.test(o.name))o.material=W});
 const scr=new THREE.Mesh(new THREE.PlaneGeometry(.598,.336),BLACK);fx.push(scr);
 {imac.updateMatrixWorld(true);let sm=null;nImac.traverse(o=>{if(o.isMesh&&/Screen_Screen/.test(o.name))sm=o});
- sm.geometry.computeBoundingBox();const bb=sm.geometry.boundingBox,sz=bb.getSize(new THREE.Vector3()),ctr=bb.getCenter(new THREE.Vector3());
- const ax=['x','y','z'],nA=ax.reduce((a,k)=>sz[k]<sz[a]?k:a,'x'),rest=ax.filter(k=>k!==nA);   /* 가장 얇은 축 = 화면이 보는 방향 */
- const unit=k=>new THREE.Vector3(k==='x'?1:0,k==='y'?1:0,k==='z'?1:0),toW=v=>v.clone().transformDirection(sm.matrixWorld);
- const vA=rest.reduce((a,k)=>Math.abs(toW(unit(k)).y)>Math.abs(toW(unit(a)).y)?k:a),uA=rest.find(k=>k!==vA);   /* 세상에서 위쪽에 가까운 축 = 화면 세로 */
- const n=unit(nA);if(toW(n).z<0)n.negate();const v=unit(vA);if(toW(v).y<0)v.negate();const u=new THREE.Vector3().crossVectors(v,n);
- scr.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(u,v,n));scr.scale.set(sz[uA]/.598,sz[vA]/.336,1);
- scr.position.copy(ctr).addScaledVector(n,sz[nA]/2+Math.max(sz[uA],sz[vA])*.004);sm.add(scr)}
+ // 화면 면은 뒤로 약 10° 기울어 있다 → 꼭짓점들로 실제 기울기를 구해 판을 같은 각도·크기로 맞춘다(가로는 세상 x축 그대로)
+ const pa=sm.geometry.attributes.position,P=[],q=new THREE.Vector3();for(let i=0;i<pa.count;i++)P.push(q.fromBufferAttribute(pa,i).applyMatrix4(sm.matrixWorld).clone());
+ let my=0,mz=0;P.forEach(p=>{my+=p.y;mz+=p.z});my/=P.length;mz/=P.length;let syy=0,syz=0;P.forEach(p=>{syy+=(p.y-my)**2;syz+=(p.y-my)*(p.z-mz)});
+ const u=new THREE.Vector3(1,0,0),v=new THREE.Vector3(0,1,syz/syy).normalize(),n=new THREE.Vector3().crossVectors(u,v);   /* z = 기울기·y 직선 맞춤 */
+ let a0=1e9,a1=-1e9,b0=1e9,b1=-1e9,c1=-1e9;P.forEach(p=>{const x=p.dot(u),y=p.dot(v),z=p.dot(n);a0=Math.min(a0,x);a1=Math.max(a1,x);b0=Math.min(b0,y);b1=Math.max(b1,y);c1=Math.max(c1,z)});
+ const ctr=u.clone().multiplyScalar((a0+a1)/2).addScaledVector(v,(b0+b1)/2).addScaledVector(n,c1+.05);
+ scr.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(u,v,n));scr.scale.set((a1-a0)/.598,(b1-b0)/.336,1);scr.position.copy(ctr);
+ S.add(scr);sm.attach(scr)}   /* 세상 좌표로 맞춘 뒤 화면 부품에 붙여 함께 움직이게 */
 const lamp=new THREE.Group();lamp.position.set(-47,TOP+.949*26,2);lamp.rotation.y=Math.PI/2;lamp.scale.setScalar(26);S.add(lamp);lamp.add(mStand);
 const coneM=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.4,depthWrite:false,blending:THREE.AdditiveBlending});
 const cone=new THREE.Mesh(new THREE.ConeGeometry(.52,1.25,40,1,true),coneM);cone.position.set(.01,-.325,.78);
@@ -410,7 +415,7 @@ const mug=new THREE.Group();mug.position.set(30,TOP,25);mug.rotation.y=-.25;S.ad
 mug.add(fitModel(nCup,{size:9,axis:'y'}));   /* 커피잔(models/cup.glb): 높이 9cm */
 const cup=new THREE.Group();cup.position.set(38,TOP,-18);S.add(cup);
 cup.add(fitModel(nPen,{size:19,axis:'y'}));   /* 펜꽂이(models/penholder.glb): 연필 끝까지 19cm */
-const CLKD={h:'09',m:'35'};const clk=new THREE.Group();clk.position.set(-39,TOP,-8);clk.rotation.y=.2;S.add(clk);
+const CLKD=(d=>({h:String(d.getHours()).padStart(2,'0'),m:String(d.getMinutes()).padStart(2,'0')}))(new Date());const clk=new THREE.Group();clk.position.set(-39,TOP,-8);clk.rotation.y=.2;S.add(clk);
 clk.add(fitModel(nClock,{size:21}));   /* 플립 시계(models/flipclock.glb): 폭 21cm */
 // 숫자판: 모델 정면 좌(시)·우(분) 판 위에 숫자 그림을 붙인다(모델 좌표: 판 .199×.178, 가운데 x ±.1595 · y .276, 앞면 z .063). Ending에서 시간이 흐르면 다시 그려진다(setClock)
 [-1,1].forEach((s,i)=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(.199,.178),TM(tex(224,200,(g,w,h)=>{g.fillStyle=INK;g.fillRect(0,0,w,h);g.fillStyle=CRM;g.font='600 150px Jost, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(i?CLKD.m:CLKD.h,w/2,h/2+8);g.fillStyle=INK;g.fillRect(0,h/2-2,w,4)})));
@@ -427,7 +432,13 @@ const SCRON=new THREE.MeshBasicMaterial({color:0xe6dcc6});const ENDM=new THREE.M
 let eT=0,eTarget=0,clkTimer=0;const C_SUN0=new THREE.Color(0xffffff),C_SUN1=new THREE.Color(0xff7a3a),C_H0=new THREE.Color(0xffffff),C_H1=new THREE.Color(0xff9e6e),C_BG0=new THREE.Color(RETRO?'#d8cdb7':'#5b4fee'),C_BG1=new THREE.Color('#e9774c'),tmpC=new THREE.Color();
 const SUN_P0=new THREE.Vector3(-310,190,170),SUN_P1=new THREE.Vector3(-330,95,250),tmpV=new THREE.Vector3();
 function setClock(h,m){CLKD.h=String(h).padStart(2,'0');CLKD.m=String(m).padStart(2,'0');texReg.filter(r=>r.draw.toString().includes('CLKD')).forEach(r=>{r.g.setTransform(1,0,0,1,0,0);r.g.save();r.draw(r.g,r.w,r.h);r.g.restore();r.t.needsUpdate=true})}
-function endClock(on){clearInterval(clkTimer);if(!on){setClock(9,35);return}let t=9*60+35;clkTimer=setInterval(()=>{t+=24;if(t>=1080){t=1080;clearInterval(clkTimer)}setClock((t/60)|0,t%60)},45)}
+// 플립 시계는 실제 시각을 보여 준다(방문자 컴퓨터 시계, 분이 바뀔 때만 다시 그림). Ending 연출 동안만 멈춘다
+let clkLive=true,clkLast='';
+function tickClock(){if(!clkLive)return;const d=new Date(),k=d.getHours()+':'+d.getMinutes();if(k!==clkLast){clkLast=k;setClock(d.getHours(),d.getMinutes())}}
+// Ending(퇴근): 지금 시각에서 18:00까지 빠르게 흘러간다. 이미 18시가 지났으면 지금 시각 그대로
+function endClock(on){clearInterval(clkTimer);if(!on){clkLive=true;clkLast='';tickClock();return}clkLive=false;const d=new Date();let t=d.getHours()*60+d.getMinutes();if(t>=1080)return;
+ clkTimer=setInterval(()=>{t=Math.min(1080,t+24);setClock((t/60)|0,t%60);if(t>=1080)clearInterval(clkTimer)},45)}
+setInterval(tickClock,5000);
 // 창문 그림자: 햇빛 앞에 창틀(바깥 틀 + 문설주)만 두고 그림자만 드리운다
 const winM=new THREE.MeshBasicMaterial({colorWrite:false,depthWrite:false,side:THREE.DoubleSide});
 const win=new THREE.Group();S.add(win);win.position.copy(sun.position.clone().normalize().multiplyScalar(250));win.lookAt(0,0,0);
@@ -477,7 +488,7 @@ const qS=new THREE.Scene();qS.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),po
 // ── 카메라 장면(상태) ───────────────────────────────────────
 const portrait=()=>innerWidth/innerHeight<.9;
 const V=(a)=>new THREE.Vector3(...a);
-const CAMS={end:[[-8,114,138],[-8,100,-6]],home:[[0,104,160],[0,98,-6]],screen:[[0,106,44],[0,105,-6]],work:[[40,46,150],[40,38,20]],open:[[40,90,116],[40,21,58]],contact:[[6,98,68],[50,82,4]]};
+const CAMS={end:[[-8,114,138],[-8,100,-6]],home:[[0,104,160],[0,98,-6]],screen:[[0,106,44],[0,105,-6]],work:[[40,46,150],[40,38,20]],open:[[40,90,108],[40,21,50]],contact:[[6,98,68],[50,82,4]]};
 CAMS.pour=CAMS.open;CAMS.call=CAMS.contact;
 // WORK 모니터: 화면 정중앙 바로 앞에서 화면과 수직으로(완전 정면) 보도록 카메라 위치를 계산. 창 크기에 맞춰 거리 조절
 const _sc=new THREE.Vector3(),_sn=new THREE.Vector3(),_sq=new THREE.Quaternion(),_ss=new THREE.Vector3();
@@ -823,7 +834,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  if(st==='screen'&&abDone)wkTick();
  {const tt=clock.elapsedTime;LV.forEach(m=>{m.rotation.z=m.userData.base+Math.sin(tt*.9+m.userData.ph)*.07})}
  if(cardOpen){bcRY+=(bcTY-bcRY)*.12;bcRX+=(bcTX-bcRX)*.12;bcSpin.style.transform=`rotateX(${bcRX}deg) rotateY(${bcRY}deg)`}
- drawers.forEach((d,i)=>{const o=(i===2&&(fileOpen||prog>.05))?46+d.userData.depth-4:0;   /* 서류 서랍은 끝까지 빼서 안이 다 보이게(앞부분 두께만큼 더) */d.position.z+=((d.userData.z0+o)-d.position.z)*.1});
+ drawers.forEach((d,i)=>{const o=(i===2&&(fileOpen||prog>.05))?d.userData.depth+3+(NF-1)*FS+5:0;   /* 서류 서랍은 폴더가 다 보일 만큼만 뺀다 */d.position.z+=((d.userData.z0+o)-d.position.z)*.1});
  // 서류 폴더: 서랍 안에 서 있고, 마우스를 올린 폴더는 살짝 떠오르며 안의 종이가 빼꼼 나온다
  files.forEach(f=>{f.visible=fileOpen;const u=f.userData,tg=(st==='open'&&hover&&hover.doc===u.k)?1:0;u.h+=(tg-u.h)*(RM?1:Math.min(1,dt2*9));
   f.position.set(40,22+u.h*3.2,fileDrawer.position.z-fileDrawer.userData.depth-3-u.k*FS);f.quaternion.setFromEuler(fEu.set(-.3+u.jit,0,u.jit*.5));u.paper.position.y=u.h*7.5});
