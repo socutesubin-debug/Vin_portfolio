@@ -236,7 +236,7 @@ html.cc input,html.cc textarea{cursor:text!important}
 @media (prefers-reduced-motion:reduce){#mon.on,#bc.on .cd,#rings span{animation:none!important;opacity:1}#mon *{animation:none!important;opacity:1!important}#c{transition:none}}
 </style>
 <canvas id="c" aria-label="일러스트 책상 3D. 서랍에는 소개 서류(이력서·자기소개서 등), 모니터에는 작업물이 있어요."></canvas>
-<header><div class="logo">Vision INside</div><nav aria-label="주 메뉴"><a href="#home">HOME</a><a href="#about">ABOUT</a><a href="#work">WORK</a><a href="#contact">CONTACT</a></nav></header>
+<header><div class="logo">Vision INside</div><nav aria-label="주 메뉴"><a href="#home">HOME</a><a href="#work">WORK</a><a href="#about">ABOUT</a><a href="#contact">CONTACT</a></nav></header>
 <div id="label"></div>
 <div id="hint"></div>
 <button id="back" hidden>Back</button>
@@ -415,9 +415,9 @@ files.forEach((f,k)=>{const d=34+((k*37)%11)*3.6,sx=d*.364*1.8*.85,sy=d*.364*.85
 // ── 상태 전환 ────────────────────────────────────────────────
 const hint=$('hint'),back=$('back'),pj=$('pj'),callEl=$('call');
 const HINT={};
-// 화면 이름(코드 안): screen=모니터(WORK), work/open=서랍(ABOUT). 흐름: home → work → open → screen → contact → end
+// 화면 이름(코드 안): screen=모니터(WORK), work/open=서랍(ABOUT). 흐름: home → screen → work → open → contact → end
 const HASH={end:'thanks',home:'',work:'about',open:'about-open',pour:'about-open',screen:'work',contact:'contact',call:'call'};
-const BACK={end:'contact',work:'home',open:'work',pour:'open',screen:'open',contact:'screen',call:'contact'};
+const BACK={end:'contact',screen:'home',work:'screen',open:'work',pour:'open',contact:'open',call:'contact'};
 const NAV={end:'contact',home:'home',work:'about',open:'about',pour:'about',screen:'work',contact:'contact',call:'contact'};
 // 카메라 이동: 요청 0.3초 뒤 출발 → 천천히 가속 → 천천히 안착 (cubic-bezier .7,0,.16,1, 거리에 따라 1.3~2.8초)
 const bez=(x1,y1,x2,y2)=>{const cx=3*x1,bx=3*(x2-x1)-cx,ax=1-cx-bx,cy=3*y1,by=3*(y2-y1)-cy,ay=1-cy-by;
@@ -485,7 +485,7 @@ function step(dy,e){
  const now=performance.now();if(now-accT>300)acc=0;accT=now;acc+=dy;
  if(st==='pour'){autoP=false;progT=Math.max(0,Math.min(1,progT+dy*.0008));if(progT<=0&&dy<0){go('open')}return}
  if(Math.abs(acc)<90)return;const d=acc>0?1:-1;acc=0;
- if(st==='home'&&d>0)go('work');else if(st==='work'){go(d>0?'open':'home')}else if(st==='open'){if(d>0){if(performance.now()-openT>900)go('screen')}else go('work')}else if(st==='screen')go(d>0?'contact':'open');else if(st==='contact'){go(d>0?'end':'screen')}else if(st==='end'&&d<0)go('contact')}
+ if(st==='home'&&d>0)go('screen');else if(st==='screen')go(d>0?'work':'home');else if(st==='work'){go(d>0?'open':'screen')}else if(st==='open'){if(d>0){if(performance.now()-openT>900)go('contact')}else go('work')}else if(st==='contact'){go(d>0?'end':'open')}else if(st==='end'&&d<0)go('contact')}
 addEventListener('wheel',e=>{if(e.target.closest&&e.target.closest('#form,#doc'))return;step(e.deltaY,e)},{passive:false});
 let ty=null;addEventListener('touchstart',e=>{ty=e.touches[0].clientY},{passive:true});
 addEventListener('touchmove',e=>{if(ty==null||e.target.closest('#form,#doc'))return;const y=e.touches[0].clientY,dy=(ty-y)*2.2;ty=y;step(dy,e)},{passive:false});

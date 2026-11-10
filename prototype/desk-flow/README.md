@@ -1,7 +1,7 @@
 # VIN 책상 흐름 (3D 프로토타입)
 
 three.js 책상 장면 하나로 이어지는 포트폴리오 흐름.
-Home → About(서랍: 이력서·자기소개서 등 서류) → Work(모니터: 작업물 목록) → Contact(전화) → Ending(퇴근)
+Home → Work(모니터: 작업물 목록) → About(서랍: 이력서·자기소개서 등 서류) → Contact(전화) → Ending(퇴근)
 
 - 실행: `index.html`을 정적 서버로 열기 (예: `npx serve prototype/desk-flow`)
 - `models.js`: 3D 모델(스탠드·iMac·전화기·수화기·책상·의자) base64
