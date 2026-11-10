@@ -771,9 +771,9 @@ function updHandset(){
  hsA.visible=true;hsA.position.set(-.72*halfW,A,-D);hsA.rotation.z=rot;
  hsG.scale.setScalar(sc);hsG.position.y=-len;
  hsC.visible=len>.3;hsC.scale.y=Math.max(.05,len/(sc*HB.cordLen))}
-// 매트캡 재질 구분: 금속(스탠드·모니터·서랍장·시계) · 플라스틱(전화기·수화기·컵·연필꽂이·의자) · 나머지는 종이
+// 매트캡 재질 구분: 금속(스탠드·서랍장·시계) · 플라스틱(모니터·전화기·수화기·컵·연필꽂이·의자) · 나머지는 종이
 if(MATCAP){const MK=(g,k)=>g&&g.traverse(o=>{if(o.isMesh)o.userData.mk=(o.material&&o.material.map)?'paper':k});
- MK(lamp,'metal');MK(imac,'metal');MK(cab,'metal');MK(clk,'metal');MK(phone,'plastic');MK(hsA,'plastic');MK(mug,'plastic');MK(cup,'plastic');MK(chair,'plastic')}
+ MK(lamp,'metal');MK(imac,'plastic');MK(cab,'metal');MK(clk,'metal');MK(phone,'plastic');MK(hsA,'plastic');MK(mug,'plastic');MK(cup,'plastic');MK(chair,'plastic')}
 // ── 루프 ───────────────────────────────────────────────────────
 const clock=new THREE.Clock(),bumpBase=new Map(),vis=[],tmpQ=new THREE.Quaternion(),startQ=new THREE.Quaternion();
 const ease=x=>x*x*(3-2*x),fEu=new THREE.Euler();
