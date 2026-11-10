@@ -426,7 +426,7 @@ const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:
    col+=vec3(1.,.97,.9)*clamp(l-1.,0.,.6)*.4;                                                 // 광택 하이라이트
    col=mix(col,vec3(dot(col,vec3(.299,.587,.114))),.1)*vec3(1.03,1.,.95);                    // 살짝 차분하고 따뜻하게
    col*=1.07-.1*clamp(dot(v-vec2(.1,.95),vec2(.7071,-.7071)),0.,1.);}                          // 창문 쪽(왼쪽 위)이 조금 더 밝게
-  if(mc>.5){vec3 W3=vec3(.299,.587,.114);float ms=dot(pow(texture2D(tM,v).rgb,vec3(.4545)),W3)/max(dot(a,W3),.03);vec3 m=a*clamp(ms/.74,0.,1.2)*vec3(1.02,1.,.97);float ls=clamp(l,0.,1.);   // 매트캡(물건 볼륨) × 그림자(창문·물체)
+  if(mc>.5){vec3 W3=vec3(.299,.587,.114);float ms=dot(pow(texture2D(tM,v).rgb,vec3(.4545)),W3)/max(dot(a,W3),.03);vec3 m=a*clamp(ms/.64,0.,1.25)*vec3(1.02,1.,.97);float ls=clamp(l,0.,1.);   // 매트캡(물건 볼륨) × 그림자(창문·물체)
    col=m*mix(sh,vec3(1.),ls*ls*(3.-2.*ls))+vec3(1.,.97,.9)*clamp(l-1.,0.,.5)*.3;}
   col=mix(col,col*vec3(1.,.88,.62)+vec3(.05,.025,0.),warmK*smoothstep(wLo,wHi,l)*step(.72,t0));
   vec2 px=ow/res;float d0=ld(v);vec3 n0=texture2D(tN,v).rgb;float e=0.;
@@ -436,11 +436,13 @@ const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:
   if(texture2D(tD,v).r>.9999)col=cBg;
   if(grainA>0.){float n=fract(sin(dot(floor(gl_FragCoord.xy),vec2(12.9898,78.233)))*43758.5453);float m=fract(sin(dot(floor(gl_FragCoord.xy/3.),vec2(39.34,11.13)))*24634.63);col+=(n-.5)*grainA+(m-.5)*grainA*.5;}
   if(dbg>.5)col=vec3(l/3.);gl_FragColor=vec4(col,1.);}`});
-if(MATCAP)Object.assign(post.uniforms,{mc:{value:1},grainA:{value:.035},ow:{value:1.5},sh:{value:new THREE.Vector3(.86,.83,.88)}});
+if(MATCAP)Object.assign(post.uniforms,{mc:{value:1},grainA:{value:.035},ow:{value:1.5},sh:{value:new THREE.Vector3(.92,.90,.94)}});
 if(RETRO)Object.assign(post.uniforms,{soft:{value:1},grainA:{value:.06},ow:{value:1.6},eThr:{value:.5},sh:{value:new THREE.Vector3(.86,.80,.75)},cDark:{value:toLin('#221e1c')},cBg:{value:toLin('#d8cdb7')}});
 const aCache=new Map();const albOf=m=>{let a=aCache.get(m);if(!a){a=new THREE.MeshBasicMaterial({color:m.color.clone(),map:m.map||null,side:m.side});aCache.set(m,a)}return a};
-const MCT=MATCAP?new THREE.TextureLoader().load('matcap/pearl.jpg',t=>{t.colorSpace=THREE.SRGBColorSpace}):null,mCache=new Map();
-const mcOf=m=>{if(m.isMeshBasicMaterial)return m;let x=mCache.get(m);if(!x){x=new THREE.MeshMatcapMaterial({color:m.color.clone(),map:m.map||null,matcap:MCT,side:m.side});mCache.set(m,x)}return x};
+const MCK={},mCache=new Map();
+if(MATCAP){const tl=new THREE.TextureLoader(),cs=t=>{t.colorSpace=THREE.SRGBColorSpace;return t},fb=cs(tl.load('matcap/pearl.jpg'));
+ ['metal','plastic','paper'].forEach(k=>{MCK[k]=fb;const ok=t=>{MCK[k]=cs(t);mCache.clear()};tl.load('matcap/'+k+'.jpg',ok,undefined,()=>tl.load('matcap/'+k+'.png',ok,undefined,()=>{}))})}
+const mcOf=(m,k)=>{if(m.isMeshBasicMaterial)return m;const key=m.uuid+k;let x=mCache.get(key);if(!x){x=new THREE.MeshMatcapMaterial({color:m.color.clone(),map:m.map||null,matcap:MCK[k]||MCK.paper,side:m.side});mCache.set(key,x)}return x};
 const qS=new THREE.Scene();qS.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),post));const qC=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
 // ── 카메라 장면(상태) ───────────────────────────────────────
 const portrait=()=>innerWidth/innerHeight<.9;
@@ -764,6 +766,9 @@ function updHandset(){
  hsA.visible=true;hsA.position.set(-.72*halfW,A,-D);hsA.rotation.z=rot;
  hsG.scale.setScalar(sc);hsG.position.y=-len;
  hsC.visible=len>.3;hsC.scale.y=Math.max(.05,len/(sc*HB.cordLen))}
+// 매트캡 재질 구분: 금속(스탠드·모니터·서랍장·시계) · 플라스틱(전화기·수화기·컵·연필꽂이·의자) · 나머지는 종이
+if(MATCAP){const MK=(g,k)=>g&&g.traverse(o=>{if(o.isMesh)o.userData.mk=(o.material&&o.material.map)?'paper':k});
+ MK(lamp,'metal');MK(imac,'metal');MK(cab,'metal');MK(clk,'metal');MK(phone,'plastic');MK(hsA,'plastic');MK(mug,'plastic');MK(cup,'plastic');MK(chair,'plastic')}
 // ── 루프 ───────────────────────────────────────────────────────
 const clock=new THREE.Clock(),bumpBase=new Map(),vis=[],tmpQ=new THREE.Quaternion(),startQ=new THREE.Quaternion();
 const ease=x=>x*x*(3-2*x),fEu=new THREE.Euler();
@@ -797,7 +802,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  R.setRenderTarget(rtC);R.render(S,cam);
  {const hid=[];fx.forEach(o=>{if(o!==scr&&o.visible){o.visible=false;hid.push(o)}});const sw=[];
   S.traverse(o=>{if(o.isMesh&&o.visible&&o.material&&o.material.colorWrite!==false){sw.push([o,o.material]);o.material=albOf(o.material)}});
-  R.setRenderTarget(rtA);R.render(S,cam);if(MATCAP){sw.forEach(([o,m])=>o.material=mcOf(m));R.setRenderTarget(rtM);R.render(S,cam)}sw.forEach(([o,m])=>o.material=m);hid.forEach(o=>o.visible=true)}
+  R.setRenderTarget(rtA);R.render(S,cam);if(MATCAP){sw.forEach(([o,m])=>o.material=mcOf(m,o.userData.mk||'paper'));R.setRenderTarget(rtM);R.render(S,cam)}sw.forEach(([o,m])=>o.material=m);hid.forEach(o=>o.visible=true)}
  vis.length=0;fx.forEach(o=>{if(o.visible){o.visible=false;vis.push(o)}});S.overrideMaterial=nMat;R.setRenderTarget(rtN);R.render(S,cam);S.overrideMaterial=null;vis.forEach(o=>o.visible=true);
  R.setRenderTarget(null);R.render(qS,qC);updCur();requestAnimationFrame(loop)}
 const css=n=>'#'+n.toString(16).padStart(6,'0');
