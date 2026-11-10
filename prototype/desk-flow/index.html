@@ -314,7 +314,7 @@ const load=(k,mt)=>new Promise((res,rej)=>loader.parse(b64(window.VIN_MODELS[k])
 const [mStand,mPhone,mTable,mChair,mHand]=await Promise.all([['stand',RD],['phone',BL],['table',W],['chair',YL],['handset',BL]].map(([k,m])=>load(k,m)));
 mChair.traverse(o=>{if(o.isMesh&&/base/i.test(o.name))o.material=G});
 // 새 모델(models/*.glb, 원본은 public/models/src): 원래 색·텍스처는 그대로 두고, 화면 스타일에 맞게 '밝기만 계산하는 재질'로 바꾼다
-const KM=m=>{const o={color:m.color?m.color.clone():new THREE.Color(1,1,1),map:m.map||null,side:m.side};return RETRO?new THREE.MeshPhongMaterial({...o,shininess:42,specular:0x4a4640}):new THREE.MeshLambertMaterial(o)};
+const KM=m=>{const o={name:m.name,color:m.color?m.color.clone():new THREE.Color(1,1,1),map:m.map||null,side:m.side};return RETRO?new THREE.MeshPhongMaterial({...o,shininess:42,specular:0x4a4640}):new THREE.MeshLambertMaterial(o)};
 const loadGLB=f=>loader.loadAsync('models/'+f).then(g=>{const root=g.scene,mc=new Map();root.traverse(o=>{if(o.isMesh){let geo=o.geometry;geo.deleteAttribute('normal');geo=toCreasedNormals(geo,Math.PI/4);o.geometry=geo;
  const m=Array.isArray(o.material)?o.material[0]:o.material;if(!mc.has(m))mc.set(m,KM(m));o.material=mc.get(m);o.castShadow=o.receiveShadow=true}});return root});
 // 크기 맞추기: rotY만큼 돌린 뒤 axis 방향 길이를 size(cm)로, 바닥 가운데를 (0,0,0)에 둔 묶음을 돌려준다
@@ -389,6 +389,19 @@ const imac=new THREE.Group();imac.position.set(0,TOP,-6);S.add(imac);
 const im=fitModel(nImac,{rotY:-Math.PI/2,size:54.7});imac.add(im);   /* 24인치 iMac(2021): 폭 54.7cm. 모델은 화면이 +x를 봐서 돌림 */
 const kbd=fitModel(nKb,{size:41.9});kbd.position.set(-4,0,20);imac.add(kbd);   /* 매직 키보드(숫자 키패드): 폭 41.9cm */
 const mse=fitModel(nMouse,{rotY:-Math.PI/2,size:11.4,axis:'z'});mse.position.set(24,0,19);imac.add(mse);   /* 매직 마우스: 길이 11.4cm, 로고가 손바닥 쪽 */
+// 키보드 누르기: 키 부품(Keys)을 키 하나하나(이어진 조각)로 나눠 두고, 누른 키의 꼭짓점만 살짝 내렸다 올린다
+const KEYS=(()=>{let km=null;kbd.traverse(o=>{if(o.isMesh&&o.material.name==='Keys')km=o});if(!km)return null;imac.updateMatrixWorld(true);
+ const pa=km.geometry.attributes.position,n=pa.count,par=new Int32Array(n);for(let i=0;i<n;i++)par[i]=i;
+ const f=i=>{while(par[i]!==i){par[i]=par[par[i]];i=par[i]}return i},u=(a,b)=>{a=f(a);b=f(b);if(a!==b)par[a]=b};
+ const seen=new Map(),q=new THREE.Vector3();for(let i=0;i<n;i++){q.fromBufferAttribute(pa,i);const k=q.x.toFixed(4)+','+q.y.toFixed(4)+','+q.z.toFixed(4);if(seen.has(k))u(i,seen.get(k));else seen.set(k,i)}
+ for(let i=0;i+2<n;i+=3){u(i,i+1);u(i+1,i+2)}   /* 같은 삼각형·같은 위치의 점은 같은 키 */
+ const G=new Map();for(let i=0;i<n;i++){const r=f(i);if(!G.has(r))G.set(r,[]);G.get(r).push(i)}
+ const comps=[...G.values()].filter(v=>v.length>=24);
+ const wp=new THREE.Vector3().setFromMatrixPosition(km.matrixWorld),d=km.worldToLocal(wp.clone().add(new THREE.Vector3(0,-.1,0))).sub(km.worldToLocal(wp.clone()));   /* 세상 기준 0.1cm 아래(실제 매직 키보드처럼 얕게 — 더 깊으면 키가 본체 판 아래로 숨음) */
+ return {pa,base:pa.array.slice(),comps,d}})();
+function pressKey(c,down){const {pa,base,d}=KEYS,s=down?1:0;for(const i of c)pa.setXYZ(i,base[i*3]+d.x*s,base[i*3+1]+d.y*s,base[i*3+2]+d.z*s);pa.needsUpdate=true}
+// 클릭하면 아무 키 7개를 빠르게 눌렀다 뗀다(타닥타닥) — 누를 때마다 키 소리
+function typeBurst(){if(!KEYS||!KEYS.comps.length){sfx('key');return}let t=0;for(let k=0;k<7;k++){const c=KEYS.comps[Math.random()*KEYS.comps.length|0];t+=55+Math.random()*95;setTimeout(()=>{pressKey(c,true);sfx('key')},t);setTimeout(()=>pressKey(c,false),t+80)}}
 // 모니터 화면 판(scr): WORK 화면 HTML을 맞추는 기준. 모델의 화면 면(Screen_Screen)을 찾아 같은 크기·방향으로 바로 앞에 덧댄다
 // 본체 색: 모델의 하늘색(턱·받침·뒷면)을 위쪽 흰 테두리와 같은 흰색으로
 nImac.traverse(o=>{if(o.isMesh&&/LightBlue|DarkBlue|Screen_White/.test(o.name))o.material=W});
@@ -406,6 +419,11 @@ const lamp=new THREE.Group();lamp.position.set(-47,TOP+.949*26,2);lamp.rotation.
 const coneM=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.4,depthWrite:false,blending:THREE.AdditiveBlending});
 const cone=new THREE.Mesh(new THREE.ConeGeometry(.52,1.25,40,1,true),coneM);cone.position.set(.01,-.325,.78);
 const spot=new THREE.SpotLight(0xffcf94,0,120,.6,1,1.15);spot.castShadow=true;spot.shadow.mapSize.set(1024,1024);spot.shadow.bias=-.001;spot.position.set(.01,.3,.78);lamp.add(spot);const spt=new THREE.Object3D();spt.position.set(-.45,-.93,.665);lamp.add(spt);spot.target=spt;
+// 전구 위치: 갓 모양에서 잰 값(램프 좌표). BULB_L = 갓 안 전구, RIM_L = 갓 입구 가운데. 빛은 전구 → 입구 방향으로 나간다
+const BULB_L=new THREE.Vector3(-.181,.536,.481),RIM_L=new THREE.Vector3(-.349,.318,.598);
+lamp.updateMatrixWorld(true);const BULB=lamp.localToWorld(BULB_L.clone()),RIM=lamp.localToWorld(RIM_L.clone()),LDIR=RIM.clone().sub(BULB).normalize();
+const LHIT=BULB.clone().addScaledVector(LDIR,(BULB.y-TOP)/-LDIR.y);   /* 빛 가운데가 책상 높이에 닿는 곳 */
+spot.position.copy(BULB_L);spt.position.copy(lamp.worldToLocal(LHIT.clone()));spot.angle=.55;spot.penumbra=.9;
 const phone=new THREE.Group();phone.position.set(52,TOP+5.8*1.2,8);phone.rotation.y=Math.PI-.3;phone.scale.setScalar(1.2);S.add(phone);phone.add(mPhone);const phoneY=phone.position.y;
 const card=new THREE.Group();card.position.set(-26,TOP,20);card.rotation.y=-.6;S.add(card);add(BX(9,.3,5),W,[0,.15,0],[0,0,0],card);
 const cardT=tex(450,250,(g,w,h)=>{g.fillStyle='#f7f1e3';g.fillRect(0,0,w,h);g.fillStyle=INK;g.font='500 20px Jost, sans-serif';g.fillText('VISION INSIDE',34,52);g.font='600 46px Jost, sans-serif';g.fillText('박수빈',34,150);g.font='500 18px Jost, sans-serif';g.fillText('UX/UI Designer',34,205);g.fillStyle=BLU;g.fillRect(w-70,0,70,h)});
@@ -485,6 +503,29 @@ if(MATCAP){mcLoad('matcap/pearl.jpg',t=>{['metal','plastic','paper'].forEach(k=>
 const mcOf=(m,k)=>{if(m.isMeshBasicMaterial){let b=mCache.get(m.uuid);if(!b){b=m.clone();b.color=m.color.clone().multiplyScalar(Math.pow(.66,2.2));mCache.set(m.uuid,b)}return b}   /* 모니터 화면처럼 스스로 빛나는 면은 밝기 보정이 상쇄되도록(원래 밝기 그대로) */
  const key=m.uuid+k;let x=mCache.get(key);if(!x){x=new THREE.MeshMatcapMaterial({color:m.color.clone(),map:m.map||null,matcap:MCK[k]||MCK.paper,side:m.side});mCache.set(key,x)}return x};
 const qS=new THREE.Scene();qS.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),post));const qC=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+// ── 스탠드 불빛 겹쳐 그리기 ─────────────────────────────────────
+// 화면 스타일 처리가 끝난 그림 위에 빛을 더한다(처리 안에 넣으면 빈 공간이 배경색으로 덮여 빛이 사라짐).
+// 물건 뒤에 있는 빛은 장면 깊이(dt)와 비교해 가린다. 세기는 스탠드 켜짐 정도(lampV)를 따른다.
+const gS=new THREE.Scene(),GLOWC=new THREE.Color(1,.8,.52),glowM=[];
+// tint=true: 닿는 곳을 따뜻한 전구색으로 물들인다(흰 면 위에서도 보이게, 곱하기). false: 밝게 더한다(전구 번짐)
+const glowMat=(frag,tint)=>{const m=new THREE.ShaderMaterial({uniforms:{tD:{value:dt},res:post.uniforms.res,near:{value:10},far:{value:5000},op:{value:0},col:{value:GLOWC},tint:{value:tint?1:0}},
+ transparent:true,depthTest:false,depthWrite:false,side:THREE.DoubleSide,...(tint?{blending:THREE.CustomBlending,blendEquation:THREE.AddEquation,blendSrc:THREE.DstColorFactor,blendDst:THREE.ZeroFactor}:{blending:THREE.AdditiveBlending}),
+ vertexShader:'varying vec3 vP,vN,vL,vW;varying float vD;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);vP=mv.xyz;vN=normalize(normalMatrix*normal);vL=position;vW=(modelMatrix*vec4(position,1.)).xyz;vD=-mv.z;gl_Position=projectionMatrix*mv;}',
+ fragmentShader:`precision highp float;uniform sampler2D tD;uniform vec2 res;uniform float near,far,op,tint;uniform vec3 col;varying vec3 vP,vN,vL,vW;varying float vD;
+  float ld(float z){z=z*2.-1.;return 2.*near*far/(far+near-z*(far-near));}
+  void main(){float occ=smoothstep(-2.5,1.,ld(texture2D(tD,gl_FragCoord.xy/res).r)-vD);float a=0.;${frag}float k=clamp(a*op*occ,0.,1.);
+   gl_FragColor=tint>.5?vec4(mix(vec3(1.),vec3(1.,.8,.55),k),1.):vec4(col*k,1.);}`});glowM.push(m);return m};
+// 1) 빛줄기: 갓 입구에서 책상까지, 아래로 갈수록·가장자리로 갈수록 옅게
+const BEAM_H=(RIM.y-TOP)/-LDIR.y,BEAM_R0=8,BEAM_R1=BEAM_R0+BEAM_H*Math.tan(.36);
+const beam=new THREE.Mesh(new THREE.CylinderGeometry(BEAM_R0,BEAM_R1,BEAM_H,48,1,true),glowMat(`float t=clamp(.5-vL.y/${BEAM_H.toFixed(2)},0.,1.);float f=abs(dot(normalize(vN),normalize(-vP)));a=.55*pow(1.-t,1.2)*pow(f,1.6)*smoothstep(0.,.06,t);`,true));
+beam.position.copy(RIM).addScaledVector(LDIR,BEAM_H/2);beam.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),LDIR.clone().negate());gS.add(beam);
+// 2) 갓 입구의 빛 번짐 + 전구 심지(카메라를 늘 바라보는 판)
+const halo=new THREE.Mesh(new THREE.PlaneGeometry(34,34),glowMat('float r=length(vL.xy)/17.;a=.5*pow(max(0.,1.-r),2.8);'));halo.position.copy(RIM).addScaledVector(LDIR,2);gS.add(halo);
+const core=new THREE.Mesh(new THREE.PlaneGeometry(9,9),glowMat('float r=length(vL.xy)/4.5;a=1.1*pow(max(0.,1.-r),1.6);'));core.position.copy(RIM).addScaledVector(LDIR,-1);gS.add(core);
+// 3) 책상 위 빛 웅덩이(책상 밖으로는 그리지 않음)
+const pool=new THREE.Mesh(new THREE.PlaneGeometry(1,1),glowMat('if(abs(vW.x)>75.||abs(vW.z)>35.)discard;float r=length(vL.xy)*2.;a=.75*pow(max(0.,1.-r),1.3);',true));
+pool.rotation.x=-Math.PI/2;pool.position.set(LHIT.x,TOP+.25,LHIT.z);pool.scale.set(70,70/Math.sqrt(Math.max(.3,-LDIR.y)),1);gS.add(pool);
+pool.rotation.z=-Math.atan2(LDIR.x,LDIR.z);   /* 빛이 비스듬히 닿는 방향으로 길쭉하게 */
 // ── 카메라 장면(상태) ───────────────────────────────────────
 const portrait=()=>innerWidth/innerHeight<.9;
 const V=(a)=>new THREE.Vector3(...a);
@@ -496,6 +537,7 @@ function scrPose(){scr.updateWorldMatrix(true,false);scr.matrixWorld.decompose(_
  const w=.598*Math.abs(_ss.x),h=.336*Math.abs(_ss.y),t=Math.tan(cam.fov*Math.PI/360),d=Math.max(w/(.86*2*t*cam.aspect),h/(.8*2*t));
  return {p:_sc.clone().addScaledVector(_sn,d),l:_sc.clone()}}
 const camFor=s=>{if(s==='screen')return scrPose();let [p,l]=CAMS[s].map(V);if(portrait()){p=l.clone().add(p.clone().sub(l).multiplyScalar(1.5));p.y+=6}return {p,l}};
+let drawerWas=false;   /* 서류 서랍이 열려 있었는지(소리용) */
 let st='home',prog=0,progT=0,lampOn=false,lampV=0,lampT0=0,lampFirst=true;
 function setLamp(o){if(o===lampOn)return;lampOn=o;lampT0=performance.now()/1000+(lampFirst&&o?.9:0);if(o)lampFirst=false}
 const lampEnv=t=>{if(t<.1)return 0;if(t<.18)return .5;if(t<.26)return .06;if(t<.33)return .7;if(t<.4)return .2;const x=Math.min(1,(t-.4)/.9);return .2+.8*(1-Math.pow(1-x,3))};
@@ -542,7 +584,8 @@ function go(s,opts={}){domEl=null;const was=st;st=s;lockUntil=performance.now()+
  document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+(NAV[s]==='home'?'home':NAV[s])));
  const h=HASH[s];if(!opts.fromHash&&('#'+h)!==location.hash){try{history.replaceState(null,'',h?'#'+h:location.pathname+location.search)}catch(e){}}
  callEl.classList.toggle('on',s==='call');callEl.classList.remove('up');$('dusk').classList.toggle('on',s==='end');$('endmsg').classList.toggle('on',s==='end');setLamp(true);eTarget=s==='end'?1:0;scr.material=s==='end'?ENDM:BLACK;if(s==='end'){setTimeout(()=>{if(st==='end')endClock(true)},900)}else if(was==='end')endClock(false);if(s==='open')openT=performance.now();if(s!=='pour')autoP=false;
- if(s!=='contact'&&s!=='call')stopRing();
+ if(s!=='contact')stopRing();   /* 전화를 받으면(call) 벨이 멈춘다 */
+ if(s==='call'&&was==='contact')sfx('pickup');else if(was==='call'&&s!=='call')sfx('hangup');   /* 수화기 들기·내려놓기 소리 */
  syncOverlay()}
 let pjShown=false;const sheet2=$('sheet2'),ctaEl=$('cta');let ctaT=0;
 function updCta(){const on=pjShown&&pj.classList.contains('on')&&pj.scrollTop+pj.clientHeight>=pj.scrollHeight-6&&!dOpen;if(on!==ctaEl.classList.contains('show')){ctaEl.classList.toggle('show',on);if(on)ctaT=performance.now()}}
@@ -588,7 +631,7 @@ let ty=null;addEventListener('touchstart',e=>{ty=e.touches[0].clientY},{passive:
 addEventListener('touchmove',e=>{if(ty==null||e.target.closest('#form,#doc'))return;const y=e.touches[0].clientY,dy=(ty-y)*2.2;ty=y;step(dy,e)},{passive:false});
 // ── 선택 ──────────────────────────────────────────────────────
 const lbl=$('label'),mouse=new THREE.Vector2(0,0),ray=new THREE.Raycaster();let hover=null,moved=false,ptrIn=false;
-const PICK=[{g:lamp,t:'스탠드 · 불 켜고 끄기',act:'lamp'},{g:imac,t:'모니터 · 작업물 보기',to:'screen',from:['home']},{g:phone,t:'전화기 · 연락하기',to:'contact',from:['home','contact']},{g:cab,t:'서랍 · 소개 서류',to:'work',from:['home','work','open']},{g:mug,t:'컵',act:'bump'},{g:card,t:'명함 · 크게 보기',act:'card'}];
+const PICK=[{g:lamp,t:'스탠드 · 불 켜고 끄기',act:'lamp'},{g:imac,t:'모니터 · 작업물 보기',to:'screen',from:['home']},{g:kbd,t:'키보드 · 타닥타닥',act:'type'},{g:phone,t:'전화기 · 연락하기',to:'contact',from:['home','contact']},{g:cab,t:'서랍 · 소개 서류',to:'work',from:['home','work','open']},{g:mug,t:'컵',act:'bump'},{g:card,t:'명함 · 크게 보기',act:'card'}];
 PICK.forEach(p=>p.g.traverse(o=>{if(o.isMesh)o.userData.pick=p}));
 cv.addEventListener('pointermove',e=>{moved=true;ptrIn=true;mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1)});
 // 커서: 평소엔 동그라미, 누를 수 있는 곳 위에서는 커지면서 클릭 아이콘 + 설명 글
@@ -610,15 +653,38 @@ cv.addEventListener('click',e=>{if(cardOpen){closeCard();return}
   else{const p=L[wI];if(p)openDetail({getBoundingClientRect:()=>({left:e.clientX,top:e.clientY,width:0,height:0}),dataset:{n:p.t,k:p.c,img:p.img,url:p.url||''}},e)}}return}
  if(!hover){return}
  if(hover.act==='card'){openCard();return}
- if(hover.act==='lamp'){setLamp(!lampOn);return}if(hover.act==='bump'){hover.g.userData.bump=1;return}if(hover.act==='card'){openCard();return}
+ if(hover.act==='lamp'){setLamp(!lampOn);sfx('switch');return}if(hover.act==='bump'){hover.g.userData.bump=1;return}if(hover.act==='card'){openCard();return}
+ if(hover.act==='type'){typeBurst();return}   /* 키보드: 키가 눌리며 타닥타닥 */
  if(hover.to==='work'){go(st==='home'?'work':'open');return}
  if(hover.to==='contact'){go(st==='contact'?'call':'contact');return}
  go(hover.to)});
 // ── 전화벨 소리 ────────────────────────────────────────────────
 let ac=null,soundOn=false,ringTimer=null;
-$('snd').onclick=()=>{soundOn=!soundOn;$('snd').setAttribute('aria-pressed',soundOn);$('snd').setAttribute('aria-label',soundOn?'소리 끄기':'소리 켜기');if(soundOn){ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume&&ac.resume()}};
-function beep(t0){if(!soundOn||!ac)return;[0,.08].forEach((o,i)=>{});const g=ac.createGain();g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(.06,t0+.01);g.gain.setValueAtTime(.06,t0+.34);g.gain.linearRampToValueAtTime(0,t0+.38);g.connect(ac.destination);[480,520].forEach(f=>{const o=ac.createOscillator();o.type='square';o.frequency.value=f+ (0);const m=ac.createOscillator();m.frequency.value=22;const mg=ac.createGain();mg.gain.value=60;m.connect(mg);mg.connect(o.frequency);o.connect(g);o.start(t0);o.stop(t0+.4);m.start(t0);m.stop(t0+.4)})}
-function startRing(){if(ringTimer)return;const ring=()=>{dings();if(!soundOn||!ac)return;const t=ac.currentTime;beep(t);beep(t+.5)};ring();ringTimer=setInterval(ring,2400)}
+$('snd').onclick=()=>{soundOn=!soundOn;$('snd').setAttribute('aria-pressed',soundOn);$('snd').setAttribute('aria-label',soundOn?'소리 끄기':'소리 켜기');if(soundOn){ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume&&ac.resume();initSfx()}};
+// ── 효과음 ── ♪ 소리 켜기일 때만 난다. sounds/ 폴더에 실제 녹음 파일이 있으면 그 파일을, 없으면 아래(SYN)처럼 코드로 만든 소리를 쓴다.
+// 파일 쓰는 법: sounds/이름.mp3 를 넣고 sounds/list.json 에 이름을 적는다(예: ["key","cup"]).
+// 이름: key(키 하나) cup(컵) drawerOpen drawerClose(서랍) ring(전화벨 한 번) pickup(수화기 들기) hangup(내려놓기) switch(스탠드 스위치)
+let master=null,noiseB=null;const sfxBuf={};
+function initSfx(){if(master)return;master=ac.createGain();master.gain.value=.9;master.connect(ac.destination);
+ const n=ac.sampleRate,b=ac.createBuffer(1,n,n),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;noiseB=b;
+ fetch('sounds/list.json').then(r=>r.ok?r.json():[]).then(L=>L.forEach(k=>fetch('sounds/'+k+'.mp3').then(r=>r.arrayBuffer()).then(x=>ac.decodeAudioData(x)).then(buf=>{sfxBuf[k]=buf}).catch(()=>{}))).catch(()=>{})}
+function sfx(k){if(!soundOn||!ac||!master)return;const t=ac.currentTime+.005;if(sfxBuf[k]){const s=ac.createBufferSource();s.buffer=sfxBuf[k];s.connect(master);s.start(t);return}SYN[k]&&SYN[k](t)}
+// 소리 재료: 잡음(nz, 걸러서 딸깍·스르륵) + 순음(tone, 종·도자기 울림). 빨리 커졌다가 서서히 사라지는 모양
+const env=(g,t,a,peak,dec)=>{g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+dec)};
+function nz(t,dur,{type='bandpass',f=2000,q=1,peak=.3,a=.002,f2=null}={}){const s=ac.createBufferSource();s.buffer=noiseB;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+dur);fl.Q.value=q;
+ const g=ac.createGain();env(g,t,a,peak,dur);s.connect(fl);fl.connect(g);g.connect(master);s.start(t,Math.random()*.5);s.stop(t+a+dur+.05)}
+function tone(t,f,dur,{peak=.2,a=.002,type='sine'}={}){const o=ac.createOscillator();o.type=type;o.frequency.setValueAtTime(f,t);const g=ac.createGain();env(g,t,a,peak,dur);o.connect(g);g.connect(master);o.start(t);o.stop(t+a+dur+.05)}
+const SYN={
+ key:t=>{const v=.85+Math.random()*.3;nz(t,.025,{f:3200*v,q:1.2,peak:.22});nz(t+.004,.05,{type:'lowpass',f:900*v,peak:.12});tone(t,170*v,.045,{peak:.08})},   // 키 하나: 딸깍 + 바닥에 닿는 톡
+ cup:t=>{const b=2350*(.97+Math.random()*.06);[[1,.18,.45],[2.32,.08,.25],[4.1,.04,.14],[6.3,.02,.08]].forEach(([r,p,d])=>tone(t,b*r,d,{peak:p}));nz(t,.012,{type:'highpass',f:5000,peak:.15});
+  [[1,.07,.25],[2.32,.03,.15]].forEach(([r,p,d])=>tone(t+.07,b*r*1.003,d,{peak:p}));tone(t,140,.08,{peak:.12})},   // 도자기 '팅' + 살짝 튀는 두 번째 소리 + 책상에 닿는 톡
+ drawerOpen:t=>{nz(t,.42,{f:350,f2:900,q:.8,peak:.16,a:.04});nz(t,.42,{type:'lowpass',f:180,peak:.12,a:.04});nz(t+.42,.1,{type:'lowpass',f:700,peak:.25});tone(t+.42,95,.14,{peak:.22})},   // 스르륵 미끄러지다 끝에서 쿵
+ drawerClose:t=>{nz(t,.3,{f:900,f2:380,q:.8,peak:.15,a:.03});nz(t+.3,.12,{type:'lowpass',f:600,peak:.3});tone(t+.3,80,.18,{peak:.3})},
+ ring:t=>{[0,.5].forEach(o=>{for(let i=0;i<9;i++){const s=t+o+i/22;[[1,.07,.12],[2.76,.035,.08],[5.4,.015,.05]].forEach(([r,p,d])=>tone(s,1180*r,d,{peak:p}))}})},   // 옛날 전화기 벨: 쇠 종을 빠르게 두드림(0.4초씩 두 번)
+ pickup:t=>{nz(t,.03,{f:1600,q:1.5,peak:.25});tone(t,210,.06,{peak:.12});nz(t+.07,.025,{type:'highpass',f:3000,peak:.2});nz(t+.11,.04,{f:1100,q:1,peak:.12})},   // 수화기 드는 달칵 + 걸이 스위치 딸깍
+ hangup:t=>{nz(t,.04,{f:1200,q:1.2,peak:.3});tone(t,150,.1,{peak:.2});nz(t+.03,.02,{type:'highpass',f:3500,peak:.15})},
+ switch:t=>{nz(t,.012,{type:'highpass',f:4000,peak:.25});tone(t,1800,.02,{peak:.06})}};
+function startRing(){if(ringTimer)return;const ring=()=>{dings();sfx('ring')};ring();ringTimer=setInterval(ring,2400)}
 function stopRing(){if(ringTimer){clearInterval(ringTimer);ringTimer=null}}
 // ── 프로젝트 목록 ──────────────────────────────────────────────
 const PJ=[['Tunee','UX/UI'],['프로젝트 이름 (예시)','UX/UI'],['프로젝트 이름 (예시)','UX/UI'],['프로젝트 이름 (예시)','UX/UI'],['프로젝트 이름 (예시)','Branding'],['프로젝트 이름 (예시)','Branding'],['프로젝트 이름 (예시)','Web'],['프로젝트 이름 (예시)','Web']];
@@ -829,24 +895,27 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
   const nk=p?p.wk.key:'',ok=hover&&hover.wk?hover.wk.key:'';if(nk!==ok||(!p&&hover)){hover=p;const hc=p&&p.wk.type==='chip'?p.wk.c:'',hk=p?p.wk.type:'';if(hk!==wkHK||hc!==wkChipHov){wkHK=hk;wkChipHov=hc;wkRedraw()}}}
  else if(hover){hover=null;cv.style.cursor='default';lbl.style.opacity=0}
  {eT+=(eTarget-eT)*Math.min(1,dt2*1.1);const k=eT<.001?0:eT;tmpC.copy(C_SUN0).lerp(C_SUN1,k);sun.color.copy(tmpC);sun.intensity=2.3-.95*k;fill.intensity=.3-.15*k;hemi.intensity=1.8-1.0*k;hemi.color.copy(C_H0).lerp(C_H1,k);sun.position.lerpVectors(SUN_P0,SUN_P1,k);win.position.copy(tmpV.copy(sun.position).normalize().multiplyScalar(250));win.lookAt(0,0,0);tmpC.copy(C_BG0).lerp(C_BG1,k).convertLinearToSRGB();post.uniforms.cBg.value.set(tmpC.r,tmpC.g,tmpC.b)}
- lampV=lampOn?lampEnv(performance.now()/1000-lampT0):Math.max(0,lampV-dt2*5);spot.intensity=lampV*(RETRO?2600:4200)*Math.max(0,1-1.4*eT);spot.angle=.6-.24*eT;post.uniforms.wLo.value=1+.35*eT;post.uniforms.wHi.value=1.6+.5*eT;cal.position.y=130-14*eT;post.uniforms.warmK.value=lampV;
+ lampV=lampOn?lampEnv(performance.now()/1000-lampT0):Math.max(0,lampV-dt2*5);spot.intensity=lampV*(RETRO?2600:4200)*Math.max(0,1-1.4*eT);spot.angle=.55-.2*eT;glowM.forEach(m=>m.uniforms.op.value=lampV);halo.quaternion.copy(cam.quaternion);core.quaternion.copy(cam.quaternion);post.uniforms.wLo.value=1+.35*eT;post.uniforms.wHi.value=1.6+.5*eT;cal.position.y=130-14*eT;post.uniforms.warmK.value=lampV;
  {const onScr=st==='screen'&&cpos.distanceTo(tpos)<16;if(onScr&&!abWas){abStart=performance.now();abDirty=true;abDone=false}abWas=onScr;scr.material=onScr?ABM:(st==='end'?ENDM:BLACK);if(onScr){const ap=Math.min(1,(performance.now()-abStart)/1400);if(!abDone){drawAbout(ap);if(ap>=1)abDone=true}}if(onScr){placeMon();if(!mon.classList.contains('on'))mon.classList.add('on')}else if(mon.classList.contains('on'))mon.classList.remove('on')}
  if(st==='screen'&&abDone)wkTick();
  {const tt=clock.elapsedTime;LV.forEach(m=>{m.rotation.z=m.userData.base+Math.sin(tt*.9+m.userData.ph)*.07})}
  if(cardOpen){bcRY+=(bcTY-bcRY)*.12;bcRX+=(bcTX-bcRX)*.12;bcSpin.style.transform=`rotateX(${bcRX}deg) rotateY(${bcRY}deg)`}
+ {const fo=fileOpen||prog>.05;if(fo!==drawerWas){drawerWas=fo;sfx(fo?'drawerOpen':'drawerClose')}}   /* 서류 서랍이 열리고 닫힐 때 소리 */
  drawers.forEach((d,i)=>{const o=(i===2&&(fileOpen||prog>.05))?d.userData.depth+3+(NF-1)*FS+5:0;   /* 서류 서랍은 폴더가 다 보일 만큼만 뺀다 */d.position.z+=((d.userData.z0+o)-d.position.z)*.1});
  // 서류 폴더: 서랍 안에 서 있고, 마우스를 올린 폴더는 살짝 떠오르며 안의 종이가 빼꼼 나온다
  files.forEach(f=>{f.visible=fileOpen;const u=f.userData,tg=(st==='open'&&hover&&hover.doc===u.k)?1:0;u.h+=(tg-u.h)*(RM?1:Math.min(1,dt2*9));
   f.position.set(40,22+u.h*3.2,fileDrawer.position.z-fileDrawer.userData.depth-3-u.k*FS);f.quaternion.setFromEuler(fEu.set(-.3+u.jit,0,u.jit*.5));u.paper.position.y=u.h*7.5});
  // 전화벨: 울리는 동안 몸체가 떨림
  if(st==='contact'){startRing();const on=(t%2.4)<1.1;const s=on?Math.sin(t*70):0;phone.rotation.z=s*.018;phone.position.y=phoneY+(on?Math.abs(Math.sin(t*35))*.35:0)}else{phone.rotation.z=0;phone.position.y=phoneY}
- PICK.forEach(p=>{const g=p.g;if(g.userData.bump>0){if(!bumpBase.has(g))bumpBase.set(g,g.position.y);g.userData.bump=Math.max(0,g.userData.bump-dt2*2.5);g.position.y=bumpBase.get(g)+Math.sin(g.userData.bump*Math.PI)*3}});
+ PICK.forEach(p=>{const g=p.g;if(g.userData.bump>0){if(!bumpBase.has(g))bumpBase.set(g,g.position.y);g.userData.bump=Math.max(0,g.userData.bump-dt2*2.5);if(g.userData.bump===0&&p.act==='bump')sfx('cup');   /* 컵이 내려앉을 때 '팅' */g.position.y=bumpBase.get(g)+Math.sin(g.userData.bump*Math.PI)*3}});
  R.setRenderTarget(rtC);R.render(S,cam);
  {const hid=[];fx.forEach(o=>{if(o!==scr&&o.visible){o.visible=false;hid.push(o)}});const sw=[];
   S.traverse(o=>{if(o.isMesh&&o.visible&&o.material&&o.material.colorWrite!==false){sw.push([o,o.material]);o.material=albOf(o.material)}});
   R.setRenderTarget(rtA);R.render(S,cam);if(MATCAP){sw.forEach(([o,m])=>o.material=mcOf(m,o.userData.mk||'paper'));R.setRenderTarget(rtM);R.render(S,cam)}sw.forEach(([o,m])=>o.material=m);hid.forEach(o=>o.visible=true)}
  vis.length=0;fx.forEach(o=>{if(o.visible){o.visible=false;vis.push(o)}});S.overrideMaterial=nMat;R.setRenderTarget(rtN);R.render(S,cam);S.overrideMaterial=null;vis.forEach(o=>o.visible=true);
- R.setRenderTarget(null);R.render(qS,qC);updCur();requestAnimationFrame(loop)}
+ R.setRenderTarget(null);R.render(qS,qC);
+ if(lampV>.001){R.autoClear=false;R.render(gS,cam);R.autoClear=true}   /* 스탠드 불빛을 마지막에 더한다 */
+ updCur();requestAnimationFrame(loop)}
 const css=n=>'#'+n.toString(16).padStart(6,'0');
 const THEMES=[
  {n:'크림·레드·블루',W:0xf3e9d4,FL:0x85707c,RD:0xdb4a3e,BL:0x3f8fd8,YL:0xf0b93f,CM:0x3f86cc,DF:0x62a6e6},
@@ -858,7 +927,7 @@ function applyTheme(i){themeI=i;const T=THEMES[i];for(const k in MATS)MATS[k].co
 }
 applyTheme(RETRO?1:MATCAP?2:0);
 if(document.fonts){document.fonts.load('600 40px Jost');document.fonts.load('500 30px "Noto Sans KR"');document.fonts.ready.then(()=>applyTheme(themeI))}
-window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={files,scr,cam,AW,AH,get wk(){return WKR},cpos,fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
+window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={keysN:KEYS?KEYS.comps.length:0,typeBurst,sfx,files,scr,cam,AW,AH,get wk(){return WKR},cpos,fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
 fit();addEventListener('resize',fit);if(window.ResizeObserver)new ResizeObserver(()=>{if(R.domElement.width!==innerWidth*2||innerWidth/innerHeight!==cam.aspect)fit()}).observe(document.documentElement);fromHash();loop();
 const ld=$('load');ld.style.opacity=0;setTimeout(()=>ld.hidden=true,600);
 </script>
