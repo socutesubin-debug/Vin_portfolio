@@ -775,9 +775,8 @@ const WP=[
 const WCATS=['ALL','UXUI','WEB','BRANDING','GRAPHIC'],WDUR=700,wE=x=>1-Math.pow(1-x,3);
 let wEdgeT=0,wCat='ALL',wI=0,wOld=0,wFrom=0,wT0=0,wAnim=false,wDir=1,wLastUser=0,wLastChange=0,wStepT=0,wkHK='',wkChipHov='';const WKR={chips:[],cy:450};
 const wkList=()=>WP.filter(p=>wCat==='ALL'||p.g===wCat);
-// 표지: 작은 판(1280px)으로 먼저 빨리 띄우고, 페이지가 다 열린 뒤 큰 판(2560px)으로 바꿔 선명하게
-const WIMG={};WP.forEach(p=>{const load=(src,then)=>{const im=new Image();im.onload=()=>{WIMG[p.img]=im;if(st==='screen')wkRedraw();then&&then()};im.src=src};
- load('covers/'+p.img+'-sm.jpg',()=>{if(SS>1)setTimeout(()=>load('covers/'+p.img+'.jpg'),1500)})});
+// 표지: 모니터용 판(-sm, 글자 없는 배경 그림)을 쓴다. 큰 판(.jpg)은 글자가 들어간 다른 구성이라 상세 화면용
+const WIMG={};WP.forEach(p=>{const im=new Image();im.onload=()=>{WIMG[p.img]=im;if(st==='screen')wkRedraw()};im.src='covers/'+p.img+'-sm.jpg'});
 $('wkA11y').innerHTML=WP.map(p=>`<button data-n="${p.t}" data-k="${p.c}" data-img="${p.img}" data-url="${p.url||''}">${p.t} (${p.c}, ${p.y}) 열기</button>`).join('');[...$('wkA11y').children].forEach(b=>b.onclick=e=>openDetail(b,e));
 function wkRedraw(){abDirty=true;if(abDone)drawAbout(1)}
 function wPosNow(){if(!wAnim)return wI;return wFrom+(wI-wFrom)*wE(Math.min(1,(performance.now()-wT0)/WDUR))}
@@ -792,7 +791,7 @@ function drawPage(){const g=abPage.getContext('2d');const KR='"Noto Sans KR", sa
  g.setTransform(SS,0,0,SS,0,0);g.imageSmoothingQuality='high';
  g.fillStyle='#444444';g.fillRect(0,0,AW,AH);
  {const bg=p=>p&&WIMG[p.img],kk=wAnim?wE(Math.min(1,(performance.now()-wT0)/WDUR)):1;if(wAnim&&bg(L[wOld]))g.drawImage(bg(L[wOld]),0,0,AW,AH);if(bg(L[wI])){g.globalAlpha=wAnim?kk:1;g.drawImage(bg(L[wI]),0,0,AW,AH);g.globalAlpha=1}}
- g.fillStyle='rgba(24,24,28,.24)';g.fillRect(0,0,AW,AH);   /* 표지 전체에 옅은 그레이톤 그림자(글자가 잘 보이게) */
+ g.fillStyle='rgba(24,24,28,.12)';g.fillRect(0,0,AW,AH);   /* 표지 전체에 옅은 그레이톤 그림자(글자가 잘 보이게) */
  {const cy=WKR.cy;let gr=g.createLinearGradient(0,0,0,150);gr.addColorStop(0,'rgba(0,0,0,.38)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,AW,150);   // 위쪽 탭 뒤 옅은 그림자
   gr=g.createLinearGradient(0,cy-130,0,cy+130);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(.5,'rgba(0,0,0,.34)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,cy-130,AW,260)}   // 가운데 줄 뒤 옅은 그림자
  g.shadowColor='rgba(0,0,0,.55)';g.shadowBlur=14;   // 글자·막대에 옅은 그림자
@@ -916,7 +915,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
   R.setRenderTarget(rtA);R.render(S,cam);if(MATCAP){sw.forEach(([o,m])=>o.material=mcOf(m,o.userData.mk||'paper'));R.setRenderTarget(rtM);R.render(S,cam)}sw.forEach(([o,m])=>o.material=m);hid.forEach(o=>o.visible=true)}
  vis.length=0;fx.forEach(o=>{if(o.visible){o.visible=false;vis.push(o)}});S.overrideMaterial=nMat;R.setRenderTarget(rtN);R.render(S,cam);S.overrideMaterial=null;vis.forEach(o=>o.visible=true);
  R.setRenderTarget(null);R.render(qS,qC);
- if(scr.material===ABM){scrO.matrixWorld.copy(scr.matrixWorld);R.autoClear=false;R.render(sS,cam);R.autoClear=true}   /* 모니터 화면은 스타일(알갱이·명암) 처리 없이 원래 그림 그대로 위에 그린다 */
+ if(scr.material===ABM){scrO.matrixWorld.copy(scr.matrixWorld);R.autoClear=false;R.outputColorSpace=THREE.SRGBColorSpace;R.render(sS,cam);R.outputColorSpace=THREE.LinearSRGBColorSpace;R.autoClear=true}   /* 모니터 화면은 스타일(알갱이·명암) 처리 없이 원래 그림 그대로 위에 그린다 */
  if(lampV>.001){R.autoClear=false;R.render(gS,cam);R.autoClear=true}   /* 스탠드 불빛을 마지막에 더한다 */
  updCur();requestAnimationFrame(loop)}
 const css=n=>'#'+n.toString(16).padStart(6,'0');
