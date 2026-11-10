@@ -426,7 +426,7 @@ const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:
    col+=vec3(1.,.97,.9)*clamp(l-1.,0.,.6)*.4;                                                 // 광택 하이라이트
    col=mix(col,vec3(dot(col,vec3(.299,.587,.114))),.1)*vec3(1.03,1.,.95);                    // 살짝 차분하고 따뜻하게
    col*=1.07-.1*clamp(dot(v-vec2(.1,.95),vec2(.7071,-.7071)),0.,1.);}                          // 창문 쪽(왼쪽 위)이 조금 더 밝게
-  if(mc>.5){vec3 W3=vec3(.299,.587,.114);float ms=dot(pow(texture2D(tM,v).rgb,vec3(.4545)),W3)/max(dot(a,W3),.03);vec3 m=a*clamp(ms/.64,0.,1.25)*vec3(1.02,1.,.97);float ls=clamp(l,0.,1.);   // 매트캡(물건 볼륨) × 그림자(창문·물체)
+  if(mc>.5){vec3 W3=vec3(.299,.587,.114);float ms=dot(pow(texture2D(tM,v).rgb,vec3(.4545)),W3)/max(dot(a,W3),.03);vec3 m=a*clamp(ms/.66,0.,1.25)*vec3(1.02,1.,.97);float ls=clamp(l,0.,1.);   // 매트캡(물건 볼륨) × 그림자(창문·물체)
    col=m*mix(sh,vec3(1.),ls*ls*(3.-2.*ls))+vec3(1.,.97,.9)*clamp(l-1.,0.,.5)*.3;}
   col=mix(col,col*vec3(1.,.88,.62)+vec3(.05,.025,0.),warmK*smoothstep(wLo,wHi,l)*step(.72,t0));
   vec2 px=ow/res;float d0=ld(v);vec3 n0=texture2D(tN,v).rgb;float e=0.;
@@ -436,12 +436,17 @@ const post=new THREE.ShaderMaterial({uniforms:{tC:{value:rtC.texture},tN:{value:
   if(texture2D(tD,v).r>.9999)col=cBg;
   if(grainA>0.){float n=fract(sin(dot(floor(gl_FragCoord.xy),vec2(12.9898,78.233)))*43758.5453);float m=fract(sin(dot(floor(gl_FragCoord.xy/3.),vec2(39.34,11.13)))*24634.63);col+=(n-.5)*grainA+(m-.5)*grainA*.5;}
   if(dbg>.5)col=vec3(l/3.);gl_FragColor=vec4(col,1.);}`});
-if(MATCAP)Object.assign(post.uniforms,{mc:{value:1},grainA:{value:.035},ow:{value:1.5},sh:{value:new THREE.Vector3(.92,.90,.94)}});
+if(MATCAP)Object.assign(post.uniforms,{mc:{value:1},grainA:{value:.035},ow:{value:1.5},sh:{value:new THREE.Vector3(.86,.83,.89)}});
 if(RETRO)Object.assign(post.uniforms,{soft:{value:1},grainA:{value:.06},ow:{value:1.6},eThr:{value:.5},sh:{value:new THREE.Vector3(.86,.80,.75)},cDark:{value:toLin('#221e1c')},cBg:{value:toLin('#d8cdb7')}});
 const aCache=new Map();const albOf=m=>{let a=aCache.get(m);if(!a){a=new THREE.MeshBasicMaterial({color:m.color.clone(),map:m.map||null,side:m.side});aCache.set(m,a)}return a};
 const MCK={},mCache=new Map();
-if(MATCAP){const tl=new THREE.TextureLoader(),cs=t=>{t.colorSpace=THREE.SRGBColorSpace;return t},fb=cs(tl.load('matcap/pearl.jpg'));
- ['metal','plastic','paper'].forEach(k=>{MCK[k]=fb;const ok=t=>{MCK[k]=cs(t);mCache.clear()};tl.load('matcap/'+k+'.jpg',ok,undefined,()=>tl.load('matcap/'+k+'.png',ok,undefined,()=>{}))})}
+// 매트캡을 불러올 때 구슬 가운데 밝기를 같은 값으로 맞춤(재질마다 광택·결만 다르고 전체 밝기는 고르게)
+function mcLoad(url,ok,bad){const im=new Image();im.onload=()=>{const N=256,c=document.createElement('canvas');c.width=c.height=N;const g=c.getContext('2d');g.drawImage(im,0,0,N,N);
+ const d=g.getImageData(0,0,N,N),p=d.data;let sum=0,cnt=0;for(let y=0;y<N;y++)for(let x=0;x<N;x++){const dx=x/N-.5,dy=y/N-.5;if(dx*dx+dy*dy<.0225){const i=(y*N+x)*4;sum+=(p[i]*.299+p[i+1]*.587+p[i+2]*.114)/255;cnt++}}
+ const k=.66/Math.max(.05,sum/cnt);for(let i=0;i<p.length;i+=4){p[i]=Math.min(255,p[i]*k);p[i+1]=Math.min(255,p[i+1]*k);p[i+2]=Math.min(255,p[i+2]*k)}g.putImageData(d,0,0);
+ const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;ok(t)};im.onerror=bad;im.src=url}
+if(MATCAP){mcLoad('matcap/pearl.jpg',t=>{['metal','plastic','paper'].forEach(k=>{if(!MCK[k]||MCK[k].isFallback){t.isFallback=true;MCK[k]=t}});mCache.clear()},()=>{});
+ ['metal','plastic','paper'].forEach(k=>{const ok=t=>{MCK[k]=t;mCache.clear()};mcLoad('matcap/'+k+'.jpg',ok,()=>mcLoad('matcap/'+k+'.png',ok,()=>{}))})}
 const mcOf=(m,k)=>{if(m.isMeshBasicMaterial)return m;const key=m.uuid+k;let x=mCache.get(key);if(!x){x=new THREE.MeshMatcapMaterial({color:m.color.clone(),map:m.map||null,matcap:MCK[k]||MCK.paper,side:m.side});mCache.set(key,x)}return x};
 const qS=new THREE.Scene();qS.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),post));const qC=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
 // ── 카메라 장면(상태) ───────────────────────────────────────
