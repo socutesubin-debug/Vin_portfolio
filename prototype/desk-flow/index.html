@@ -346,27 +346,20 @@ const fileDrawer=drawers[2];
 add(new THREE.PlaneGeometry(12,3.4),TM(tex(360,102,(g,w,h)=>{g.fillStyle=YEL;g.fillRect(0,0,w,h);g.strokeStyle=INK;g.lineWidth=5;g.strokeRect(3,3,w-6,h-6);g.fillStyle=INK;g.font='500 36px Jost, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText("VIN's secret files",w/2,h/2+3)})),[0,-8.5,.85],[0,0,0],fileDrawer);
 // ABOUT 서류 폴더 6장: 마우스를 올리면 폴더가 살짝 떠오르고 안의 종이가 빼꼼 나온다
 const DOCN=[['cv','이력서','Resume'],['cl','자기소개서','Cover Letter'],['edu','학력·교육','Education'],['exp','경력','Experience'],['skill','자격·도구','Skills'],['contact','연락처','Contact']];
-const NF=DOCN.length,FS=5.2,files=[],FMS=[BL,RD,YL,W];
+const NF=DOCN.length,FS=5.2,files=[],FMS=[BL,RD,YL,W],FW=LM(0xfbfaf6);   /* 폴더: 흰 카드 */
 const tabGeo=(()=>{const sh=new THREE.Shape();sh.moveTo(-6.5,0);sh.lineTo(-5.7,2.5);sh.quadraticCurveTo(-5.2,3.6,-4,3.6);sh.lineTo(4,3.6);sh.quadraticCurveTo(5.2,3.6,5.7,2.5);sh.lineTo(6.5,0);sh.lineTo(-6.5,0);const g=new THREE.ShapeGeometry(sh);const p=g.attributes.position,uv=g.attributes.uv;for(let i=0;i<p.count;i++)uv.setXY(i,(p.getX(i)+6.5)/13,p.getY(i)/3.6);return g})();
 for(let k=0;k<NF;k++){const f=new THREE.Group();const ci=k%4,[id,ko,en]=DOCN[k],num=String(k+1).padStart(2,'0');
- add(BX(30,25,.5),FMS[ci],[0,0,0],[0,0,0],f);
- const tm=TM(tex(390,108,(g,w,h)=>{g.fillStyle=[BLU,RED,YEL,CRM][ci];g.fillRect(0,0,w,h);g.fillStyle='#17151f';g.textBaseline='middle';g.font='500 30px Jost, sans-serif';g.textAlign='left';g.fillText(num,24,h/2+6);g.font='700 34px "Noto Sans KR", sans-serif';g.textAlign='right';g.fillText(ko,w-22,h/2+6)}),{side:THREE.DoubleSide});
+ add(BX(30,25,.5),FW,[0,0,0],[0,0,0],f);
+ const tm=TM(tex(390,108,(g,w,h)=>{g.fillStyle='#fbfaf6';g.fillRect(0,0,w,h);g.fillStyle='#17151f';g.textBaseline='middle';g.font='400 30px Jost, sans-serif';g.textAlign='left';g.fillText(num,40,h/2+8);g.font='500 30px "Noto Sans KR", sans-serif';g.textAlign='right';g.fillText(ko,w-34,h/2+8)}),{side:THREE.DoubleSide});
  add(tabGeo,tm,[[-8,0,8][k%3],12.5,.16],[0,0,0],f);
  // 안에 든 종이: 평소엔 폴더 뒤에 숨어 있고, hover하면 위로 빼꼼 나온다
  const pm=TM(tex(312,264,(g,w,h)=>{g.fillStyle='#fffdf7';g.fillRect(0,0,w,h);g.strokeStyle='#17151f';g.lineWidth=4;g.strokeRect(2,2,w-4,h-4);g.fillStyle='#17151f';g.textAlign='left';g.textBaseline='top';g.font='600 30px Jost, sans-serif';g.fillText(en.toUpperCase(),20,18);g.font='500 22px "Noto Sans KR", sans-serif';g.fillText(ko,20,56);g.fillStyle='#cfc6b4';for(let i=0;i<7;i++)g.fillRect(20,100+i*22,w-40-(i%3)*44,8)}),{side:THREE.DoubleSide});
  const paper=add(new THREE.PlaneGeometry(26,22),pm,[0,0,-.42],[0,0,0],f);
- if(RETRO){const RF=['#2b4f9e','#cf2f2a','#2f7a4d','#8d9299','#f2c400','#f08a3c'],fc=RF[k%6],ink=(k%6>=4)?'#1b2240':'#ffffff',NV='#1b2240';
-  // 폴더 앞면: 3번처럼 큰 글씨와 흰 줄, 2번처럼 남색 굵은 테두리와 아래쪽 하프톤 점
-  f.children[0].material=TM(tex(600,500,(g,w,h)=>{g.fillStyle=fc;g.fillRect(0,0,w,h);
-   g.fillStyle=ink==='#ffffff'?'rgba(255,255,255,.2)':'rgba(27,34,64,.18)';for(let y=h*.6,r=0;y<h;y+=10,r++)for(let x=(r%2)*5;x<w;x+=10){g.beginPath();g.arc(x,y,1+2.6*((y-h*.6)/(h*.4)),0,7);g.fill()}
-   g.fillStyle=ink;for(let i=0;i<9;i++)g.fillRect(40,64+i*(i<4?13:19),230,i<4?3:4);
-   g.fillRect(w-300,46,260,4);g.font='700 34px "Noto Sans KR", sans-serif';g.textAlign='left';g.textBaseline='top';g.fillText(ko,w-300,62);
-   g.fillRect(w-300,150,260,3);g.font='500 22px Jost, sans-serif';g.fillText('No. '+num,w-300,164);
-   g.font='400 58px Jost, sans-serif';g.textBaseline='alphabetic';const ws=en.split(' ');ws.forEach((t,i)=>g.fillText(t,40,h-60-(ws.length-1-i)*62));
-   g.strokeStyle=NV;g.lineWidth=8;g.strokeRect(4,4,w-8,h-8)}));
-  // 탭: 폴더 색 + 가운데 이름
-  f.children[1].material=TM(tex(390,108,(g,w,h)=>{g.fillStyle=fc;g.fillRect(0,0,w,h);g.fillStyle=ink;g.font='700 32px "Noto Sans KR", sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(ko,w/2,h/2+8);g.strokeStyle=NV;g.lineWidth=8;g.strokeRect(0,0,w,h+20)}),{side:THREE.DoubleSide})}
+ f.traverse(o=>{o.castShadow=o.receiveShadow=false});   /* 폴더는 그림자 얼룩 없이 깨끗한 흰색 */
  S.add(f);f.userData={k,doc:k,h:0,paper,jit:(Math.random()-.5)*.04,delay:k/NF*.62};files.push(f)}
+{const dv=new THREE.Group();dv.position.set(0,5.5,-4.4);dv.rotation.x=-.3;fileDrawer.add(dv);   /* 서랍과 함께 움직이는 맨 앞 구분 카드 */
+ add(BX(30,20,.4),FW,[0,.5,0],[0,0,0],dv);
+ add(tabGeo,TM(tex(390,108,(g,w,h)=>{g.fillStyle='#17151f';g.fillRect(0,0,w,h);g.fillStyle='#fbfaf6';g.textBaseline='middle';g.font='500 30px Jost, sans-serif';g.textAlign='left';g.fillText('ABOUT',40,h/2+8);g.textAlign='right';g.fillText(String(NF).padStart(2,'0'),w-34,h/2+8)}),{side:THREE.DoubleSide}),[-9.5,10.5,.21],[0,0,0],dv);dv.traverse(o=>{o.castShadow=o.receiveShadow=false})}
 const DOCP=DOCN.map(([id,ko],k)=>({t:ko+' 꺼내 보기',doc:k}));
 // iMac, 스탠드, 전화기, 명함, 컵, 연필꽂이, 의자, 탁상시계
 const imac=new THREE.Group();imac.position.set(0,TOP,-6);S.add(imac);
@@ -437,7 +430,7 @@ const qS=new THREE.Scene();qS.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),po
 // ── 카메라 장면(상태) ───────────────────────────────────────
 const portrait=()=>innerWidth/innerHeight<.9;
 const V=(a)=>new THREE.Vector3(...a);
-const CAMS={end:[[-8,114,138],[-8,100,-6]],home:[[0,104,160],[0,98,-6]],screen:[[0,106,44],[0,105,-6]],work:[[40,46,150],[40,38,20]],open:[[40,104,86],[40,22,46]],contact:[[6,98,68],[50,82,4]]};
+const CAMS={end:[[-8,114,138],[-8,100,-6]],home:[[0,104,160],[0,98,-6]],screen:[[0,106,44],[0,105,-6]],work:[[40,46,150],[40,38,20]],open:[[40,90,106],[40,21,48]],contact:[[6,98,68],[50,82,4]]};
 CAMS.pour=CAMS.open;CAMS.call=CAMS.contact;
 // WORK 모니터: 화면 정중앙 바로 앞에서 화면과 수직으로(완전 정면) 보도록 카메라 위치를 계산. 창 크기에 맞춰 거리 조절
 const _sc=new THREE.Vector3(),_sn=new THREE.Vector3(),_sq=new THREE.Quaternion(),_ss=new THREE.Vector3();
@@ -779,7 +772,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  if(st==='screen'&&abDone)wkTick();
  {const tt=clock.elapsedTime;LV.forEach(m=>{m.rotation.z=m.userData.base+Math.sin(tt*.9+m.userData.ph)*.07})}
  if(cardOpen){bcRY+=(bcTY-bcRY)*.12;bcRX+=(bcTX-bcRX)*.12;bcSpin.style.transform=`rotateX(${bcRX}deg) rotateY(${bcRY}deg)`}
- drawers.forEach((d,i)=>{const o=(i===2&&(fileOpen||prog>.05))?34:0;d.position.z+=((d.userData.z0+o)-d.position.z)*.1});
+ drawers.forEach((d,i)=>{const o=(i===2&&(fileOpen||prog>.05))?46:0;   /* 서류 서랍은 끝까지 빼서 안이 다 보이게 */d.position.z+=((d.userData.z0+o)-d.position.z)*.1});
  // 서류 폴더: 서랍 안에 서 있고, 마우스를 올린 폴더는 살짝 떠오르며 안의 종이가 빼꼼 나온다
  files.forEach(f=>{f.visible=fileOpen;const u=f.userData,tg=(st==='open'&&hover&&hover.doc===u.k)?1:0;u.h+=(tg-u.h)*(RM?1:Math.min(1,dt2*9));
   f.position.set(40,22+u.h*3.2,fileDrawer.position.z-5-u.k*FS);f.quaternion.setFromEuler(fEu.set(-.3+u.jit,0,u.jit*.5));u.paper.position.y=u.h*7.5});
