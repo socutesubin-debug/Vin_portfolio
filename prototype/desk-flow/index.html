@@ -221,6 +221,7 @@ html.cc input,html.cc textarea{cursor:text!important}
 .docb h2{font:600 34px/1.2 var(--display);margin:4px 0 14px}
 .docb h3{font:700 17px "Noto Sans KR",sans-serif;margin:22px 0 6px;padding-bottom:6px;border-bottom:1.5px solid var(--ink)}
 .docb ul{margin:0;padding-left:1.2em}.docb p{margin:.4em 0}.docb a{color:#2f6fb8}
+.docb .todo{margin:.5em 0;padding:8px 12px;border:1.5px dashed #b9b1a0;color:#8a8273;font-size:14px;background:#faf6ec}
 .docb .ex{display:inline-block;font:500 13px var(--display);background:#f0b93f;padding:2px 10px;border-radius:99px;margin-bottom:6px}
 .docb .go{all:unset;cursor:pointer;display:inline-block;margin-top:18px;font:500 15px var(--display);padding:11px 20px;background:var(--ink);color:#fff;box-shadow:4px 5px 0 #db4a3e}
 #mon .hit{all:unset;position:absolute;cursor:pointer}#mon .hit:focus-visible{outline:.15em solid #3f8fd8}
@@ -359,9 +360,10 @@ const CW=(()=>{const b=new THREE.Box3().setFromObject(cabM);return b.max.x-b.min
 const fileDrawer=drawers[2];
 add(new THREE.PlaneGeometry(12,3.4),TM(tex(360,102,(g,w,h)=>{g.fillStyle=YEL;g.fillRect(0,0,w,h);g.strokeStyle=INK;g.lineWidth=5;g.strokeRect(3,3,w-6,h-6);g.fillStyle=INK;g.font='500 36px Jost, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText("VIN's secret files",w/2,h/2+3)})),[0,-fileDrawer.userData.h*.28,-.9],[0,0,0],fileDrawer);
 // ABOUT 서류 폴더 6장: 마우스를 올리면 폴더가 살짝 떠오르고 안의 종이가 빼꼼 나온다
-const DOCN=[['cv','이력서','Resume'],['cl','자기소개서','Cover Letter'],['edu','학력·교육','Education'],['exp','경력','Experience'],['skill','자격·도구','Skills'],['contact','연락처','Contact']];
+const DOCN=[['cv','이력서','Resume'],['cl','자기소개서','Cover Letter'],['story','옷에서 화면으로','My Story'],['work','일하는 방식','How I Work'],['taste','취향 노트','Taste Notes'],['qa','박수빈 Q&A','Q & A']];
 // 색지(카드스톡) 질감: 바탕색 + 고운 알갱이 + 짧은 섬유 + 가장자리 살짝 어둡게
-const PAPERC=['#d2c7a5','#5363ae','#2d3172','#1f1e27','#c6b993','#7787c6'];   /* 레퍼런스: 크라프트·연보라 파랑·남색·검정 */
+const PAPERC=['#efe7d6','#a3c3e6','#2f6db5','#efca68','#d65a48','#1f2c4f'];   /* 책상 무드에 맞춘 색: 크림(책상)·하늘·코발트(서랍)·버터(이름표)·토마토(스탠드)·남색 */
+const PAPERT=['#1d2433','#1d2433','#fbf8f0','#1d2433','#fbf8f0','#fbf8f0'];   /* 탭 글자색: 밝은 종이엔 진한 글자, 진한 종이엔 흰 글자 */
 function paperFill(g,w,h,col,seed){let r=seed*9301+49297;const rnd=()=>(r=(r*16807)%2147483647)/2147483647;
  g.fillStyle=col;g.fillRect(0,0,w,h);
  for(let i=0;i<w*h/90;i++){const x=rnd()*w,y=rnd()*h,a=rnd();g.fillStyle=a<.5?`rgba(0,0,0,${.05+rnd()*.07})`:`rgba(255,255,255,${.05+rnd()*.08})`;g.fillRect(x,y,1+rnd()*1.6,1+rnd()*1.6)}
@@ -373,7 +375,7 @@ for(let k=0;k<NF;k++){const f=new THREE.Group();const ci=k%4,[id,ko,en]=DOCN[k],
  const pc=PAPERC[k%6];add(BX(30,25,.5),TM(tex(600,500,(g,w,h)=>{paperFill(g,w,h,pc,k+1);
   if(k===0){g.lineWidth=10;g.strokeStyle='rgba(255,255,255,.16)';g.beginPath();g.arc(w/2,h*.68,86,0,7);g.stroke();g.beginPath();g.moveTo(w/2-48,h*.68-40);g.lineTo(w/2,h*.68+46);g.lineTo(w/2+48,h*.68-40);g.stroke();
    g.strokeStyle='rgba(0,0,0,.10)';g.lineWidth=3;g.beginPath();g.arc(w/2+2,h*.68+3,90,.3,2.8);g.stroke()}})),[0,0,0],[0,0,0],f);
- const tm=TM(tex(390,108,(g,w,h)=>{paperFill(g,w,h,pc,k+11);g.fillStyle='#fbf8f0';g.textAlign='center';g.textBaseline='middle';g.font='600 26px Jost, sans-serif';g.letterSpacing='5px';g.fillText(en.toUpperCase(),w/2+3,h/2+10);g.letterSpacing='0px'}),{side:THREE.DoubleSide});
+ const tm=TM(tex(390,108,(g,w,h)=>{paperFill(g,w,h,pc,k+11);g.fillStyle=PAPERT[k%6];g.textAlign='center';g.textBaseline='middle';g.font='600 26px Jost, sans-serif';g.letterSpacing='5px';g.fillText(en.toUpperCase(),w/2+3,h/2+10);g.letterSpacing='0px'}),{side:THREE.DoubleSide});
  add(tabGeo,tm,[[-8,0,8][k%3],12.5,.16],[0,0,0],f);
  // 안에 든 종이: 평소엔 폴더 뒤에 숨어 있고, hover하면 위로 빼꼼 나온다
  const pm=TM(tex(312,264,(g,w,h)=>{g.fillStyle='#fffdf7';g.fillRect(0,0,w,h);g.strokeStyle='#17151f';g.lineWidth=4;g.strokeRect(2,2,w-4,h-4);g.fillStyle='#17151f';g.textAlign='left';g.textBaseline='top';g.font='600 30px Jost, sans-serif';g.fillText(en.toUpperCase(),20,18);g.font='500 22px "Noto Sans KR", sans-serif';g.fillText(ko,20,56);g.fillStyle='#cfc6b4';for(let i=0;i<7;i++)g.fillRect(20,100+i*22,w-40-(i%3)*44,8)}),{side:THREE.DoubleSide});
@@ -825,10 +827,31 @@ function toast(m){toastEl.textContent=m;toastEl.classList.add('on');clearTimeout
 async function dlDoc(id){const f=DLF[id];if(!f)return;const [u,n]=f;try{const r=await fetch(u,{method:'HEAD',cache:'no-store'});const ct=r.headers.get('content-type')||'';if(!r.ok||/text\/html/.test(ct))throw 0;const a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();a.remove();toast(n+' 다운로드를 시작했어요')}catch(e){toast('파일을 준비 중이에요')}}
 // ── ABOUT(서랍): 서류 꺼내 읽기 ──
 const DOCH={cv:DOCS.cv,cl:DOCS.cl,
- edu:`<h2>학력 · 교육</h2><h3>학력</h3><ul><li>한국폴리텍대학교 시각디자인과 (졸업 예정)</li><li>사사다 패션스쿨 졸업</li></ul><h3>교육</h3><ul><li>KMA 메타버스 패션 과정 6개월 수료</li></ul>`,
- exp:`<span class="ex">자세한 내용은 채울 예정</span><h2>경력</h2><h3>패션 디자이너 · 1년</h3><p>QC(품질 관리)와 그래픽 디자인을 함께 맡았어요.</p>`,
- skill:`<h2>자격 · 도구</h2><h3>자격</h3><ul><li>GTQ</li><li>AI 프롬프트 활용 자격</li></ul><h3>도구</h3><p>Figma · Cinema 4D · InDesign</p>`,
- contact:`<h2>연락처</h2><p>UX/UI Designer 박수빈</p><h3>이메일</h3><p><a href="mailto:eilibean01@gmail.com">eilibean01@gmail.com</a></p><button class="go" data-go="contact">전화기로 메시지 남기기 →</button>`};
+ story:`<h2>옷에서 화면으로</h2><p>사람의 몸을 위해 옷을 설계하던 사람이, 이제는 사람의 행동을 위해 화면을 설계합니다.</p>
+<h3>01 · 패션을 배우다</h3><p>사사다 패션스쿨 졸업. 옷 한 벌이 패턴 → 가봉 → 수정을 거쳐 완성되는 과정을 익혔어요.</p>
+<h3>02 · 패션 디자이너로 일하다 (1년)</h3><p>디자인과 함께 QC(품질 관리)와 그래픽 디자인을 맡았어요. 작은 오차가 완성도를 가른다는 걸 현장에서 배웠어요.</p>
+<h3>03 · 가상 공간을 만나다</h3><p>KMA 메타버스 패션 과정 6개월 수료. 옷이 화면 속에서도 '경험'이 될 수 있다는 걸 알게 됐어요.</p>
+<h3>04 · 화면을 설계하다</h3><p>한국폴리텍대학교 시각디자인과. UX/UI로 방향을 정하고, 15명 졸업전시를 총괄했어요.</p>
+<p class="todo">✎ 직접 채우기 — 방향을 바꾸게 된 결정적인 순간 한 가지(장면·대화·프로젝트)</p>`,
+ work:`<h2>일하는 방식</h2><p>옷을 만들던 순서가 지금 화면을 만드는 순서가 됐어요.</p>
+<h3>재단 전에 치수부터 — 리서치</h3><p>입을 사람을 먼저 재듯, 쓰는 사람과 문제를 먼저 봐요.</p>
+<h3>가봉하듯 빨리 — 프로토타입</h3><p>완성 전에 대충이라도 입혀 보고, 어색한 곳을 고쳐요.</p>
+<h3>QC의 눈으로 — 디테일 검수</h3><p>간격 1px, 글자 한 줄까지 출고 전 검수하듯 확인해요.</p>
+<h3>함께 맞추기 — 협업</h3><p>졸업전시 15명을 조율하며, 각자의 작업이 한 무대에서 어울리게 맞췄어요.</p>
+<h3>쓰는 도구</h3><p>Figma · Cinema 4D · InDesign · Photoshop</p>
+<p class="todo">✎ 직접 채우기 — 이 방식이 잘 드러난 프로젝트 하나(예: 프린트카페 UI 리뉴얼)의 짧은 사례</p>`,
+ taste:`<h2>취향 노트</h2><p>박수빈이 좋아하고, 자주 들여다보는 것들.</p>
+<h3>요즘 자주 보는 것</h3><p class="todo">✎ 직접 채우기 — 브랜드·웹사이트·전시·책 3가지</p>
+<h3>작업할 때 듣는 것</h3><p class="todo">✎ 직접 채우기 — 플레이리스트나 좋아하는 음악</p>
+<h3>좋아하는 색과 재료</h3><p class="todo">✎ 직접 채우기 — 예: 코발트 블루, 거친 종이, 리넨 같은 패션 시절부터 좋아한 것</p>
+<h3>영감을 얻는 곳</h3><p class="todo">✎ 직접 채우기 — 산책길·매장·전시장 등 아이디어가 떠오르는 장소</p>`,
+ qa:`<h2>박수빈에게 묻다</h2>
+<h3>Q. 디자이너로서 한 문장으로 소개한다면?</h3><p>보이는 것 너머를 설계하는 디자이너예요.</p>
+<h3>Q. 패션 경험이 UX/UI에 어떻게 쓰이나요?</h3><p>사람의 몸에 맞추던 감각을 사람의 행동에 맞추는 데 써요. QC를 하며 익힌 디테일 감각도 그대로예요.</p>
+<h3>Q. 가장 애착 가는 작업은?</h3><p class="todo">✎ 직접 채우기 — 작업 이름과 이유 한두 줄</p>
+<h3>Q. 함께 일하면 어떤 동료인가요?</h3><p class="todo">✎ 직접 채우기 — 동료·교수님에게 들은 말이나 스스로 생각하는 모습</p>
+<h3>Q. 앞으로 만들고 싶은 것은?</h3><p class="todo">✎ 직접 채우기 — 3년 뒤 하고 싶은 일</p>
+<h3>연락하기</h3><p><a href="mailto:eilibean01@gmail.com">eilibean01@gmail.com</a></p><button class="go" data-go="contact">전화기로 메시지 남기기 →</button>`};
 let docOpen=false;const docEl=$('doc'),docPP=docEl.querySelector('.pp');
 function openDoc(k){const [id,ko,en]=DOCN[k];$('docT').textContent=ko+' · '+en;$('docB').innerHTML=DOCH[id];$('docDl').hidden=!DLF[id];docEl.dataset.id=id;
  const b=$('docB').querySelector('[data-go]');if(b)b.onclick=()=>{closeDoc();go(b.dataset.go)};
