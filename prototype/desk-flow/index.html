@@ -634,7 +634,7 @@ function camStep(dt){camPrevP.copy(cpos);camPrevL.copy(clook);
   if(u>=1){cpos.copy(T.tp);clook.copy(T.tl);camT=null}}
  if(dt>0){camVp.copy(cpos).sub(camPrevP).divideScalar(dt);camVl.copy(clook).sub(camPrevL).divideScalar(dt)}}
 function retarget(inst){const c=camFor(st);tpos.copy(c.p);tlook.copy(c.l);if(inst||RM){cpos.copy(tpos);clook.copy(tlook);camT=null;camVp.set(0,0,0);camVl.set(0,0,0)}else camStart()}
-function go(s,opts={}){domEl=null;if(typeof pickReq!=='undefined')pickReq=true;const was=st;st=s;lockUntil=performance.now()+(s==='contact'?1800:s==='end'?1200:s==='pour'?500:900);if(s==='contact'&&was==='pour')progT=0;if(s==='call'||s==='contact'){const fm=$('form');if(fm)fm.style.opacity=''}
+function go(s,opts={}){domEl=null;setTimeout(()=>{if(bgm)bgmUpd()},0);if(typeof pickReq!=='undefined')pickReq=true;const was=st;st=s;lockUntil=performance.now()+(s==='contact'?1800:s==='end'?1200:s==='pour'?500:900);if(s==='contact'&&was==='pour')progT=0;if(s==='call'||s==='contact'){const fm=$('form');if(fm)fm.style.opacity=''}
  if(s==='pour'&&opts.full){progT=1}else if(s==='pour'&&was!=='pour'&&progT<.02){progT=.0}
  if(s==='open'||s==='work'||s==='home'||s==='screen'){if(s!=='pour')progT=Math.min(progT,0)}
  retarget(opts.instant);
@@ -719,7 +719,7 @@ cv.addEventListener('click',e=>{if(cardOpen){closeCard();return}
  go(hover.to)});
 // ── 전화벨 소리 ────────────────────────────────────────────────
 let ac=null,soundOn=false,ringTimer=null;
-$('snd').onclick=()=>{soundOn=!soundOn;$('snd').setAttribute('aria-pressed',soundOn);$('snd').setAttribute('aria-label',soundOn?'소리 끄기':'소리 켜기');if(soundOn){ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume&&ac.resume();initSfx()}};
+$('snd').onclick=()=>{soundOn=!soundOn;$('snd').setAttribute('aria-pressed',soundOn);$('snd').setAttribute('aria-label',soundOn?'소리 끄기':'소리 켜기');if(soundOn){ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume&&ac.resume();initSfx()}bgmUpd()};
 // ── 효과음 ── ♪ 소리 켜기일 때만 난다. sounds/ 폴더에 실제 녹음 파일이 있으면 그 파일을, 없으면 아래(SYN)처럼 코드로 만든 소리를 쓴다.
 // 파일 쓰는 법: sounds/이름.mp3 를 넣고 sounds/list.json 에 이름을 적는다(예: ["key","cup"]).
 // 이름: key(키 하나) cup(컵) drawerOpen drawerClose(서랍) ring(전화벨 한 번) pickup(수화기 들기) hangup(내려놓기) switch(스탠드 스위치)
@@ -727,6 +727,16 @@ let master=null,noiseB=null;const sfxBuf={};
 function initSfx(){if(master)return;master=ac.createGain();master.gain.value=.9;master.connect(ac.destination);
  const n=ac.sampleRate,b=ac.createBuffer(1,n,n),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;noiseB=b;
  fetch('sounds/list.json').then(r=>r.ok?r.json():[]).then(L=>L.forEach(k=>fetch('sounds/'+k+'.mp3').then(r=>r.arrayBuffer()).then(x=>ac.decodeAudioData(x)).then(buf=>{sfxBuf[k]=buf}).catch(()=>{}))).catch(()=>{})}
+// ── 배경음 ── ♪ 소리 켜기일 때 반복 재생(효과음보다 작게). 전화 장면에선 줄이고, 다른 탭으로 가면 잠시 멈춤. 켜고 끌 때 부드럽게
+// 파일: sounds/VIN_portfolio_bgMusic.mp3 (♪를 처음 켤 때 불러옴 → 첫 로딩 속도에는 영향 없음)
+const BGM_SRC='sounds/VIN_portfolio_bgMusic.mp3';let bgm=null,bgmG=null,bgmOffT=0;
+function bgmUpd(){if(!ac)return;
+ if(!bgm){bgm=new Audio(BGM_SRC);bgm.loop=true;bgm.preload='auto';try{bgmG=ac.createGain();bgmG.gain.value=0;ac.createMediaElementSource(bgm).connect(bgmG);bgmG.connect(ac.destination)}catch(e){bgmG=null;bgm.volume=0}}
+ const on=soundOn&&!document.hidden,v=!on?0:(st==='contact'||st==='call')?.12:st==='end'?.22:.32;   /* 기본 32%, 전화 장면 12%, 마지막 장면 22% */
+ clearTimeout(bgmOffT);if(on&&bgm.paused)bgm.play().catch(()=>{});
+ if(bgmG){const t=ac.currentTime;bgmG.gain.cancelScheduledValues(t);bgmG.gain.setValueAtTime(bgmG.gain.value,t);bgmG.gain.linearRampToValueAtTime(v,t+(on?1.5:1))}else bgm.volume=v;
+ if(!on)bgmOffT=setTimeout(()=>{if(!(soundOn&&!document.hidden))bgm.pause()},1100)}
+document.addEventListener('visibilitychange',()=>{if(bgm)bgmUpd()});
 function sfx(k){if(!soundOn||!ac||!master)return;const t=ac.currentTime+.005;if(sfxBuf[k]){const s=ac.createBufferSource();s.buffer=sfxBuf[k];s.connect(master);s.start(t);return}SYN[k]&&SYN[k](t)}
 // 소리 재료: 잡음(nz, 걸러서 딸깍·스르륵) + 순음(tone, 종·도자기 울림). 빨리 커졌다가 서서히 사라지는 모양
 const env=(g,t,a,peak,dec)=>{g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+dec)};
@@ -1174,7 +1184,7 @@ function applyTheme(i){themeI=i;const T=THEMES[i];for(const k in MATS)MATS[k].co
 }
 applyTheme(RETRO?1:MATCAP?2:0);
 if(document.fonts){document.fonts.load('600 40px Jost');document.fonts.load('500 30px "Noto Sans KR"');document.fonts.ready.then(()=>applyTheme(themeI))}
-window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={keysN:KEYS?KEYS.comps.length:0,typeBurst,sfx,files,scr,cam,AW,AH,get wk(){return WKR},cpos,fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
+window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={get bgm(){return bgm},get bgmG(){return bgmG},keysN:KEYS?KEYS.comps.length:0,typeBurst,sfx,files,scr,cam,AW,AH,get wk(){return WKR},cpos,fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
 fit();addEventListener('resize',fit);if(window.ResizeObserver)new ResizeObserver(()=>{if(R.domElement.width!==Math.round(innerWidth*RS)||innerWidth/innerHeight!==cam.aspect)fit()}).observe(document.documentElement);fromHash();loop();
 if(window.__ld)__ld.finish();else{const ld=$('load');ld.hidden=true}   /* 다 불러옴 → 인트로가 100% 찍고 사라짐 */
 </script>
