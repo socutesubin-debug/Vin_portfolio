@@ -35,8 +35,15 @@ nav a:hover,nav a:focus-visible,nav a.on{border-bottom-color:var(--ink);outline:
 html.cc,html.cc *{cursor:none!important}
 html.cc input,html.cc textarea{cursor:text!important}
 #back:hover,#back:focus-visible,#snd:focus-visible{outline:2px solid #fff;outline-offset:4px}
-#snd{left:max(24px,env(safe-area-inset-left,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));width:38px;height:38px;border-radius:50%;background:rgba(15,15,24,.55);display:grid;place-items:center}
-#snd[aria-pressed="true"]{background:#fff;color:var(--ink)}
+#snd{left:max(24px,env(safe-area-inset-left,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;gap:2.6px;
+ background:rgba(78,76,68,.42);-webkit-backdrop-filter:blur(12px) saturate(1.3);backdrop-filter:blur(12px) saturate(1.3);border:1px solid rgba(255,255,255,.45);
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.35),inset 0 -6px 12px rgba(0,0,0,.08),0 6px 18px rgba(0,0,0,.18)}   /* 유리 느낌 원 */
+#snd i{display:block;width:2.6px;height:18px;border-radius:2px;background:#fff;transform:scaleY(.16);transition:transform .5s cubic-bezier(.3,.7,.3,1)}   /* 멈춤: 낮은 막대 */
+#snd.play i{animation:eq 1s ease-in-out infinite alternate}   /* 재생 중: 막대가 오르내림 */
+#snd i:nth-child(1){--h:.5;animation-duration:.9s!important}#snd i:nth-child(2){--h:.9;animation-duration:1.2s!important;animation-delay:-.3s}#snd i:nth-child(3){--h:.62;animation-duration:.8s!important;animation-delay:-.5s}
+#snd i:nth-child(4){--h:1;animation-duration:1.05s!important;animation-delay:-.2s}#snd i:nth-child(5){--h:.7;animation-duration:.95s!important;animation-delay:-.7s}#snd i:nth-child(6){--h:.95;animation-duration:1.15s!important;animation-delay:-.4s}
+@keyframes eq{0%{transform:scaleY(calc(var(--h)*.42))}100%{transform:scaleY(var(--h))}}
+@media (prefers-reduced-motion:reduce){#snd.play i{animation:none;transform:scaleY(var(--h))}}
 [hidden]{display:none!important}
 /* 프로젝트 화면 */
 #pj{position:fixed;inset:0;z-index:6;overflow:auto;overscroll-behavior:contain;opacity:0;pointer-events:none;
@@ -304,7 +311,7 @@ body:has(#doc:not([hidden])) header{opacity:0;pointer-events:none}   /* 서류 �
 <button id="back" hidden>Back</button>
 <button id="dl" hidden aria-label="이력서 다운로드" data-tip="이력서 다운로드"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg></button>
 <div id="cur" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3l12 7.2-5.2 1.6L10.6 17z" fill="#fff"/></svg></div>
-<button id="snd" aria-label="소리 켜기" aria-pressed="false">♪</button>
+<button id="snd" aria-label="소리 끄기" aria-pressed="true"><i></i><i></i><i></i><i></i><i></i><i></i></button>
 <div id="sheet2"></div>
 <section id="pj" aria-label="프로젝트 목록"><h1>Projects</h1><div id="chips"></div><div id="grid"></div></section>
 <button id="cta" aria-label="연락하기">연락하기 <span aria-hidden="true">→</span></button>
@@ -718,8 +725,15 @@ cv.addEventListener('click',e=>{if(cardOpen){closeCard();return}
  if(hover.to==='contact'){go(st==='contact'?'call':'contact');return}
  go(hover.to)});
 // ── 전화벨 소리 ────────────────────────────────────────────────
-let ac=null,soundOn=false,ringTimer=null;
-$('snd').onclick=()=>{soundOn=!soundOn;$('snd').setAttribute('aria-pressed',soundOn);$('snd').setAttribute('aria-label',soundOn?'소리 끄기':'소리 켜기');if(soundOn){ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume&&ac.resume();initSfx()}bgmUpd()};
+let ac=null,soundOn=true,ringTimer=null;   /* 소리는 처음부터 켜짐 */
+$('snd').onclick=()=>{soundOn=!soundOn;$('snd').setAttribute('aria-pressed',soundOn);$('snd').setAttribute('aria-label',soundOn?'소리 끄기':'소리 켜기');if(soundOn){ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume&&ac.resume();initSfx()}else sndUI(false);bgmUpd()};
+// 막대 아이콘: 음악이 실제로 흐르면 움직이고, 멈추면 지금 높이에서 낮게 줄어들며 멈춤
+function sndUI(p){const b=$('snd'),bars=[...b.children];if(p){bars.forEach(x=>x.style.transform='');b.classList.add('play');return}
+ if(!b.classList.contains('play'))return;bars.forEach(x=>x.style.transform=getComputedStyle(x).transform);b.classList.remove('play');requestAnimationFrame(()=>requestAnimationFrame(()=>bars.forEach(x=>x.style.transform='')))}
+// 처음부터 켜짐: 첫 클릭·키 입력·터치 때 소리 시작(브라우저 정책상 그 전엔 무음)
+function audioKick(){if(!soundOn||(ac&&ac.state==='running'&&bgm&&!bgm.paused))return;ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume&&ac.resume();initSfx();bgmUpd()}
+['pointerdown','keydown','touchend'].forEach(ev=>addEventListener(ev,function k(e){if(e.target&&e.target.closest&&e.target.closest('#snd'))return;audioKick()},{passive:true}));
+setTimeout(audioKick,0);
 // ── 효과음 ── ♪ 소리 켜기일 때만 난다. sounds/ 폴더에 실제 녹음 파일이 있으면 그 파일을, 없으면 아래(SYN)처럼 코드로 만든 소리를 쓴다.
 // 파일 쓰는 법: sounds/이름.mp3 를 넣고 sounds/list.json 에 이름을 적는다(예: ["key","cup"]).
 // 이름: key(키 하나) cup(컵) drawerOpen drawerClose(서랍) ring(전화벨 한 번) pickup(수화기 들기) hangup(내려놓기) switch(스탠드 스위치)
@@ -731,7 +745,7 @@ function initSfx(){if(master)return;master=ac.createGain();master.gain.value=.9;
 // 파일: sounds/VIN_portfolio_bgMusic.mp3 (♪를 처음 켤 때 불러옴 → 첫 로딩 속도에는 영향 없음)
 const BGM_SRC='sounds/VIN_portfolio_bgMusic.mp3';let bgm=null,bgmG=null,bgmOffT=0;
 function bgmUpd(){if(!ac)return;
- if(!bgm){bgm=new Audio(BGM_SRC);bgm.loop=true;bgm.preload='auto';try{bgmG=ac.createGain();bgmG.gain.value=0;ac.createMediaElementSource(bgm).connect(bgmG);bgmG.connect(ac.destination)}catch(e){bgmG=null;bgm.volume=0}}
+ if(!bgm){bgm=new Audio(BGM_SRC);bgm.loop=true;bgm.preload='auto';bgm.addEventListener('playing',()=>sndUI(true));bgm.addEventListener('pause',()=>sndUI(false));try{bgmG=ac.createGain();bgmG.gain.value=0;ac.createMediaElementSource(bgm).connect(bgmG);bgmG.connect(ac.destination)}catch(e){bgmG=null;bgm.volume=0}}
  const on=soundOn&&!document.hidden,v=!on?0:(st==='contact'||st==='call')?.12:st==='end'?.22:.32;   /* 기본 32%, 전화 장면 12%, 마지막 장면 22% */
  clearTimeout(bgmOffT);if(on&&bgm.paused)bgm.play().catch(()=>{});
  if(bgmG){const t=ac.currentTime;bgmG.gain.cancelScheduledValues(t);bgmG.gain.setValueAtTime(bgmG.gain.value,t);bgmG.gain.linearRampToValueAtTime(v,t+(on?1.5:1))}else bgm.volume=v;
@@ -1148,7 +1162,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  else if(hover){hover=null;cv.style.cursor='default';lbl.style.opacity=0}
  }}
  {eT+=(eTarget-eT)*Math.min(1,dt2*1.1);const k=eT<.001?0:eT;tmpC.copy(C_SUN0).lerp(C_SUN1,k);sun.color.copy(tmpC);sun.intensity=2.3-.95*k;fill.intensity=.3-.15*k;hemi.intensity=1.8-1.0*k;hemi.color.copy(C_H0).lerp(C_H1,k);sun.position.lerpVectors(SUN_P0,SUN_P1,k);win.position.copy(tmpV.copy(sun.position).normalize().multiplyScalar(250));win.lookAt(0,0,0);tmpC.copy(C_BG0).lerp(C_BG1,k).convertLinearToSRGB();post.uniforms.cBg.value.set(tmpC.r,tmpC.g,tmpC.b)}
- lampV=lampOn?lampEnv(performance.now()/1000-lampT0):Math.max(0,lampV-dt2*5);spot.intensity=lampV*(RETRO?2600:4200)*Math.max(0,1-1.4*eT);spot.angle=.55-.2*eT;glowM.forEach(m=>m.uniforms.op.value=lampV);halo.quaternion.copy(cam.quaternion);core.quaternion.copy(cam.quaternion);post.uniforms.wLo.value=1+.35*eT;post.uniforms.wHi.value=1.6+.5*eT;cal.position.y=130-14*eT;post.uniforms.warmK.value=lampV;
+ lampV=lampOn?lampEnv(performance.now()/1000-lampT0):Math.max(0,lampV-dt2*5);spot.intensity=lampV*(RETRO?2600:4200)*Math.max(0,1-1.4*eT);spot.angle=.55-.2*eT;glowM.forEach(m=>m.uniforms.op.value=lampV);halo.quaternion.copy(cam.quaternion);core.quaternion.copy(cam.quaternion);post.uniforms.wLo.value=1+.35*eT;post.uniforms.wHi.value=1.6+.5*eT;post.uniforms.warmK.value=lampV;
  {const onScr=st==='screen'&&cpos.distanceTo(tpos)<16;if(onScr&&!abWas){abStart=performance.now();abDirty=true;abDone=false}abWas=onScr;scr.material=onScr?ABM:(st==='end'?ENDM:BLACK);if(onScr){const ap=Math.min(1,(performance.now()-abStart)/1400);if(!abDone){drawAbout(ap);if(ap>=1)abDone=true}}if(onScr){placeMon();if(!mon.classList.contains('on'))mon.classList.add('on')}else if(mon.classList.contains('on'))mon.classList.remove('on')}
  if(st==='screen'&&abDone)wkTick();
  {const tt=clock.elapsedTime;LV.forEach(m=>{m.rotation.z=m.userData.base+Math.sin(tt*.9+m.userData.ph)*.07})}
