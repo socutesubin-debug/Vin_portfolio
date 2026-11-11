@@ -1670,9 +1670,9 @@ section h2{font-size:clamp(22px,2.4vw,32px)!important;line-height:1.4!important;
  .pn-t{text-align:left}
  .pn-h{font-size:clamp(24px,2.1vw,30px)!important}
  .pn-d br{display:none}
- .pn-phone.mk{height:min(calc(100svh - 60px - 56px),780px);margin-top:0}
+ .pn-phone.mk{height:min(calc(100svh - 60px - 104px),780px);margin-top:-24px}
  .sc-pin{padding-top:60px}
- .sc-stage{--w:min(340px,26vw,calc((100svh - 60px - 64px)*878/1800));margin-top:0}
+ .sc-stage{--w:min(340px,26vw,calc((100svh - 60px - 110px)*878/1800));margin-top:-24px}
  .sc-h{position:absolute;left:var(--lx);top:calc(50% + 30px - 110px);width:var(--tw);text-align:left}
  .sc-h .h2{font-size:clamp(24px,2.1vw,30px)}
  .sc-caps{position:absolute;left:var(--lx);top:calc(50% + 30px + 10px);width:var(--tw);height:120px;margin:0;text-align:left}
@@ -1682,6 +1682,13 @@ section h2{font-size:clamp(22px,2.4vw,32px)!important;line-height:1.4!important;
 /* auto-play pins: one screen tall */
 @media(min-width:901px){.pn{height:100vh;height:100svh}}
 .sc{height:100vh!important;height:100svh!important}
+/* scroll nudge: halftone chevron after auto-play ends */
+.nudge{position:absolute;left:50%;bottom:16px;z-index:30;color:#fff;opacity:0;transform:translate(-50%,-10px);transition:opacity .6s,transform .6s cubic-bezier(.2,.7,.2,1);pointer-events:none}
+.nudge svg{display:block;width:46px;height:auto;max-width:none}
+.pn.fin .nudge,.sc.fin .nudge{opacity:.85;transform:translate(-50%,0)}
+.pn.fin .nudge svg,.sc.fin .nudge svg{animation:nudge 1.5s cubic-bezier(.45,0,.35,1) .6s infinite}
+@keyframes nudge{0%,100%{transform:translateY(0);opacity:1}50%{transform:translateY(8px);opacity:.55}}
+@media (prefers-reduced-motion:reduce){.pn.fin .nudge svg,.sc.fin .nudge svg{animation:none}}
 /* ---------- v3 additions ---------- */
 .sum{background:var(--dk);border-top:1px solid var(--dline)}
 .sumg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding-top:28px;padding-bottom:clamp(64px,8vw,100px)}
@@ -2009,7 +2016,7 @@ section h2{font-size:clamp(22px,2.4vw,32px)!important;line-height:1.4!important;
 <!-- ===================== SOLUTION FLOW ===================== -->
 <section class="fs" id="flow" aria-label="Main Flow — 핵심 화면">
   <div class="fs-a pn" id="pn" style="--n:3" aria-label="Main Flow — 홈에서 파일 출력까지 프로토타입">
-    <div class="pn-pin">
+    <div class="pn-pin"><div class="nudge" aria-hidden="true"><svg viewBox="0 0 44 29" width="44" height="29" fill="currentColor"><circle cx="1.0" cy="1.0" r="0.81"/><circle cx="4.6" cy="1.0" r="0.61"/><circle cx="8.2" cy="1.0" r="0.45"/><circle cx="33.4" cy="1.0" r="0.37"/><circle cx="37.0" cy="1.0" r="0.50"/><circle cx="40.6" cy="1.0" r="0.67"/><circle cx="4.6" cy="4.6" r="0.85"/><circle cx="8.2" cy="4.6" r="0.66"/><circle cx="11.8" cy="4.6" r="0.48"/><circle cx="33.4" cy="4.6" r="0.54"/><circle cx="37.0" cy="4.6" r="0.72"/><circle cx="8.2" cy="8.2" r="0.90"/><circle cx="11.8" cy="8.2" r="0.70"/><circle cx="15.4" cy="8.2" r="0.52"/><circle cx="29.8" cy="8.2" r="0.58"/><circle cx="33.4" cy="8.2" r="0.76"/><circle cx="37.0" cy="8.2" r="0.97"/><circle cx="11.8" cy="11.8" r="0.95"/><circle cx="15.4" cy="11.8" r="0.74"/><circle cx="19.0" cy="11.8" r="0.56"/><circle cx="26.2" cy="11.8" r="0.62"/><circle cx="29.8" cy="11.8" r="0.81"/><circle cx="33.4" cy="11.8" r="1.03"/><circle cx="15.4" cy="15.4" r="1.00"/><circle cx="19.0" cy="15.4" r="0.79"/><circle cx="22.6" cy="15.4" r="0.66"/><circle cx="26.2" cy="15.4" r="0.86"/><circle cx="29.8" cy="15.4" r="1.08"/><circle cx="15.4" cy="19.0" r="1.29"/><circle cx="19.0" cy="19.0" r="1.06"/><circle cx="22.6" cy="19.0" r="0.91"/><circle cx="26.2" cy="19.0" r="1.13"/><circle cx="19.0" cy="22.6" r="1.35"/><circle cx="22.6" cy="22.6" r="1.19"/><circle cx="26.2" cy="22.6" r="1.43"/><circle cx="22.6" cy="26.2" r="1.49"/></svg></div>
       <p class="pn-sec">Main Flow</p>
       <div class="pn-txt" aria-live="polite"><div class="pn-t on" data-i="0"><h2 class="pn-h">출력 준비는 <em>홈</em>에서 바로 시작해요</h2><p class="pn-d">파일 업로드를 최상단에 배치해 출력 준비를 바로 시작할 수 있게 했어요. <br>주변 매장과 기기 현황, UP카드 잔액, 파일 보관함을 한눈에 확인할 수 있도록 모았어요.</p></div><div class="pn-t" data-i="1"><h2 class="pn-h">어디에 있는 <em>파일</em>이든 바로 올려요</h2><p class="pn-d">매장 PC 로그인 없이 내 폰의 파일을 미리 올려요. <br>여러 파일도 한 번에 올리고 업로드 상태를 바로 확인해요.</p></div><div class="pn-t" data-i="2"><h2 class="pn-h"><em>문서 유형</em>만 고르면<br>옵션이 맞춰져요</h2><p class="pn-d">컬러 · 용지 · 단면/양면 · 매수를 집에서 미리 정하고, <br>장당 요금도 옵션 옆에서 바로 확인해요.</p></div><div class="pn-t" data-i="3"><h2 class="pn-h">출력될 모습을 <em>먼저</em> 확인해요</h2><p class="pn-d">선택한 옵션이 적용된 화면으로 <br>잘림이나 흑백 변환 같은 실수를 미리 막아요.</p></div><div class="pn-t" data-i="4"><h2 class="pn-h">결제까지 마치면<br><em>코드</em>가 바로 발급돼요</h2><p class="pn-d">유피카드로 앱에서 미리 결제하고 QR과 6자리 출력번호를 받아요. <br>매장에서는 코드만 입력하면 준비한 파일이 바로 나와요.</p></div></div>
       <div class="pn-phone mk" id="pnPhone">
@@ -2065,7 +2072,7 @@ section h2{font-size:clamp(22px,2.4vw,32px)!important;line-height:1.4!important;
 
 <!-- ===================== STORE (carousel) ===================== -->
 <section class="sc" id="store" aria-label="Store — 매장 찾기">
-  <div class="sc-pin">
+  <div class="sc-pin"><div class="nudge" aria-hidden="true"><svg viewBox="0 0 44 29" width="44" height="29" fill="currentColor"><circle cx="1.0" cy="1.0" r="0.81"/><circle cx="4.6" cy="1.0" r="0.61"/><circle cx="8.2" cy="1.0" r="0.45"/><circle cx="33.4" cy="1.0" r="0.37"/><circle cx="37.0" cy="1.0" r="0.50"/><circle cx="40.6" cy="1.0" r="0.67"/><circle cx="4.6" cy="4.6" r="0.85"/><circle cx="8.2" cy="4.6" r="0.66"/><circle cx="11.8" cy="4.6" r="0.48"/><circle cx="33.4" cy="4.6" r="0.54"/><circle cx="37.0" cy="4.6" r="0.72"/><circle cx="8.2" cy="8.2" r="0.90"/><circle cx="11.8" cy="8.2" r="0.70"/><circle cx="15.4" cy="8.2" r="0.52"/><circle cx="29.8" cy="8.2" r="0.58"/><circle cx="33.4" cy="8.2" r="0.76"/><circle cx="37.0" cy="8.2" r="0.97"/><circle cx="11.8" cy="11.8" r="0.95"/><circle cx="15.4" cy="11.8" r="0.74"/><circle cx="19.0" cy="11.8" r="0.56"/><circle cx="26.2" cy="11.8" r="0.62"/><circle cx="29.8" cy="11.8" r="0.81"/><circle cx="33.4" cy="11.8" r="1.03"/><circle cx="15.4" cy="15.4" r="1.00"/><circle cx="19.0" cy="15.4" r="0.79"/><circle cx="22.6" cy="15.4" r="0.66"/><circle cx="26.2" cy="15.4" r="0.86"/><circle cx="29.8" cy="15.4" r="1.08"/><circle cx="15.4" cy="19.0" r="1.29"/><circle cx="19.0" cy="19.0" r="1.06"/><circle cx="22.6" cy="19.0" r="0.91"/><circle cx="26.2" cy="19.0" r="1.13"/><circle cx="19.0" cy="22.6" r="1.35"/><circle cx="22.6" cy="22.6" r="1.19"/><circle cx="26.2" cy="22.6" r="1.43"/><circle cx="22.6" cy="26.2" r="1.49"/></svg></div>
   <div class="wrap">
     <header class="sc-h">
       <h2 class="h2">가까운 <em>매장</em>을 찾고,<br>기기 현황까지 미리 확인해요</h2>
@@ -2417,7 +2424,7 @@ function PinLock(sec,active,next){var on=false,ty=0,cool=0;
       ph=document.getElementById('pnPhone'),cur=document.getElementById('pnCur'),rip=document.getElementById('pnRip'),hs=document.getElementById('pnTap'),
       rm=matchMedia('(prefers-reduced-motion: reduce)').matches,ch=0,si=0,busy=false,tm=[],tk=0;
   var scrT=0;function setScr(i){var p=si;si=i;scrT=performance.now();S.forEach(function(e,k){e.classList.toggle('on',k===i);e.classList.toggle('out',k===p&&k!==i)});
-    uxHide();if(i===3)tm.push(setTimeout(uxShow,rm?0:250));if(i===4)tm.push(setTimeout(ux2Show,rm?0:450));if(i===6)tm.push(setTimeout(function(){if(si===6)pn.classList.add('ux3')},rm?0:500));for(var c=0;c<END.length&&END[c]<i;c++);if(c!==ch&&c<END.length)setCh(c);var t=TAP[i];hs.hidden=!t;S[i].appendChild(hs);S[i].scrollTop=0;bar();place()}
+    uxHide();if(i===3)tm.push(setTimeout(uxShow,rm?0:250));if(i===4)tm.push(setTimeout(ux2Show,rm?0:450));if(i===6){tm.push(setTimeout(function(){if(si===6)pn.classList.add('ux3')},rm?0:500));tm.push(setTimeout(function(){if(si===6)pn.classList.add('fin')},rm?0:1600))}else pn.classList.remove('fin');for(var c=0;c<END.length&&END[c]<i;c++);if(c!==ch&&c<END.length)setCh(c);var t=TAP[i];hs.hidden=!t;S[i].appendChild(hs);S[i].scrollTop=0;bar();place()}
   function imgH(e){var im=e.querySelector('img');return e.clientWidth*(im.getAttribute('height')/im.getAttribute('width'))}
   function place(){var t=TAP[si];if(!t)return;var e=S[si];if(t[2]==='img'){var h=imgH(e);hs.style.cssText='left:'+(t[0]-30)+'%;top:'+(h*t[1]/100-e.clientHeight*.03)+'px;width:60%;height:'+(e.clientHeight*.06)+'px'}else hs.style.cssText='left:'+(t[0]-9)+'%;top:'+(t[1]-2.6)+'%;width:18%;height:5.2%'}
   function setCh(c){ch=c;T.forEach(function(e,k){e.classList.toggle('on',k===c);e.setAttribute('aria-hidden',k!==c)});D.forEach(function(e,k){e.className=k<c?'done':k===c?'cur':''})}
@@ -2439,12 +2446,12 @@ function PinLock(sec,active,next){var on=false,ty=0,cool=0;
   function play(){var tok=++seq;
     (function next(){if(tok!==seq)return;
       tm.push(setTimeout(function(){if(tok!==seq)return;
-        if(si>=S.length-1){done=true;lock.release();return}
+        if(si>=S.length-1){done=true;pn.classList.add('fin');lock.release();return}
         if(AUTO[si]){setScr(si+1);next()}else step(next)},rm?300:DW[si]))})()}
   hs.addEventListener('click',function(){if(busy||si>=S.length-1)return;clear();seq++;step(play)});
   var pin=pn.querySelector('.pn-pin');
   /* 스크롤(휠·터치·키)하면 기다리지 않고 다음 화면으로 */
-  function skip(){if(!started||busy||performance.now()-scrT<(si===3||si===4?2400:900))return;if(si>=S.length-1){seq++;done=true;return}clear();seq++;if(AUTO[si]){setScr(si+1);play()}else step(play)}
+  function skip(){if(!started||busy||performance.now()-scrT<(si===3||si===4?2400:900))return;if(si>=S.length-1){seq++;done=true;pn.classList.add('fin');return}clear();seq++;if(AUTO[si]){setScr(si+1);play()}else step(play)}
   var lock=PinLock(pn,function(){return !done&&getComputedStyle(pin).display!=='none'},skip);
   function f(){tk=0;if(getComputedStyle(pin).display==='none')return;var r=pn.getBoundingClientRect();
     if(r.top>innerHeight*.6){if(started&&!done){started=false;seq++;clear();uxHide();setCh(0);setScr(0)}return}
@@ -2530,7 +2537,7 @@ function PinLock(sec,active,next){var on=false,ty=0,cool=0;
   /* 스크롤 단계: 0 지도 · 1 리스트 · 2 상세 · 3 상세 끝까지 · 4 패스프린트 UX 포인트 · 5 서비스 */
   var N=6,wide=function(){return innerWidth>900};
   function cls(n){sec.classList.toggle('pass',n>=4);var z=wide()&&n>=4;sec.classList.toggle('szoom',z);sec.classList.toggle('z1',z&&n===4);sec.classList.toggle('z1m',z&&n===4);sec.classList.toggle('z2',z&&n===5)}
-  function setS(n){clear();i=Math.min(n,2);lay();scroll3(n>=3);cls(n)}
+  function setS(n){clear();i=Math.min(n,2);lay();scroll3(n>=3);cls(n);sec.classList.toggle('fin',n===5&&done)}
   var stT=0;function apply(n){var prev=stage;stage=n;stT=performance.now();
     if(rm||n!==prev+1){setS(n);return}
     clear();
@@ -2538,13 +2545,13 @@ function PinLock(sec,active,next){var on=false,ty=0,cool=0;
     else if(n===2){tap(1,function(){i=2;lay()})}
     else if(n===3){scroll3(true)}
     else if(n===4){sec.classList.add('pass');at(300,function(){tapAt(50,94.2,function(){if(!wide())return;sec.classList.add('szoom','z1');at(450,function(){sec.classList.add('z1m')})})})}
-    else if(n===5){cls(5)}}
+    else if(n===5){cls(5);at(rm?0:2200,function(){if(stage===5)sec.classList.add('fin')})}}
   /* 자동 재생: 지도 → 리스트 → 상세 → 상세 끝까지 → 패스프린트 UX 포인트 → 서비스, 끝나기 전에는 아래로 넘어가지 않아요 */
   var DWS=[2600,2600,1600,3200,4800,4600],ptm=[],started=false,done=false;
   function stopPlay(){ptm.forEach(clearTimeout);ptm=[]}
   function play(){stopPlay();(function next(){ptm.push(setTimeout(function(){
-      if(stage>=N-1){done=true;lock.release();return}apply(stage+1);next()},rm?300:DWS[stage]))})()}
-  function skip(){if(!started||performance.now()-stT<(stage>=3?2000:1000))return;stopPlay();if(stage>=N-1){done=true;return}apply(stage+1);play()}
+      if(stage>=N-1){done=true;sec.classList.add('fin');lock.release();return}apply(stage+1);next()},rm?300:DWS[stage]))})()}
+  function skip(){if(!started||performance.now()-stT<(stage>=3?2000:1000))return;stopPlay();if(stage>=N-1){done=true;sec.classList.add('fin');return}apply(stage+1);play()}
   var lock=PinLock(sec,function(){return !done},skip);
   function f(){tk=0;var r=sec.getBoundingClientRect();
     if(r.top>innerHeight*.6){if(started&&!done){started=false;stopPlay();stage=0;setS(0)}return}
