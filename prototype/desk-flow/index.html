@@ -356,8 +356,10 @@ const RETRO=STYLE==='retro';
 const MATCAP=STYLE==='matcap'||STYLE==='matcap2',MCDIR=STYLE==='matcap2'?'matcap/v2/':'matcap/';   /* ?style=matcap2 → v2 매트캡 */   /* 매트캡 버전 (?style=matcap) */   // 비교용 레트로 일러스트 버전 (?style=retro)
 const $=id=>document.getElementById(id);
 // ── 렌더러 / 장면 ────────────────────────────────────────────
-const cv=$('c'),R=new THREE.WebGLRenderer({canvas:cv,antialias:false});R.setPixelRatio(2);
-R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;R.outputColorSpace=THREE.LinearSRGBColorSpace;R.toneMapping=THREE.NoToneMapping;
+const cv=$('c'),R=new THREE.WebGLRenderer({canvas:cv,antialias:false});
+/* 성능: 그리는 배율(RS). 화면이 클수록 낮게(약 360만 픽셀 안), 느린 기기면 PQ로 자동 낮춤 */
+let PQ=1,RS=2;const calcRS=()=>{RS=Math.max(1,Math.min(2,Math.sqrt(3.6e6/(innerWidth*innerHeight))*PQ));return RS};calcRS();R.setPixelRatio(RS);
+R.shadowMap.enabled=true;R.shadowMap.autoUpdate=false;/* 성능: 그림자는 아래 rtC 그리기 때 한 번만 */R.shadowMap.type=THREE.PCFSoftShadowMap;R.outputColorSpace=THREE.LinearSRGBColorSpace;R.toneMapping=THREE.NoToneMapping;
 const S=new THREE.Scene();S.background=new THREE.Color(0x000000);
 const cam=new THREE.PerspectiveCamera(40,1,10,5000);
 const LM=h=>RETRO?new THREE.MeshPhongMaterial({color:h,shininess:42,specular:0x4a4640}):new THREE.MeshLambertMaterial({color:h});/* 레트로: 표면 광택 */const W=LM(0xf3e9d4),G=LM(0xcfc6b4),Dk=LM(0x17151f),RD=LM(0xdb4a3e),BL=LM(0x3f8fd8),YL=LM(0xf0b93f),FL=LM(0x85707c),BLACK=new THREE.MeshBasicMaterial({color:0x000000});
@@ -598,7 +600,7 @@ let st='home',prog=0,progT=0,lampOn=false,lampV=0,lampT0=0,lampFirst=true;
 function setLamp(o){if(o===lampOn)return;lampOn=o;lampT0=performance.now()/1000+(lampFirst&&o?.9:0);if(o)lampFirst=false}
 const lampEnv=t=>{if(t<.1)return 0;if(t<.18)return .5;if(t<.26)return .06;if(t<.33)return .7;if(t<.4)return .2;const x=Math.min(1,(t-.4)/.9);return .2+.8*(1-Math.pow(1-x,3))};
 const h0=camFor('home');const cpos=h0.p.clone(),clook=h0.l.clone(),tpos=h0.p.clone(),tlook=h0.l.clone();const sm=new THREE.Vector2();
-function fit(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);rtC.setSize(w*2,h*2);rtN.setSize(w*2,h*2);rtA.setSize(w*2,h*2);if(MATCAP)rtM.setSize(w*2,h*2);post.uniforms.res.value.set(w*2,h*2);rtF.setSize(w*2,h*2);rtMk.setSize(w,h);rtB1.setSize(w,h);rtB2.setSize(w,h);cam.aspect=w/h;cam.fov=portrait()?62:40;cam.updateProjectionMatrix();retarget(true)}
+function fit(){const w=innerWidth,h=innerHeight;calcRS();R.setPixelRatio(RS);R.setSize(w,h,false);const W2=Math.round(w*RS),H2=Math.round(h*RS);rtC.setSize(W2,H2);rtN.setSize(W2,H2);rtA.setSize(W2,H2);if(MATCAP)rtM.setSize(W2,H2);post.uniforms.res.value.set(W2,H2);if(post.uniforms.ow.base==null)post.uniforms.ow.base=post.uniforms.ow.value;post.uniforms.ow.value=Math.max(1.1,post.uniforms.ow.base*RS/2);/* 그리는 배율이 바뀌어도 외곽선 두께는 그대로 */rtF.setSize(W2,H2);rtMk.setSize(w,h);rtB1.setSize(w,h);rtB2.setSize(w,h);cam.aspect=w/h;cam.fov=portrait()?62:40;cam.updateProjectionMatrix();retarget(true)}
 // 파일이 날아가 닿을 자리(열린 서랍 카메라 앞)를 한 번 계산
 const oc=camFor('open'),tc=new THREE.PerspectiveCamera(40,1.6,10,5000);tc.position.copy(V(CAMS.open[0]));tc.lookAt(V(CAMS.open[1]));tc.updateMatrixWorld();
 const fwd=new THREE.Vector3(),rgt=new THREE.Vector3(),up=new THREE.Vector3();tc.matrixWorld.extractBasis(rgt,up,fwd);fwd.negate();
@@ -632,7 +634,7 @@ function camStep(dt){camPrevP.copy(cpos);camPrevL.copy(clook);
   if(u>=1){cpos.copy(T.tp);clook.copy(T.tl);camT=null}}
  if(dt>0){camVp.copy(cpos).sub(camPrevP).divideScalar(dt);camVl.copy(clook).sub(camPrevL).divideScalar(dt)}}
 function retarget(inst){const c=camFor(st);tpos.copy(c.p);tlook.copy(c.l);if(inst||RM){cpos.copy(tpos);clook.copy(tlook);camT=null;camVp.set(0,0,0);camVl.set(0,0,0)}else camStart()}
-function go(s,opts={}){domEl=null;const was=st;st=s;lockUntil=performance.now()+(s==='contact'?1800:s==='end'?1200:s==='pour'?500:900);if(s==='contact'&&was==='pour')progT=0;if(s==='call'||s==='contact'){const fm=$('form');if(fm)fm.style.opacity=''}
+function go(s,opts={}){domEl=null;if(typeof pickReq!=='undefined')pickReq=true;const was=st;st=s;lockUntil=performance.now()+(s==='contact'?1800:s==='end'?1200:s==='pour'?500:900);if(s==='contact'&&was==='pour')progT=0;if(s==='call'||s==='contact'){const fm=$('form');if(fm)fm.style.opacity=''}
  if(s==='pour'&&opts.full){progT=1}else if(s==='pour'&&was!=='pour'&&progT<.02){progT=.0}
  if(s==='open'||s==='work'||s==='home'||s==='screen'){if(s!=='pour')progT=Math.min(progT,0)}
  retarget(opts.instant);
@@ -689,7 +691,8 @@ addEventListener('touchmove',e=>{if(ty==null||e.target.closest('#form,#doc'))ret
 const lbl=$('label'),mouse=new THREE.Vector2(0,0),ray=new THREE.Raycaster();let hover=null,moved=false,ptrIn=false;
 const PICK=[{g:lamp,t:'스탠드 · 불 켜고 끄기',act:'lamp'},{g:imac,t:'모니터 · 작업물 보기',to:'screen',from:['home']},{g:kbd,t:'키보드 · 타닥타닥',act:'type'},{g:phone,t:'전화기 · 연락하기',to:'contact',from:['home','contact']},{g:cab,t:'서랍 · 소개 서류',to:'work',from:['home','work','open']},{g:mug,t:'컵',act:'bump'},{g:card,t:'명함 · 크게 보기',act:'card'}];
 PICK.forEach(p=>p.g.traverse(o=>{if(o.isMesh)o.userData.pick=p}));
-cv.addEventListener('pointermove',e=>{moved=true;ptrIn=true;mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1)});
+let pickReq=true,pickT=0;
+cv.addEventListener('pointermove',e=>{moved=true;ptrIn=true;pickReq=true;mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1)});
 // 커서: 평소엔 동그라미, 누를 수 있는 곳 위에서는 커지면서 클릭 아이콘 + 설명 글
 const cur=$('cur');let domEl=null,curOn=false;
 const tipOf=el=>el.dataset.tip||el.getAttribute('aria-label')||(el.classList.contains('card')?'프로젝트 열기':'');
@@ -829,7 +832,7 @@ cl:`<p class="quote">“작업의 이유를 고민하고, 아이디어를 경험
 <h3>04 입사 후 포부 | 배움을 바탕으로 새로운 가능성을 만들어가는 디자이너</h3><p>저는 아이디어를 제안하는데 그치지 않고, 구체적인 결과물로 보여줄 수 있는 디자이너가 되고 싶습니다.</p><p>입사 초기에는 회사의 디자인 방향과 작업 방식을 익히고, 맡은 업무를 정확하게 수행하는 데 집중하겠습니다. 학교의 프로젝트와 달리 실무에서는 일정과 제작 환경, 다양한 사람들의 요구를 함께 고려해야 한다고 생각합니다. 따라서 작업의 목적을 먼저 확인하고, 피드백을 받아 부족한 부분을 수정하며 실무에 적응하겠습니다.</p><p>업무에 익숙해진 뒤에는 주어진 요구사항을 수행하는 것에서 한 걸음 더 나아가고 싶습니다. 기존의 방식에서 개선할 부분이나 새로운 가능성을 찾아 아이디어를 제안하고, 직접 자료를 조사하고 시안을 제작하며 실현할 방법을 고민하겠습니다. 동료들과 의견을 나누며 실제로 적용할 수 있는 방법까지 고민하겠습니다.</p><p>배움에 대한 열정이 있습니다. 맡은 일을 책임감 있게 수행하고 피드백을 통해 보완해 나가겠습니다. 무엇보다 소통과 협업을 중요하게 여기며, 동료들이 믿고 함께 일할 수 있는 디자이너가 되겠습니다.</p>`};
 const mon=$('mon');
 // 모니터 화면 그림: 좌표는 1600×900 기준으로 그리고, 실제 픽셀은 SS배(큰 화면에서 2560×1440)로 선명하게
-const AW=1600,AH=900,SS=Math.min(innerWidth,innerHeight*1.78)*Math.min(devicePixelRatio||1,2)>=1800?1.6:1,abPage=document.createElement('canvas');abPage.width=AW*SS;abPage.height=AH*SS;
+const AW=1600,AH=900,SS=Math.min(innerWidth,innerHeight*1.78)*Math.min(devicePixelRatio||1,2)>=1800?1.25:1,abPage=document.createElement('canvas');abPage.width=AW*SS;abPage.height=AH*SS;
 const abC=document.createElement('canvas');abC.width=AW*SS;abC.height=AH*SS;
 const abTex=new THREE.CanvasTexture(abC);abTex.colorSpace=THREE.SRGBColorSpace;abTex.anisotropy=8;
 const ABM=new THREE.MeshBasicMaterial({map:abTex});
@@ -1116,13 +1119,16 @@ function callBlur(){const W=rtB1.width,H=rtB1.height;
 // ── 루프 ───────────────────────────────────────────────────────
 const clock=new THREE.Clock(),bumpBase=new Map(),vis=[],tmpQ=new THREE.Quaternion(),startQ=new THREE.Quaternion();
 const ease=x=>x*x*(3-2*x),fEu=new THREE.Euler();
+let fAvg=16,fLow=0;
 function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
+ {const now=performance.now();fAvg+=(Math.min(100,clock.getDelta?dt2*1000:16)-fAvg)*.03;if(t>4&&fAvg>26&&PQ>.6&&now-fLow>3000&&!document.hidden){PQ-=.15;fLow=now;fAvg=16;fit()}}   /* 성능: 계속 느리면 그리는 배율을 한 단계 낮춤 */
  if(autoP){progT=Math.min(1,progT+dt2*1.7);if(progT>=1)autoP=false}
  prog+=(progT-prog)*(RM?1:.18);if(Math.abs(progT-prog)<.001)prog=progT;
  if(st==='pour'){const was=pj.classList.contains('on');syncOverlay()}
  const fileOpen=st==='open'||st==='pour';
  sm.lerp(mouse,RM?0:.05);camStep(dt2);
  const k=st==='home'?1:st==='screen'?0:.3;/* 모니터(WORK)에서는 마우스 기울기 없이 정면 고정 */cam.position.copy(cpos);cam.position.x+=sm.x*7*k;cam.position.y+=sm.y*3*k;cam.lookAt(clook.x+sm.x*18*k,clook.y+sm.y*7*k,clook.z);updHandset();
+ {const pn=performance.now();if(pickReq||camT||pn-pickT>200){pickReq=false;pickT=pn;   /* 성능: 마우스·카메라가 움직일 때만 물건 검사 */
  if(st==='home'||st==='work'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObjects(PICK.map(p=>p.g),true).find(h=>h.object.userData.pick);const p=hit?hit.object.userData.pick:null;
   if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?p.t:'';lbl.style.opacity=p&&moved?1:0}}
  else if(st==='contact'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObject(phone,true)[0];const p=hit?PICK.find(q=>q.g===phone):null;if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?'전화 받기':'';lbl.style.opacity=p?1:0}}
@@ -1130,6 +1136,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  else if(st==='screen'){let p=null;if(abDone&&ptrIn){ray.setFromCamera(mouse,cam);const h=ray.intersectObject(scr,false)[0];if(h&&h.uv){const r=wkHit(h.uv.x*AW,(1-h.uv.y)*AH);if(r)p={t:r.type==='chip'?r.c+' 보기':r.type==='open'?'프로젝트 열기':r.type==='prev'?'이전 프로젝트':'다음 프로젝트',wk:r}}}
   const nk=p?p.wk.key:'',ok=hover&&hover.wk?hover.wk.key:'';if(nk!==ok||(!p&&hover)){hover=p;const hc=p&&p.wk.type==='chip'?p.wk.c:'',hk=p?p.wk.type:'';if(hk!==wkHK||hc!==wkChipHov){wkHK=hk;wkChipHov=hc;wkRedraw()}}}
  else if(hover){hover=null;cv.style.cursor='default';lbl.style.opacity=0}
+ }}
  {eT+=(eTarget-eT)*Math.min(1,dt2*1.1);const k=eT<.001?0:eT;tmpC.copy(C_SUN0).lerp(C_SUN1,k);sun.color.copy(tmpC);sun.intensity=2.3-.95*k;fill.intensity=.3-.15*k;hemi.intensity=1.8-1.0*k;hemi.color.copy(C_H0).lerp(C_H1,k);sun.position.lerpVectors(SUN_P0,SUN_P1,k);win.position.copy(tmpV.copy(sun.position).normalize().multiplyScalar(250));win.lookAt(0,0,0);tmpC.copy(C_BG0).lerp(C_BG1,k).convertLinearToSRGB();post.uniforms.cBg.value.set(tmpC.r,tmpC.g,tmpC.b)}
  lampV=lampOn?lampEnv(performance.now()/1000-lampT0):Math.max(0,lampV-dt2*5);spot.intensity=lampV*(RETRO?2600:4200)*Math.max(0,1-1.4*eT);spot.angle=.55-.2*eT;glowM.forEach(m=>m.uniforms.op.value=lampV);halo.quaternion.copy(cam.quaternion);core.quaternion.copy(cam.quaternion);post.uniforms.wLo.value=1+.35*eT;post.uniforms.wHi.value=1.6+.5*eT;cal.position.y=130-14*eT;post.uniforms.warmK.value=lampV;
  {const onScr=st==='screen'&&cpos.distanceTo(tpos)<16;if(onScr&&!abWas){abStart=performance.now();abDirty=true;abDone=false}abWas=onScr;scr.material=onScr?ABM:(st==='end'?ENDM:BLACK);if(onScr){const ap=Math.min(1,(performance.now()-abStart)/1400);if(!abDone){drawAbout(ap);if(ap>=1)abDone=true}}if(onScr){placeMon();if(!mon.classList.contains('on'))mon.classList.add('on')}else if(mon.classList.contains('on'))mon.classList.remove('on')}
@@ -1144,7 +1151,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  // 전화벨: 울리는 동안 몸체가 떨림
  if(st==='contact'){startRing();const on=(t%2.4)<1.1;const s=on?Math.sin(t*70):0;phone.rotation.z=s*.018;phone.position.y=phoneY+(on?Math.abs(Math.sin(t*35))*.35:0)}else{phone.rotation.z=0;phone.position.y=phoneY}
  PICK.forEach(p=>{const g=p.g;if(g.userData.bump>0){if(!bumpBase.has(g))bumpBase.set(g,g.position.y);g.userData.bump=Math.max(0,g.userData.bump-dt2*2.5);if(g.userData.bump===0&&p.act==='bump')sfx('cup');   /* 컵이 내려앉을 때 '팅' */g.position.y=bumpBase.get(g)+Math.sin(g.userData.bump*Math.PI)*3}});
- R.setRenderTarget(rtC);R.render(S,cam);
+ R.shadowMap.needsUpdate=true;R.setRenderTarget(rtC);R.render(S,cam);
  {const hid=[];fx.forEach(o=>{if(o!==scr&&o.visible){o.visible=false;hid.push(o)}});const sw=[];
   S.traverse(o=>{if(o.isMesh&&o.visible&&o.material&&o.material.colorWrite!==false){sw.push([o,o.material]);o.material=albOf(o.material)}});
   R.setRenderTarget(rtA);R.render(S,cam);if(MATCAP){sw.forEach(([o,m])=>o.material=mcOf(m,o.userData.mk||'paper'));R.setRenderTarget(rtM);R.render(S,cam)}sw.forEach(([o,m])=>o.material=m);hid.forEach(o=>o.visible=true)}
@@ -1168,6 +1175,6 @@ function applyTheme(i){themeI=i;const T=THEMES[i];for(const k in MATS)MATS[k].co
 applyTheme(RETRO?1:MATCAP?2:0);
 if(document.fonts){document.fonts.load('600 40px Jost');document.fonts.load('500 30px "Noto Sans KR"');document.fonts.ready.then(()=>applyTheme(themeI))}
 window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={keysN:KEYS?KEYS.comps.length:0,typeBurst,sfx,files,scr,cam,AW,AH,get wk(){return WKR},cpos,fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
-fit();addEventListener('resize',fit);if(window.ResizeObserver)new ResizeObserver(()=>{if(R.domElement.width!==innerWidth*2||innerWidth/innerHeight!==cam.aspect)fit()}).observe(document.documentElement);fromHash();loop();
+fit();addEventListener('resize',fit);if(window.ResizeObserver)new ResizeObserver(()=>{if(R.domElement.width!==Math.round(innerWidth*RS)||innerWidth/innerHeight!==cam.aspect)fit()}).observe(document.documentElement);fromHash();loop();
 if(window.__ld)__ld.finish();else{const ld=$('load');ld.hidden=true}   /* 다 불러옴 → 인트로가 100% 찍고 사라짐 */
 </script>
