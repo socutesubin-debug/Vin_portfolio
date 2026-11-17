@@ -306,10 +306,21 @@ body:has(#doc:not([hidden])) header{opacity:0;pointer-events:none}   /* 서류 �
 @media (prefers-reduced-motion:reduce){#mon.on,#bc.on .cd,#rings span{animation:none!important;opacity:1}#mon *{animation:none!important;opacity:1!important}#c{transition:none}}
 /* 모바일(터치 기기)만: 당겨서 새로고침·화면 튕김·더블탭 확대를 막아 장면 넘김이 끊기지 않게. 컴퓨터에는 적용 안 됨 */
 @media (max-width:700px) and (orientation:portrait){#form textarea{min-height:92px;max-height:20vh}}
+/* 모바일 세로 화면만: 프로젝트 이미지를 화면 폭 가득, 누르면 가로로 크게 보기. 닫기 버튼은 오른쪽 위로(제목을 가리지 않게) */
+@media (pointer:coarse) and (orientation:portrait){
+ #dBody.cv .cvs img{width:100vw}
+ #dBody.cv #cover::after{content:"이미지를 누르면 가로로 크게 볼 수 있어요";display:block;text-align:center;padding:14px 16px 4px;font:400 12px/1.5 "Noto Sans KR",sans-serif;color:rgba(243,241,234,.55)}
+ #detail.nobar #dClose{left:auto;right:calc(14px + env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px))}
+}
+#zv{position:fixed;inset:0;z-index:40;background:#0b0b0d;display:none;overflow:hidden}
+#zv.on{display:block}
+#zv img{position:absolute;left:50%;top:50%;max-width:none;transform:translate(-50%,-50%) rotate(90deg)}
+#zv span{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font:400 12px "Noto Sans KR",sans-serif;white-space:nowrap;pointer-events:none}
 @media (pointer:coarse){#label{display:none!important}html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}#c{touch-action:none}button,a,.card{touch-action:manipulation}}
 </style>
 <canvas id="c" aria-label="일러스트 책상 3D. 서랍에는 소개 서류(이력서·자기소개서 등), 모니터에는 작업물이 있어요."></canvas>
 <header><a class="logo" href="#home" aria-label="SUVIN · 처음으로"></a><nav aria-label="주 메뉴"><a href="#home">HOME</a><a href="#work">WORK</a><a href="#about">ABOUT</a><a href="#contact">CONTACT</a></nav></header>
+<div id="zv" aria-hidden="true"><img alt=""><span>화면을 누르면 닫혀요</span></div>
 <div id="label"></div>
 <div id="hint"></div>
 <button id="back" hidden>Back</button>
@@ -1215,7 +1226,12 @@ function applyTheme(i){themeI=i;const T=THEMES[i];for(const k in MATS)MATS[k].co
 }
 applyTheme(RETRO?1:MATCAP?2:0);
 if(document.fonts){document.fonts.load('600 40px Jost');document.fonts.load('500 30px "Noto Sans KR"');document.fonts.ready.then(()=>applyTheme(themeI))}
-window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={PCAMS,get bgm(){return bgm},get bgmG(){return bgmG},keysN:KEYS?KEYS.comps.length:0,typeBurst,sfx,files,scr,cam,AW,AH,get wk(){return WKR},cpos,fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
+window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});/* 모바일 세로 화면만: 프로젝트 이미지를 누르면 가로로 눕혀 화면 가득 크게 보여 줌. 다시 누르면 닫힘 */
+{const zv=$('zv'),zi=zv.querySelector('img'),mqP=matchMedia('(pointer:coarse) and (orientation:portrait)');
+ const zFit=()=>{const ar=(zi.naturalWidth||16)/(zi.naturalHeight||9);zi.style.width=Math.min(innerHeight,innerWidth*ar)+'px'};
+ $('dBody').addEventListener('click',e=>{const im=e.target.closest&&e.target.closest('.cvs img');if(!im||!mqP.matches)return;zi.onload=zFit;zi.src=im.currentSrc||im.src;zFit();zv.classList.add('on')});
+ zv.addEventListener('click',()=>zv.classList.remove('on'));addEventListener('resize',()=>{if(!mqP.matches)zv.classList.remove('on');else if(zv.classList.contains('on'))zFit()})}
+window.__flow={PCAMS,get bgm(){return bgm},get bgmG(){return bgmG},keysN:KEYS?KEYS.comps.length:0,typeBurst,sfx,files,scr,cam,AW,AH,get wk(){return WKR},cpos,fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
 fit();addEventListener('resize',fit);if(window.ResizeObserver)new ResizeObserver(()=>{if(R.domElement.width!==Math.round(innerWidth*RS)||innerWidth/innerHeight!==cam.aspect)fit()}).observe(document.documentElement);fromHash();loop();
 if(window.__ld)__ld.finish();else{const ld=$('load');ld.hidden=true}   /* 다 불러옴 → 인트로가 100% 찍고 사라짐 */
 </script>
