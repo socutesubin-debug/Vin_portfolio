@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>VIN 책상 흐름</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
@@ -303,6 +304,8 @@ body:has(#doc:not([hidden])) header{opacity:0;pointer-events:none}   /* 서류 �
 #ldP{min-width:3.4em;text-align:right;font:500 12px var(--display);letter-spacing:.02em;font-variant-numeric:tabular-nums}
 @media (max-width:700px){#grid{grid-template-columns:1fr}#form{left:50%;top:auto;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%)}}
 @media (prefers-reduced-motion:reduce){#mon.on,#bc.on .cd,#rings span{animation:none!important;opacity:1}#mon *{animation:none!important;opacity:1!important}#c{transition:none}}
+/* 모바일(터치 기기)만: 당겨서 새로고침·화면 튕김·더블탭 확대를 막아 장면 넘김이 끊기지 않게. 컴퓨터에는 적용 안 됨 */
+@media (pointer:coarse){#label{display:none!important}html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}#c{touch-action:none}button,a,.card{touch-action:manipulation}}
 </style>
 <canvas id="c" aria-label="일러스트 책상 3D. 서랍에는 소개 서류(이력서·자기소개서 등), 모니터에는 작업물이 있어요."></canvas>
 <header><a class="logo" href="#home" aria-label="SUVIN · 처음으로"></a><nav aria-label="주 메뉴"><a href="#home">HOME</a><a href="#work">WORK</a><a href="#about">ABOUT</a><a href="#contact">CONTACT</a></nav></header>
@@ -365,7 +368,10 @@ const $=id=>document.getElementById(id);
 // ── 렌더러 / 장면 ────────────────────────────────────────────
 const cv=$('c'),R=new THREE.WebGLRenderer({canvas:cv,antialias:false});
 /* 성능: 그리는 배율(RS). 화면이 클수록 낮게(약 360만 픽셀 안), 느린 기기면 PQ로 자동 낮춤 */
-let PQ=1,RS=2;const calcRS=()=>{RS=Math.max(1,Math.min(2,Math.sqrt(3.6e6/(innerWidth*innerHeight))*PQ));return RS};calcRS();R.setPixelRatio(RS);
+/* 모바일(터치 기기)만: 배율 상한을 1.5로 낮춰 버벅임을 줄임. 컴퓨터는 그대로 2 */
+const TOUCH=matchMedia('(pointer:coarse)').matches&&!matchMedia('(pointer:fine)').matches;
+if(TOUCH){const h=document.getElementById('docHint');if(h)h.textContent='종이를 누른 채 움직이면 돋보기'}
+let PQ=1,RS=2;const calcRS=()=>{RS=Math.max(1,Math.min(TOUCH?1.5:2,Math.sqrt(3.6e6/(innerWidth*innerHeight))*PQ));return RS};calcRS();R.setPixelRatio(RS);
 R.shadowMap.enabled=true;R.shadowMap.autoUpdate=false;/* 성능: 그림자는 아래 rtC 그리기 때 한 번만 */R.shadowMap.type=THREE.PCFSoftShadowMap;R.outputColorSpace=THREE.LinearSRGBColorSpace;R.toneMapping=THREE.NoToneMapping;
 const S=new THREE.Scene();S.background=new THREE.Color(0x000000);
 const cam=new THREE.PerspectiveCamera(40,1,10,5000);
@@ -712,6 +718,21 @@ if(matchMedia('(pointer:fine)').matches){document.documentElement.classList.add(
   const fx_=e.clientX>innerWidth-220,fy_=e.clientY>innerHeight-80;lbl.style.transform=`translate(${fx_?`calc(${e.clientX-28}px - 100%)`:e.clientX+28+'px'},${fy_?`calc(${e.clientY-24}px - 100%)`:e.clientY+22+'px'})`;updCur()},{passive:true});
  document.documentElement.addEventListener('mouseleave',()=>{cur.style.opacity=0;domEl=null;updCur()})}
 cv.addEventListener('pointerleave',()=>{mouse.set(0,0);ptrIn=false});
+/* 물건 검사(무엇 위에 있는지). 매 장면 그릴 때 부르고, 모바일에서는 누른 순간에도 한 번 더 부른다 */
+function doPick(){
+ if(st==='home'||st==='work'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObjects(PICK.map(p=>p.g),true).find(h=>h.object.userData.pick);const p=hit?hit.object.userData.pick:null;
+  if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?p.t:'';lbl.style.opacity=p&&moved?1:0}}
+ else if(st==='contact'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObject(phone,true)[0];const p=hit?PICK.find(q=>q.g===phone):null;if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?'전화 받기':'';lbl.style.opacity=p?1:0}}
+ else if(st==='open'){let p=null;if(ptrIn&&!docOpen){ray.setFromCamera(mouse,cam);const h=ray.intersectObjects(files,true)[0];if(h){let o=h.object;while(o&&o.userData.doc==null)o=o.parent;if(o)p=DOCP[o.userData.doc]}}if(p!==hover)hover=p}
+ else if(st==='screen'){let p=null;if(abDone&&ptrIn){ray.setFromCamera(mouse,cam);const h=ray.intersectObject(scr,false)[0];if(h&&h.uv){const r=wkHit(h.uv.x*AW,(1-h.uv.y)*AH);if(r)p={t:r.type==='chip'?r.c+' 보기':r.type==='open'?'프로젝트 열기':r.type==='prev'?'이전 프로젝트':'다음 프로젝트',wk:r}}}
+  const nk=p?p.wk.key:'',ok=hover&&hover.wk?hover.wk.key:'';if(nk!==ok||(!p&&hover)){hover=p;const hc=p&&p.wk.type==='chip'?p.wk.c:'',hk=p?p.wk.type:'';if(hk!==wkHK||hc!==wkChipHov){wkHK=hk;wkChipHov=hc;wkRedraw()}}}
+ else if(hover){hover=null;cv.style.cursor='default';lbl.style.opacity=0}
+}
+/* 모바일(터치)만: 손가락은 '올려두기'가 없어서, 누른 자리에서 바로 무엇을 눌렀는지 검사한 뒤 클릭을 처리한다. 마우스는 이 부분을 지나침 */
+let lastPT='mouse';addEventListener('pointerdown',e=>{lastPT=e.pointerType||'mouse'},true);
+addEventListener('click',e=>{if(e.target!==cv||lastPT==='mouse')return;
+ mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ptrIn=true;cam.updateMatrixWorld();doPick();
+ setTimeout(()=>{mouse.set(0,0);ptrIn=false;pickReq=true},0)},true);
 cv.addEventListener('click',e=>{if(cardOpen){closeCard();return}
  if(st==='open'){if(hover&&hover.doc!=null)openDoc(hover.doc);return}                                   // ABOUT: 서류 꺼내 보기
  if(st==='screen'){if(hover&&hover.wk){const r=hover.wk,L=wkList();wLastUser=performance.now();             // WORK: 분류 / 이전·다음 / 프로젝트 열기
@@ -1153,14 +1174,7 @@ function loop(){const dt2=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  sm.lerp(mouse,RM?0:.05);camStep(dt2);
  const k=st==='home'?1:st==='screen'?0:.3;/* 모니터(WORK)에서는 마우스 기울기 없이 정면 고정 */cam.position.copy(cpos);cam.position.x+=sm.x*7*k;cam.position.y+=sm.y*3*k;cam.lookAt(clook.x+sm.x*18*k,clook.y+sm.y*7*k,clook.z);updHandset();
  {const pn=performance.now();if(pickReq||camT||pn-pickT>200){pickReq=false;pickT=pn;   /* 성능: 마우스·카메라가 움직일 때만 물건 검사 */
- if(st==='home'||st==='work'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObjects(PICK.map(p=>p.g),true).find(h=>h.object.userData.pick);const p=hit?hit.object.userData.pick:null;
-  if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?p.t:'';lbl.style.opacity=p&&moved?1:0}}
- else if(st==='contact'){ray.setFromCamera(mouse,cam);const hit=ray.intersectObject(phone,true)[0];const p=hit?PICK.find(q=>q.g===phone):null;if(p!==hover){hover=p;cv.style.cursor=p?'pointer':'default';lbl.textContent=p?'전화 받기':'';lbl.style.opacity=p?1:0}}
- else if(st==='open'){let p=null;if(ptrIn&&!docOpen){ray.setFromCamera(mouse,cam);const h=ray.intersectObjects(files,true)[0];if(h){let o=h.object;while(o&&o.userData.doc==null)o=o.parent;if(o)p=DOCP[o.userData.doc]}}if(p!==hover)hover=p}
- else if(st==='screen'){let p=null;if(abDone&&ptrIn){ray.setFromCamera(mouse,cam);const h=ray.intersectObject(scr,false)[0];if(h&&h.uv){const r=wkHit(h.uv.x*AW,(1-h.uv.y)*AH);if(r)p={t:r.type==='chip'?r.c+' 보기':r.type==='open'?'프로젝트 열기':r.type==='prev'?'이전 프로젝트':'다음 프로젝트',wk:r}}}
-  const nk=p?p.wk.key:'',ok=hover&&hover.wk?hover.wk.key:'';if(nk!==ok||(!p&&hover)){hover=p;const hc=p&&p.wk.type==='chip'?p.wk.c:'',hk=p?p.wk.type:'';if(hk!==wkHK||hc!==wkChipHov){wkHK=hk;wkChipHov=hc;wkRedraw()}}}
- else if(hover){hover=null;cv.style.cursor='default';lbl.style.opacity=0}
- }}
+ doPick()}}
  {eT+=(eTarget-eT)*Math.min(1,dt2*1.1);const k=eT<.001?0:eT;tmpC.copy(C_SUN0).lerp(C_SUN1,k);sun.color.copy(tmpC);sun.intensity=2.3-.95*k;fill.intensity=.3-.15*k;hemi.intensity=1.8-1.0*k;hemi.color.copy(C_H0).lerp(C_H1,k);sun.position.lerpVectors(SUN_P0,SUN_P1,k);win.position.copy(tmpV.copy(sun.position).normalize().multiplyScalar(250));win.lookAt(0,0,0);tmpC.copy(C_BG0).lerp(C_BG1,k).convertLinearToSRGB();post.uniforms.cBg.value.set(tmpC.r,tmpC.g,tmpC.b)}
  lampV=lampOn?lampEnv(performance.now()/1000-lampT0):Math.max(0,lampV-dt2*5);spot.intensity=lampV*(RETRO?2600:4200)*Math.max(0,1-1.4*eT);spot.angle=.55-.2*eT;glowM.forEach(m=>m.uniforms.op.value=lampV);halo.quaternion.copy(cam.quaternion);core.quaternion.copy(cam.quaternion);post.uniforms.wLo.value=1+.35*eT;post.uniforms.wHi.value=1.6+.5*eT;post.uniforms.warmK.value=lampV;
  {const onScr=st==='screen'&&cpos.distanceTo(tpos)<16;if(onScr&&!abWas){abStart=performance.now();abDirty=true;abDone=false}abWas=onScr;scr.material=onScr?ABM:(st==='end'?ENDM:BLACK);if(onScr){const ap=Math.min(1,(performance.now()-abStart)/1400);if(!abDone){drawAbout(ap);if(ap>=1)abDone=true}}if(onScr){placeMon();if(!mon.classList.contains('on'))mon.classList.add('on')}else if(mon.classList.contains('on'))mon.classList.remove('on')}
