@@ -305,6 +305,7 @@ body:has(#doc:not([hidden])) header{opacity:0;pointer-events:none}   /* 서류 �
 @media (max-width:700px){#grid{grid-template-columns:1fr}#form{left:50%;top:auto;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%)}}
 @media (prefers-reduced-motion:reduce){#mon.on,#bc.on .cd,#rings span{animation:none!important;opacity:1}#mon *{animation:none!important;opacity:1!important}#c{transition:none}}
 /* 모바일(터치 기기)만: 당겨서 새로고침·화면 튕김·더블탭 확대를 막아 장면 넘김이 끊기지 않게. 컴퓨터에는 적용 안 됨 */
+@media (max-width:700px) and (orientation:portrait){#form textarea{min-height:92px;max-height:20vh}}
 @media (pointer:coarse){#label{display:none!important}html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}#c{touch-action:none}button,a,.card{touch-action:manipulation}}
 </style>
 <canvas id="c" aria-label="일러스트 책상 3D. 서랍에는 소개 서류(이력서·자기소개서 등), 모니터에는 작업물이 있어요."></canvas>
@@ -605,9 +606,11 @@ CAMS.pour=CAMS.open;CAMS.call=CAMS.contact;
 // WORK 모니터: 화면 정중앙 바로 앞에서 화면과 수직으로(완전 정면) 보도록 카메라 위치를 계산. 창 크기에 맞춰 거리 조절
 const _sc=new THREE.Vector3(),_sn=new THREE.Vector3(),_sq=new THREE.Quaternion(),_ss=new THREE.Vector3();
 function scrPose(){scr.updateWorldMatrix(true,false);scr.matrixWorld.decompose(_sc,_sq,_ss);_sn.set(0,0,1).applyQuaternion(_sq).normalize();if(_sn.z<0)_sn.negate();
- const w=.598*Math.abs(_ss.x),h=.336*Math.abs(_ss.y),t=Math.tan(cam.fov*Math.PI/360),d=Math.max(w/(.86*2*t*cam.aspect),h/(.8*2*t));
+ const w=.598*Math.abs(_ss.x),h=.336*Math.abs(_ss.y),t=Math.tan(cam.fov*Math.PI/360),d=Math.max(w/((portrait()?.99:.86)*2*t*cam.aspect),h/(.8*2*t));/* 세로 화면(모바일)에서는 모니터가 화면 폭을 꽉 채우게 */
  return {p:_sc.clone().addScaledVector(_sn,d),l:_sc.clone()}}
-const camFor=s=>{if(s==='screen')return scrPose();let [p,l]=CAMS[s].map(V);if(portrait()){p=l.clone().add(p.clone().sub(l).multiplyScalar(1.5));p.y+=6}return {p,l}};
+/* 세로 화면(모바일) 전용 카메라 자리. 여기 없는 장면은 아래 공식(조금 멀리)대로 */
+const PCAMS={home:[[3,152,193],[3,90,0]]};   /* 홈: 책상 위를 살짝 내려다보며 가깝게 */
+const camFor=s=>{if(s==='screen')return scrPose();if(portrait()&&PCAMS[s]){const [p,l]=PCAMS[s].map(V);return {p,l}}let [p,l]=CAMS[s].map(V);if(portrait()){p=l.clone().add(p.clone().sub(l).multiplyScalar(1.5));p.y+=6}return {p,l}};
 let drawerWas=false;   /* 서류 서랍이 열려 있었는지(소리용) */
 let st='home',prog=0,progT=0,lampOn=false,lampV=0,lampT0=0,lampFirst=true;
 function setLamp(o){if(o===lampOn)return;lampOn=o;lampT0=performance.now()/1000+(lampFirst&&o?.9:0);if(o)lampFirst=false}
@@ -1127,8 +1130,8 @@ function updHandset(){
  if(st!=='call'){if(hsOn){hsOn=false;hsUp=false;hsA.visible=false}return}
  const now=performance.now();if(!hsOn){hsOn=true;hsT0=now;hsTh=hsW=hsOff=hsV=0;hsLast=0}
  const D=32,halfH=D*Math.tan(cam.fov*Math.PI/360),halfW=halfH*cam.aspect;
- const sc=(.37*2*halfH)/HB.bodyH,bodyW=HB.bodyH*sc;                // 수화기 길이 = 화면 높이의 37%
- const A=halfH+1.5,L=A-halfH*.4,len0=-bodyW*1.15;                  // 줄 걸린 곳(화면 위쪽 밖) / 정착했을 때 줄 길이
+ const PT=portrait(),sc=((PT?.24:.37)*2*halfH)/HB.bodyH,bodyW=HB.bodyH*sc;   /* 세로 화면: 수화기를 작게, 화면 위쪽에(아래는 메일 창) */                // 수화기 길이 = 화면 높이의 37%
+ const A=halfH+1.5,L=A-halfH*(PT?.7:.4),len0=-bodyW*1.15;                  // 줄 걸린 곳(화면 위쪽 밖) / 정착했을 때 줄 길이
  const tau=(now-hsT0)/1000;let len=L,rot=0;
  {const dt=Math.min(.05,Math.max(0,(now-(hsLast||now))/1000));hsLast=now;if(RM){hsTh=hsW=hsOff=hsV=0}else{
   hsW+=(-15*Math.sin(hsTh)-1.1*hsW)*dt;hsTh=Math.max(-.7,Math.min(.7,hsTh+hsW*dt));      // 진자: 되돌아오는 힘 + 공기 저항
@@ -1136,7 +1139,7 @@ function updHandset(){
  if(!RM){len=L+(len0-L)*Math.exp(-3.4*tau)*Math.cos(8.5*tau);      // 감쇠 진동: 쭉 늘어났다가 튕겨 올라오길 몇 번 반복
   rot=.05*Math.exp(-1.3*tau)*Math.sin(7*tau)+.03*Math.sin(tau*1.8)*Math.min(1,tau*.5)}
  if(callEl.classList.contains('up')){if(!hsUp){hsUp=true;hsUpT0=now}const u=Math.min(1,(now-hsUpT0)/700);len=L+(len0-L)*Math.pow(u,2.2)}else hsUp=false;
- hsA.visible=true;hsA.position.set((portrait()?-.55:-.36)*halfW,A,-D);   /* 연필꽂이 쯤 */hsA.rotation.z=rot+hsTh;
+ hsA.visible=true;hsA.position.set((PT?0:-.36)*halfW,A,-D);   /* 연필꽂이 쯤 */hsA.rotation.z=rot+hsTh;
  hsG.scale.setScalar(sc);len+=hsOff*bodyW*.04;hsG.position.y=-len;
  hsC.visible=len>.3;hsC.scale.y=Math.max(.05,len/(sc*HB.cordLen));
 }
@@ -1212,7 +1215,7 @@ function applyTheme(i){themeI=i;const T=THEMES[i];for(const k in MATS)MATS[k].co
 }
 applyTheme(RETRO?1:MATCAP?2:0);
 if(document.fonts){document.fonts.load('600 40px Jost');document.fonts.load('500 30px "Noto Sans KR"');document.fonts.ready.then(()=>applyTheme(themeI))}
-window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={get bgm(){return bgm},get bgmG(){return bgmG},keysN:KEYS?KEYS.comps.length:0,typeBurst,sfx,files,scr,cam,AW,AH,get wk(){return WKR},cpos,fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
+window.__ab=()=>({abStart,abWas,abDirty,now:performance.now(),d:cpos.distanceTo(tpos),st});window.__flow={PCAMS,get bgm(){return bgm},get bgmG(){return bgmG},keysN:KEYS?KEYS.comps.length:0,typeBurst,sfx,files,scr,cam,AW,AH,get wk(){return WKR},cpos,fill,hemi,spot,CAMS,openCard,leaves,LV,sun,leaf:(v)=>{leafM.colorWrite=v;leafM.depthWrite=v;leafM.color.set(0xff00ff)},go,setProg:v=>{progT=prog=v},setLamp,theme:applyTheme,dbg:v=>{post.uniforms.dbg.value=v},wlo:(a,b)=>{post.uniforms.wLo.value=a;post.uniforms.wHi.value=b},get st(){return st},get prog(){return prog}};
 fit();addEventListener('resize',fit);if(window.ResizeObserver)new ResizeObserver(()=>{if(R.domElement.width!==Math.round(innerWidth*RS)||innerWidth/innerHeight!==cam.aspect)fit()}).observe(document.documentElement);fromHash();loop();
 if(window.__ld)__ld.finish();else{const ld=$('load');ld.hidden=true}   /* 다 불러옴 → 인트로가 100% 찍고 사라짐 */
 </script>
