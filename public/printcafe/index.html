@@ -1679,9 +1679,9 @@ section h2{font-size:clamp(22px,2.4vw,32px)!important;line-height:1.4!important;
  .sc-line{width:clamp(56px,5vw,100px)}
  .sc-note{left:calc(50% + var(--w)*.9 + clamp(56px,5vw,100px) + 12px);width:min(300px,calc(50vw - var(--w)*.9 - clamp(56px,5vw,100px) - 44px))}
 }
-/* auto-play pins: one screen tall */
-@media(min-width:901px){.pn{height:100vh;height:100svh}}
-.sc{height:100vh!important;height:100svh!important}
+/* scroll-stepped pins */
+.pn{height:calc(var(--n)*80vh + 100vh)}
+.sc{height:calc(6*75vh + 100vh)!important}
 /* scroll nudge: halftone chevron after auto-play ends */
 .nudge{position:absolute;left:50%;bottom:16px;z-index:30;color:#fff;opacity:0;transform:translate(-50%,-10px);transition:opacity .6s,transform .6s cubic-bezier(.2,.7,.2,1);pointer-events:none}
 .nudge svg{display:block;width:46px;height:auto;max-width:none}
@@ -1689,6 +1689,84 @@ section h2{font-size:clamp(22px,2.4vw,32px)!important;line-height:1.4!important;
 .pn.fin .nudge svg,.sc.fin .nudge svg{animation:nudge 1.5s cubic-bezier(.45,0,.35,1) .6s infinite}
 @keyframes nudge{0%,100%{transform:translateY(0);opacity:1}50%{transform:translateY(8px);opacity:.55}}
 @media (prefers-reduced-motion:reduce){.pn.fin .nudge svg,.sc.fin .nudge svg{animation:none}}
+/* ===== story sections ===== */
+.pr-sub{margin-top:20px}
+.pr-steps{list-style:none;margin:56px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:none}
+.pr-steps a{display:grid;grid-template-columns:auto 1fr;column-gap:16px;row-gap:6px;padding:24px 26px;border-radius:24px;background:var(--bg2);color:inherit;text-decoration:none;height:100%;box-sizing:border-box;transition:background .25s,transform .25s}
+.pr-steps a:hover{background:#e9f1ff;transform:translateY(-2px)}
+.pr-steps b{grid-row:span 2;font-size:15px;color:var(--blue);font-weight:700;padding-top:3px}
+.pr-steps span{font-size:20px;font-weight:700}
+.pr-steps em{font-style:normal;font-size:15px;color:var(--ink2);line-height:1.5}
+.df-re{display:grid;grid-template-columns:1fr auto 1.6fr;gap:24px;align-items:stretch;margin-top:56px}
+.df-c{border-radius:28px;padding:32px 36px}
+.df-c small{display:block;font-size:15px;font-weight:700;margin-bottom:14px}
+.df-c p{margin:0;font-size:clamp(20px,1.8vw,26px);font-weight:700;line-height:1.45}
+.df-old{background:var(--bg2);color:var(--ink3)}.df-old p{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:rgba(107,115,133,.5)}
+.df-new{background:var(--blue);color:#fff}.df-new small{color:#cfe2ff}
+.df-ar{align-self:center;font-size:32px;color:var(--blue);font-weight:700}
+.df-why{margin-top:28px;max-width:860px}
+.df-ps{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:64px}
+.df-p{border:1px solid var(--line);border-radius:28px;padding:32px 36px}
+.df-p small{color:var(--blue);font-weight:700;font-size:15px}
+.df-p h3{margin:10px 0 16px;font-size:22px}
+.df-p ul{margin:0;padding-left:18px;color:var(--ink2);font-size:16px;line-height:1.8}
+.df-g{margin:18px 0 0;padding-top:16px;border-top:1px solid var(--line);font-weight:600;font-size:16px}
+.df-need{margin-top:24px;padding:22px 28px;border-radius:20px;background:#e9f1ff;font-size:17px}.df-need b{color:var(--blue);margin-right:12px}
+.hy-t{margin-top:56px;border-top:2px solid var(--ink)}
+.hy-r{display:grid;grid-template-columns:64px 1.3fr 1.3fr 160px;gap:20px;align-items:center;padding:22px 8px;border-bottom:1px solid var(--line);font-size:17px}
+.hy-h{font-size:14px;font-weight:700;color:var(--ink3);padding:14px 8px}
+.hy-r>b{color:var(--blue);font-size:18px}
+.hy-r>em{font-style:normal;justify-self:start;padding:6px 12px;border-radius:999px;background:#fff;color:var(--blue);font-size:14px;font-weight:700}
+.bm-ap{margin-top:56px;border-radius:28px;background:#fff;padding:32px 36px}
+.bm-apt{margin:0 0 14px;font-weight:700;font-size:18px}
+.bm-ap ul{list-style:none;margin:0;padding:0}
+.bm-ap li{display:grid;grid-template-columns:120px 1fr 28px 1.2fr;gap:12px;align-items:center;padding:14px 0;border-top:1px solid var(--line);font-size:16px}
+.bm-ap li span{color:var(--ink3)}.bm-ap li i{font-style:normal;color:var(--blue);font-weight:700}.bm-ap li em{font-style:normal;font-weight:600}
+.pp{margin-top:64px}
+.pp-t{font-weight:700;font-size:18px;margin:0 0 16px}
+.pp ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.pp li{background:var(--bg2);border-radius:20px;padding:22px 20px}
+.pp li b{display:block;color:var(--blue);font-size:18px;margin-bottom:8px}
+.pp li span{font-size:15px;color:var(--ink2);line-height:1.5}
+.ia-flow{list-style:none;margin:56px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:10px 0;counter-reset:f}
+.ia-flow li{counter-increment:f;display:flex;align-items:center;font-size:16px;font-weight:600}
+.ia-flow li::before{content:counter(f);display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-size:13px;margin-right:8px}
+.ia-flow li:not(:last-child)::after{content:"";width:28px;height:1px;background:#9fb4d6;margin:0 12px}
+.ia-g{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:16px;margin-top:40px}
+.ia-c{background:#fff;border-radius:28px;padding:30px 32px}
+.ia-c small{font-size:14px;font-weight:700;color:var(--ink3)}
+.ia-core{background:var(--blue);color:#fff}.ia-core small{color:#cfe2ff}.ia-core p{color:#e6efff!important}
+.ia-c h3{margin:8px 0 12px;font-size:22px}
+.ia-c p{margin:0;font-size:16px;line-height:1.7;color:var(--ink2)}
+.ia-n{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.ia-n p{margin:0;background:#fff;border-radius:24px;padding:24px 28px;font-size:16px;line-height:1.7;color:var(--ink2)}.ia-n b{display:block;color:var(--ink);margin-bottom:4px}
+.ai-loop{list-style:none;margin:56px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.ai-loop li{position:relative;background:var(--bg2);border-radius:20px;padding:22px 22px}
+.ai-loop li b{display:block;color:var(--blue);font-size:18px;margin-bottom:6px}
+.ai-loop li span{font-size:15px;color:var(--ink2)}
+.ai-t{margin-top:40px;border-top:2px solid var(--ink)}
+.ai-r{display:grid;grid-template-columns:140px 1fr 1fr;gap:20px;padding:18px 8px;border-bottom:1px solid var(--line);font-size:16px}
+.ai-r>span:last-child{font-weight:600}
+.ai-h{font-size:14px;font-weight:700;color:var(--ink3)}.ai-h>span:last-child{font-weight:700}
+.rt-g{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:56px}
+.rt-c{background:#fff;border-radius:28px;padding:32px 36px}
+.rt-c h3{margin:0 0 16px;font-size:22px}
+.rt-c ul{margin:0;padding-left:18px;font-size:16px;line-height:1.9;color:var(--ink2)}
+.rt-task{margin:0;padding:20px 22px;border-radius:18px;background:#e9f1ff;font-weight:600;font-size:17px;line-height:1.6}
+.rt-task small{display:block;color:var(--blue);font-size:14px;margin-bottom:6px}
+.rt-m{margin:16px 0 0;font-size:15px;line-height:1.7;color:var(--ink2)}.rt-m b{color:var(--ink);margin-right:8px}
+.hy-tag{display:inline-block;margin:0 0 16px;padding:4px 10px;border-radius:999px;background:rgba(90,169,255,.16);color:#5aa9ff;font-size:13px;font-weight:700;vertical-align:middle;letter-spacing:0}
+@media(max-width:900px){
+ .pr-steps{grid-template-columns:1fr}
+ .df-re{grid-template-columns:1fr}.df-ar{transform:rotate(90deg);justify-self:center}
+ .df-ps,.ia-g,.ia-n,.rt-g{grid-template-columns:1fr}
+ .hy-r{grid-template-columns:40px 1fr;row-gap:6px}.hy-r>span:nth-of-type(2){grid-column:2}.hy-r>em{grid-column:2}.hy-h{display:none}
+ .bm-ap li{grid-template-columns:1fr;gap:2px}.bm-ap li i{display:none}
+ .pp ol{grid-template-columns:1fr 1fr}
+ .ai-loop{grid-template-columns:1fr 1fr}
+ .ai-r{grid-template-columns:1fr;gap:4px}.ai-h{display:none}
+ .df-c,.df-p,.ia-c,.rt-c,.bm-ap{padding:24px}
+}
 /* ---------- v3 additions ---------- */
 .sum{background:var(--dk);border-top:1px solid var(--dline)}
 .sumg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding-top:28px;padding-bottom:clamp(64px,8vw,100px)}
@@ -1832,6 +1910,25 @@ section h2{font-size:clamp(22px,2.4vw,32px)!important;line-height:1.4!important;
 
 
 
+<!-- ===================== PROCESS (roadmap) ===================== -->
+<section class="sec pr" id="process" aria-label="Process">
+  <div class="wrap">
+    <header class="io"><p class="pill">Process</p>
+      <h2 class="h2">3개월 동안 이 순서로<br>문제를 좁혀 나갔어요</h2>
+      <p class="body pr-sub">2026.03.12 – 06월 말 · 개인 프로젝트 · 기획부터 리서치, UX·UI, 프로토타입까지 직접 진행했어요.</p></header>
+    <ol class="pr-steps">
+      <li class="io"><a href="#ch1"><b>01</b><span>관찰</span><em>기존 앱에서 출력과 창업 정보가 섞여 있는 구조를 발견</em></a></li>
+      <li class="io"><a href="#question"><b>02</b><span>핵심 질문</span><em>사용자가 앱을 설치해야 할 이유는?</em></a></li>
+      <li class="io"><a href="#ch2"><b>03</b><span>조사</span><em>프린트카페 이용자 59명 설문 (04.09 – 04.15)</em></a></li>
+      <li class="io"><a href="#define"><b>04</b><span>문제 정의</span><em>‘목적이 모호하다’를 ‘타깃과 우선순위가 섞여 있다’로 수정</em></a></li>
+      <li class="io"><a href="#hypo"><b>05</b><span>가설</span><em>기능이 만들 행동 변화 5가지</em></a></li>
+      <li class="io"><a href="#ch3"><b>06</b><span>벤치마킹</span><em>유사 업종이 아닌 유사 경험에서 원칙 선택</em></a></li>
+      <li class="io"><a href="#ch4"><b>07</b><span>역할 정의</span><em>앱의 역할을 ‘출력 준비 도구’로 고정</em></a></li>
+      <li class="io"><a href="#ia"><b>08</b><span>구조 설계</span><em>IA · User Flow · 핵심/보조/확장 기능 구분</em></a></li>
+      <li class="io"><a href="#flow"><b>09</b><span>UI · 프로토타입</span><em>핵심 화면, 디자인 시스템, 코드 프로토타입</em></a></li>
+    </ol>
+  </div>
+</section>
 <!-- ===================== 01 OVERVIEW ===================== -->
 <section class="ov" id="ch1" aria-label="Background">
   <!-- 배경 매장 이미지: 추후 다시 넣을 예정 -->
@@ -1948,6 +2045,40 @@ section h2{font-size:clamp(22px,2.4vw,32px)!important;line-height:1.4!important;
 
 
 <!-- ===================== 03 BENCHMARKING ===================== -->
+<!-- ===================== PROBLEM DEFINITION ===================== -->
+<section class="sec df" id="define" aria-label="Problem Definition">
+  <div class="wrap">
+    <header class="io"><p class="pill">Problem Definition</p>
+      <h2 class="h2">조사 결과를 보고<br>처음 세운 문제 정의를 고쳤어요</h2></header>
+    <div class="df-re io">
+      <div class="df-c df-old"><small>처음 정의</small><p>앱의 목적이 모호하다</p></div>
+      <div class="df-ar" aria-hidden="true">→</div>
+      <div class="df-c df-new"><small>최종 정의</small><p><b>출력 사용자</b>와 <b>창업 관심 사용자</b>가 한 구조에 섞여 있어,<br>핵심 타깃과 행동 우선순위가 불명확하다</p></div>
+    </div>
+    <p class="body df-why io">앱에는 출력과 창업이라는 목적이 분명히 있었어요. 문제는 목적이 없는 게 아니라, <b>서로 다른 목적의 사용자가 같은 화면에서 경쟁</b>하고 있다는 점이었어요.</p>
+    <div class="df-ps">
+      <article class="df-p io"><small>Main Persona</small><h3>급하게 출력해야 하는 대학생</h3><ul><li>과제와 발표 자료를 자주 출력해요</li><li>매장 체류 시간을 줄이고 싶어요</li><li>복잡한 탐색보다 즉시 실행을 원해요</li></ul><p class="df-g">목표 · 빠르게 준비하고 출력한 뒤 이동하기</p></article>
+      <article class="df-p io"><small>Sub Persona</small><h3>정확한 출력이 중요한 취업준비생</h3><ul><li>이력서와 포트폴리오를 자주 출력해요</li><li>한 번의 실수로 시간과 비용을 잃어요</li><li>미리보기와 오류 경고를 중요하게 여겨요</li></ul><p class="df-g">목표 · 빠르면서도 한 번에 정확하게 출력하기</p></article>
+    </div>
+    <p class="df-need io"><b>공통 니즈</b> 빠르게 준비하고, 실수 없이 출력하며, 공용 PC 없이 안심하고 이용하고 싶어요.</p>
+  </div>
+</section>
+
+<!-- ===================== HYPOTHESIS ===================== -->
+<section class="sec alt hy" id="hypo" aria-label="Hypothesis">
+  <div class="wrap">
+    <header class="io"><p class="pill">Hypothesis</p>
+      <h2 class="h2">이 기능이 있다면 사용자의 행동이<br>이렇게 바뀔 거라고 가정했어요</h2></header>
+    <div class="hy-t" role="table">
+      <div class="hy-r hy-h" role="row"><span role="columnheader"></span><span role="columnheader">가설</span><span role="columnheader">예상 변화</span><span role="columnheader">반영한 화면</span></div>
+      <div class="hy-r io" role="row"><b role="cell">H1</b><span role="cell">앱에서 파일을 미리 업로드할 수 있다</span><span role="cell">매장 내 준비 시간이 줄어든다</span><em role="cell">파일 업로드</em></div>
+      <div class="hy-r io" role="row"><b role="cell">H2</b><span role="cell">출력 옵션을 미리 설정할 수 있다</span><span role="cell">공용 PC 조작과 반복 설정이 줄어든다</span><em role="cell">문서 유형 · 옵션</em></div>
+      <div class="hy-r io" role="row"><b role="cell">H3</b><span role="cell">미리보기와 오류 경고를 제공한다</span><span role="cell">출력 실수와 재출력 불안이 줄어든다</span><em role="cell">미리보기 · 경고</em></div>
+      <div class="hy-r io" role="row"><b role="cell">H4</b><span role="cell">QR · 출력번호로 즉시 출력할 수 있다</span><span role="cell">앱을 설치할 명확한 이유가 생긴다</span><em role="cell">코드 발급</em></div>
+      <div class="hy-r io" role="row"><b role="cell">H5</b><span role="cell">최근 파일과 지난 설정을 저장한다</span><span role="cell">반복 이용과 재사용이 늘어난다</span><em role="cell">보관함 · 홈</em></div>
+    </div>
+  </div>
+</section>
 <section class="sec alt" id="ch3">
   <div class="wrap">
     <header class="bmh io">
@@ -1968,6 +2099,15 @@ section h2{font-size:clamp(22px,2.4vw,32px)!important;line-height:1.4!important;
         <div class="bmt"><img src="img/bm-ic-printer.webp" alt="Printer APP" width="80" height="80"><p>핵심 기능을 빠르게 찾을 수<br>있는 직관적인 구성</p></div>
       </article>
     </div>
+    <div class="bm-ap io">
+      <p class="bm-apt">그래서 이렇게 가져왔어요</p>
+      <ul>
+        <li><b>패스오더</b><span>방문 전 주문 · 결제</span><i>→</i><em>매장 방문 전 파일과 설정 준비</em></li>
+        <li><b>카카오T</b><span>앱 행동과 오프라인 실행 연결</span><i>→</i><em>앱에서 준비하고 매장에서는 실행만</em></li>
+        <li><b>PRINT APP</b><span>출력 기능 중심 정보구조</span><i>→</i><em>업로드 · 설정 · 상태 기능 우선 배치</em></li>
+        <li><b>스냅스</b><span>결과물 미리보기</span><i>→</i><em>잘림 · 여백 · 색상 오류 예방</em></li>
+      </ul>
+    </div>
   </div>
 </section>
 
@@ -1983,6 +2123,16 @@ section h2{font-size:clamp(22px,2.4vw,32px)!important;line-height:1.4!important;
       <div class="tg io"><div class="as"><span>출력 사용자와 창업 관심 사용자 정보가 함께 배치됨</span></div><div class="tbs"><div class="tb"><span>핵심 타깃을 <b>실제 출력 사용자</b>로 명확히 설정</span></div></div></div>
       <div class="tg io"><div class="as"><span>실제 출력 사용자의 핵심 행동이 충분히 강조되지 않음</span></div><div class="tbs"><div class="tb"><span>앱의 역할을 <b>‘출력 준비 도구’</b>로 정의</span></div></div></div>
       <div class="tg io"><div class="as"><span>앱 사용 이유가 충전 · 매장 찾기 등 일부 기능에 머무름</span></div><div class="tbs"><div class="tb"><span>출력 전 과정을 <b>앱에서 미리 준비</b></span></div><div class="tb"><span>매장에서는 <b>QR 또는 출력번호</b>로 빠르게 출력</span></div></div></div>
+    </div>
+    <div class="pp io">
+      <p class="pp-t">이 역할을 지키기 위한 5가지 UX 원칙</p>
+      <ol>
+        <li><b>단순화</b><span>출력과 직접 관련된 기능을 먼저 노출</span></li>
+        <li><b>즉시 실행</b><span>앱을 열자마자 업로드 또는 재출력</span></li>
+        <li><b>개인화</b><span>최근 파일, 지난 설정, 단골 매장을 기억</span></li>
+        <li><b>정확성</b><span>미리보기와 경고로 출력 실수 예방</span></li>
+        <li><b>안심</b><span>파일 삭제와 개인정보 보호 상태를 안내</span></li>
+      </ol>
     </div>
   </div>
 </section>
@@ -2014,11 +2164,30 @@ section h2{font-size:clamp(22px,2.4vw,32px)!important;line-height:1.4!important;
 <!-- ===================== MORE : horizontal 3D rail ===================== -->
 
 <!-- ===================== SOLUTION FLOW ===================== -->
+<!-- ===================== STRUCTURE (IA · FLOW) ===================== -->
+<section class="sec alt ia" id="ia" aria-label="Structure">
+  <div class="wrap">
+    <header class="io"><p class="pill">Structure</p>
+      <h2 class="h2">출력까지 이어지는 흐름을 먼저 정하고<br>기능을 핵심 · 보조 · 확장으로 나눴어요</h2></header>
+    <ol class="ia-flow io" aria-label="핵심 사용자 흐름">
+      <li>앱 실행</li><li>파일 업로드</li><li>문서 유형 선택</li><li>옵션 설정</li><li>미리보기 · 오류 확인</li><li>QR · 출력번호 발급</li><li>매장에서 즉시 출력</li><li>자동 삭제 · 완료 안내</li>
+    </ol>
+    <div class="ia-g">
+      <article class="ia-c ia-core io"><small>핵심 · MVP</small><h3>출력 준비</h3><p>홈 · 파일 업로드 · 문서 유형 · 옵션 설정 · 미리보기 · 오류 경고 · QR/출력번호 · 매장 찾기 · 최근 파일</p></article>
+      <article class="ia-c io"><small>보조</small><h3>계정 · 관리</h3><p>로그인 · 유피카드 충전 · 출력 내역 · 마이페이지 · 보안 안내 · FAQ · 공지</p></article>
+      <article class="ia-c io"><small>확장 · 2단계</small><h3>패스프린트</h3><p>미리 출력 후 보관 · 매장 픽업 · 택배/퀵 배송 · 인화 · 제본. 운영 부담과 책임 문제로 MVP에서 분리했어요.</p></article>
+    </div>
+    <div class="ia-n io">
+      <p><b>창업 정보는 지우지 않고 분리했어요.</b> 출력 사용자의 흐름에서 빼고 별도 공간으로 옮겨, 사용자 경험과 가맹 비즈니스 목적을 함께 지켰어요.</p>
+      <p><b>회원가입은 강요하지 않아요.</b> 비회원도 업로드부터 코드 발급까지 쓸 수 있고, 최근 파일 · 지난 설정 · 출력 내역 같은 저장 기능으로 자연스럽게 회원 전환을 유도해요.</p>
+    </div>
+  </div>
+</section>
 <section class="fs" id="flow" aria-label="Main Flow — 핵심 화면">
-  <div class="fs-a pn" id="pn" style="--n:3" aria-label="Main Flow — 홈에서 파일 출력까지 프로토타입">
+  <div class="fs-a pn" id="pn" style="--n:5" aria-label="Main Flow — 홈에서 파일 출력까지 프로토타입">
     <div class="pn-pin"><div class="nudge" aria-hidden="true"><svg viewBox="0 0 44 29" width="44" height="29" fill="currentColor"><circle cx="1.0" cy="1.0" r="0.81"/><circle cx="4.6" cy="1.0" r="0.61"/><circle cx="8.2" cy="1.0" r="0.45"/><circle cx="33.4" cy="1.0" r="0.37"/><circle cx="37.0" cy="1.0" r="0.50"/><circle cx="40.6" cy="1.0" r="0.67"/><circle cx="4.6" cy="4.6" r="0.85"/><circle cx="8.2" cy="4.6" r="0.66"/><circle cx="11.8" cy="4.6" r="0.48"/><circle cx="33.4" cy="4.6" r="0.54"/><circle cx="37.0" cy="4.6" r="0.72"/><circle cx="8.2" cy="8.2" r="0.90"/><circle cx="11.8" cy="8.2" r="0.70"/><circle cx="15.4" cy="8.2" r="0.52"/><circle cx="29.8" cy="8.2" r="0.58"/><circle cx="33.4" cy="8.2" r="0.76"/><circle cx="37.0" cy="8.2" r="0.97"/><circle cx="11.8" cy="11.8" r="0.95"/><circle cx="15.4" cy="11.8" r="0.74"/><circle cx="19.0" cy="11.8" r="0.56"/><circle cx="26.2" cy="11.8" r="0.62"/><circle cx="29.8" cy="11.8" r="0.81"/><circle cx="33.4" cy="11.8" r="1.03"/><circle cx="15.4" cy="15.4" r="1.00"/><circle cx="19.0" cy="15.4" r="0.79"/><circle cx="22.6" cy="15.4" r="0.66"/><circle cx="26.2" cy="15.4" r="0.86"/><circle cx="29.8" cy="15.4" r="1.08"/><circle cx="15.4" cy="19.0" r="1.29"/><circle cx="19.0" cy="19.0" r="1.06"/><circle cx="22.6" cy="19.0" r="0.91"/><circle cx="26.2" cy="19.0" r="1.13"/><circle cx="19.0" cy="22.6" r="1.35"/><circle cx="22.6" cy="22.6" r="1.19"/><circle cx="26.2" cy="22.6" r="1.43"/><circle cx="22.6" cy="26.2" r="1.49"/></svg></div>
       <p class="pn-sec">Main Flow</p>
-      <div class="pn-txt" aria-live="polite"><div class="pn-t on" data-i="0"><h2 class="pn-h">출력 준비는 <em>홈</em>에서 바로 시작해요</h2><p class="pn-d">파일 업로드를 최상단에 배치해 출력 준비를 바로 시작할 수 있게 했어요. <br>주변 매장과 기기 현황, UP카드 잔액, 파일 보관함을 한눈에 확인할 수 있도록 모았어요.</p></div><div class="pn-t" data-i="1"><h2 class="pn-h">어디에 있는 <em>파일</em>이든 바로 올려요</h2><p class="pn-d">매장 PC 로그인 없이 내 폰의 파일을 미리 올려요. <br>여러 파일도 한 번에 올리고 업로드 상태를 바로 확인해요.</p></div><div class="pn-t" data-i="2"><h2 class="pn-h"><em>문서 유형</em>만 고르면<br>옵션이 맞춰져요</h2><p class="pn-d">컬러 · 용지 · 단면/양면 · 매수를 집에서 미리 정하고, <br>장당 요금도 옵션 옆에서 바로 확인해요.</p></div><div class="pn-t" data-i="3"><h2 class="pn-h">출력될 모습을 <em>먼저</em> 확인해요</h2><p class="pn-d">선택한 옵션이 적용된 화면으로 <br>잘림이나 흑백 변환 같은 실수를 미리 막아요.</p></div><div class="pn-t" data-i="4"><h2 class="pn-h">결제까지 마치면<br><em>코드</em>가 바로 발급돼요</h2><p class="pn-d">유피카드로 앱에서 미리 결제하고 QR과 6자리 출력번호를 받아요. <br>매장에서는 코드만 입력하면 준비한 파일이 바로 나와요.</p></div></div>
+      <div class="pn-txt" aria-live="polite"><div class="pn-t on" data-i="0"><h2 class="pn-h">출력 준비는 <em>홈</em>에서 바로 시작해요</h2><span class="hy-tag">원칙 · 즉시 실행</span><p class="pn-d">파일 업로드를 최상단에 배치해 출력 준비를 바로 시작할 수 있게 했어요. <br>주변 매장과 기기 현황, UP카드 잔액, 파일 보관함을 한눈에 확인할 수 있도록 모았어요.</p></div><div class="pn-t" data-i="1"><h2 class="pn-h">어디에 있는 <em>파일</em>이든 바로 올려요</h2><span class="hy-tag">H1 사전 업로드</span><p class="pn-d">매장 PC 로그인 없이 내 폰의 파일을 미리 올려요. <br>여러 파일도 한 번에 올리고 업로드 상태를 바로 확인해요.</p></div><div class="pn-t" data-i="2"><h2 class="pn-h"><em>문서 유형</em>만 고르면<br>옵션이 맞춰져요</h2><span class="hy-tag">H2 옵션 사전 설정</span><p class="pn-d">컬러 · 용지 · 단면/양면 · 매수를 집에서 미리 정하고, <br>장당 요금도 옵션 옆에서 바로 확인해요.</p></div><div class="pn-t" data-i="3"><h2 class="pn-h">출력될 모습을 <em>먼저</em> 확인해요</h2><span class="hy-tag">H3 미리보기 · 경고</span><p class="pn-d">선택한 옵션이 적용된 화면으로 <br>잘림이나 흑백 변환 같은 실수를 미리 막아요.</p></div><div class="pn-t" data-i="4"><h2 class="pn-h">결제까지 마치면<br><em>코드</em>가 바로 발급돼요</h2><span class="hy-tag">H4 즉시 출력 · H5 보관</span><p class="pn-d">유피카드로 앱에서 미리 결제하고 QR과 6자리 출력번호를 받아요. <br>매장에서는 코드만 입력하면 준비한 파일이 바로 나와요.</p></div></div>
       <div class="pn-phone mk" id="pnPhone">
         <div class="mk-s" id="pnScr"><div class="pn-s on" data-k="home" tabindex="-1"><img src="img/pt/home.webp" width="804" height="1748" alt="홈 화면"></div><div class="pn-s" data-k="up2" tabindex="-1"><img src="img/pt/up2.webp" width="804" height="1748" alt="파일 선택 시트 — 사진, 내 기기, 최근 파일, 클라우드"></div><div class="pn-s" data-k="up3a" tabindex="-1"><img src="img/pt/up3a.webp" width="804" height="1748" alt="업로드한 파일 1개"></div><div class="pn-s" data-k="opt" tabindex="-1"><img src="img/pt/opt.webp" width="804" height="2094" alt="문서 유형 · 출력 옵션 설정"></div><div class="pn-s" data-k="prev" tabindex="-1"><img src="img/pt/prev.webp" width="804" height="1748" alt="출력 미리보기 — 이력서"></div><div class="pn-s" data-k="pay" tabindex="-1"><img src="img/pt/pay.webp" width="804" height="1748" alt="유피카드로 결제 중"></div><div class="pn-s" data-k="done" tabindex="-1"><img src="img/pt/done.webp" width="804" height="1748" alt="코드 생성 완료 — QR과 출력번호 824731"></div><button type="button" class="hs main pn-tap" id="pnTap" aria-label="다음 화면으로"></button></div>
         <img class="mk-f" src="img/mock-frame.webp" alt="" width="700" height="1435">
@@ -2145,6 +2314,46 @@ section h2{font-size:clamp(22px,2.4vw,32px)!important;line-height:1.4!important;
 <!-- ===================== 06 OUTCOME ===================== -->
 
 
+<!-- ===================== AI COLLABORATION ===================== -->
+<section class="sec aiw" id="ai" aria-label="AI Collaboration">
+  <div class="wrap">
+    <header class="io"><p class="pill">How I Worked</p>
+      <h2 class="h2">AI로 생각의 범위를 넓히고,<br>결정은 근거를 보고 직접 내렸어요</h2></header>
+    <ol class="ai-loop io">
+      <li><b>발산</b><span>AI로 문제 후보와 대안을 폭넓게 탐색</span></li>
+      <li><b>검증</b><span>설문과 실제 서비스 조건으로 확인</span></li>
+      <li><b>수렴</b><span>핵심 · 보조 · 확장으로 우선순위를 좁힘</span></li>
+      <li><b>기록</b><span>선택 · 수정 · 제외한 이유를 남김</span></li>
+    </ol>
+    <div class="ai-t" role="table">
+      <div class="ai-r ai-h" role="row"><span role="columnheader">단계</span><span role="columnheader">AI가 한 일</span><span role="columnheader">내가 판단한 일</span></div>
+      <div class="ai-r io" role="row"><b role="cell">문제 정의</b><span role="cell">‘앱 목적이 모호하다’는 초안 제시</span><span role="cell">타깃과 행동 우선순위 문제로 다시 정의</span></div>
+      <div class="ai-r io" role="row"><b role="cell">사용자 조사</b><span role="cell">설문 질문 구성과 응답 분류 기준</span><span role="cell">실제 응답 수집, 과도한 해석 배제</span></div>
+      <div class="ai-r io" role="row"><b role="cell">기능 발산</b><span role="cell">자동 감지, 추천 설정, 패스프린트 등 아이디어</span><span role="cell">모두 넣지 않고 MVP · 보조 · 확장으로 구분</span></div>
+      <div class="ai-r io" role="row"><b role="cell">IA</b><span role="cell">화면 목록과 Before/After 구조 제안</span><span role="cell">창업 정보를 삭제하지 않고 별도 공간으로 분리</span></div>
+      <div class="ai-r io" role="row"><b role="cell">디자인 전략</b><span role="cell">트렌드와 마이크로 인터랙션 후보 제안</span><span role="cell">가독성과 실행성을 해치는 장식은 제외</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== RETROSPECT ===================== -->
+<section class="sec alt rt" id="retro" aria-label="Retrospect">
+  <div class="wrap">
+    <header class="io"><p class="pill">Retrospect</p>
+      <h2 class="h2">잘한 점과<br>다음에 검증할 것</h2></header>
+    <div class="rt-g">
+      <article class="rt-c io"><h3>잘한 점</h3><ul>
+        <li>낡은 UI 문제로 보지 않고 타깃 · 역할 · 설치 이유로 문제를 넓혀 봤어요</li>
+        <li>개인적인 불편을 바로 해결책으로 만들지 않고 설문으로 검증했어요</li>
+        <li>앱 화면에서 끝내지 않고 매장 방문과 출력 완료까지 설계했어요</li>
+        <li>창업 정보를 없애지 않고 사용자 경험과 기업 수익 구조를 함께 고려했어요</li></ul></article>
+      <article class="rt-c io"><h3>다음 검증 과제</h3>
+        <p class="rt-task"><small>사용성 테스트 · 최소 5명</small>“포트폴리오 PDF를 A4 컬러 양면으로 설정하고 QR을 발급해 주세요.”</p>
+        <p class="rt-m">완료 시간 · 과업 성공 여부 · 막힌 지점 · 잘못 누른 횟수 · 이해하지 못한 표현 · 출력 전 불안 요소</p>
+        <p class="rt-m"><b>기술 · 운영</b> 파일 보관 · 자동 삭제 정책, 매장 기기 연동, QR 유효시간, 출력 오류 · 환불 정책, 패스프린트 운영 기준</p></article>
+    </div>
+  </div>
+</section>
 <section class="ending" id="ending" aria-label="엔딩"><img src="img/ending.webp" width="1920" height="1440" alt="거울 같은 금속 구조물 위에 놓인 스마트폰, 화면에 프린트카페 스플래시 화면" loading="lazy"></section>
 </main>
 <footer class="foot"><div class="wrap"><span>PrintCafe UX/UI Renewal · 2026</span><span>Designed by 박수빈</span></div></footer>
@@ -2401,20 +2610,6 @@ addEventListener('scroll',function(){if(!tk){tk=1;requestAnimationFrame(f)}},{pa
 })();
 </script>
 <script>
-/* PinLock: 섹션 상단이 화면 맨 위에 닿으면 재생이 끝날 때까지 아래로 스크롤을 막아요. 위로는 언제든 갈 수 있어요. */
-function PinLock(sec,active,next){var on=false,ty=0,cool=0;
-  function nudge(){var t=performance.now();if(t<cool)return;cool=t+1100;next&&next()}
-  function y0(){return sec.getBoundingClientRect().top+scrollY}
-  function blocking(){var r=sec.getBoundingClientRect();return active()&&r.top<=1&&r.bottom>innerHeight*.5}
-  addEventListener('wheel',function(e){if(e.deltaY>0&&blocking()){e.preventDefault();if(e.deltaY>4)nudge()}},{passive:false});
-  addEventListener('touchstart',function(e){ty=e.touches[0].clientY},{passive:true});
-  addEventListener('touchmove',function(e){var d=ty-e.touches[0].clientY;if(d>0&&blocking()){e.preventDefault();if(d>40){ty=e.touches[0].clientY;nudge()}}},{passive:false});
-  addEventListener('keydown',function(e){if(/^(ArrowDown|PageDown|End| |Spacebar)$/.test(e.key)&&blocking()&&!/INPUT|TEXTAREA/.test((e.target||{}).tagName||'')){e.preventDefault();nudge()}});
-  addEventListener('scroll',function(){if(!active())return;var r=sec.getBoundingClientRect();
-    if(r.top<0&&r.bottom>0){scrollTo({top:y0(),behavior:'instant'})}},{passive:true});
-  return {release:function(){on=false}}}
-</script>
-<script>
 (function(){
   var pn=document.getElementById('pn');if(!pn)return;
   /* Figma 프로토타입 흐름(home → 파일업로드-2 → 3(1) → 출력옵션 → 출력미리보기 → 결제중 → 출력준비완료) */
@@ -2441,21 +2636,20 @@ function PinLock(sec,active,next){var on=false,ty=0,cool=0;
     tm.push(setTimeout(function(){cur.style.transition='transform .12s';cur.style.transform='translate('+x+'px,'+y+'px) scale(.82)';rip.classList.remove('go');void rip.offsetWidth;rip.classList.add('go')},470));
     tm.push(setTimeout(function(){cur.style.transform='translate('+x+'px,'+y+'px)';setScr(si+1)},640));
     tm.push(setTimeout(function(){cur.style.transition='opacity .25s';cur.style.opacity=0;busy=false;done&&done()},900))}
-  /* 자동 재생: 스크롤 없이 화면마다 읽을 시간을 두고 넘어가요. 끝까지 재생되기 전에는 아래로 넘어가지 않아요(PinLock). */
-  var DW=[2600,1300,1500,5600,5600,1300,3400],seq=0,started=false,done=false;
-  function play(){var tok=++seq;
-    (function next(){if(tok!==seq)return;
-      tm.push(setTimeout(function(){if(tok!==seq)return;
-        if(si>=S.length-1){done=true;pn.classList.add('fin');lock.release();return}
-        if(AUTO[si]){setScr(si+1);next()}else step(next)},rm?300:DW[si]))})()}
-  hs.addEventListener('click',function(){if(busy||si>=S.length-1)return;clear();seq++;step(play)});
-  var pin=pn.querySelector('.pn-pin');
-  /* 스크롤(휠·터치·키)하면 기다리지 않고 다음 화면으로 */
-  function skip(){if(!started||busy||performance.now()-scrT<(si===3||si===4?2400:900))return;if(si>=S.length-1){seq++;done=true;pn.classList.add('fin');return}clear();seq++;if(AUTO[si]){setScr(si+1);play()}else step(play)}
-  var lock=PinLock(pn,function(){return !done&&getComputedStyle(pin).display!=='none'},skip);
-  function f(){tk=0;if(getComputedStyle(pin).display==='none')return;var r=pn.getBoundingClientRect();
-    if(r.top>innerHeight*.6){if(started&&!done){started=false;seq++;clear();uxHide();setCh(0);setScr(0)}return}
-    if(!started&&r.top<innerHeight*.35){started=true;clear();setCh(0);setScr(0);play()}}
+  /* 스크롤 단계형: 화면은 스크롤 위치로만 바뀌어요(자동 재생 없음). 점·키보드 ←/→로도 이동해요. */
+  var pin=pn.querySelector('.pn-pin'),NC=END.length;
+  function go(c){if(c===ch)return;clear();
+    if(c===ch+1&&si===END[ch]&&!rm){setCh(c);(function nx(){if(si>=END[c]){return}if(AUTO[si]){tm.push(setTimeout(function(){setScr(si+1);nx()},500))}else step(nx)})()}
+    else{setCh(c);setScr(END[c])}
+    pn.classList.toggle('fin',c===NC-1)}
+  function pos(c){var y=pn.getBoundingClientRect().top+scrollY,len=pn.offsetHeight-innerHeight;return y+len*(c+.5)/NC}
+  D.forEach(function(d,k){d.style.cursor='pointer';d.addEventListener('click',function(){scrollTo({top:pos(k),behavior:'smooth'})})});
+  hs.addEventListener('click',function(){if(ch<NC-1)scrollTo({top:pos(ch+1),behavior:'smooth'})});
+  addEventListener('keydown',function(e){if(getComputedStyle(pin).display==='none')return;var r=pn.getBoundingClientRect();if(r.top>1||r.bottom<innerHeight-1)return;
+    if(e.key==='ArrowRight'&&ch<NC-1){e.preventDefault();scrollTo({top:pos(ch+1),behavior:'smooth'})}
+    if(e.key==='ArrowLeft'&&ch>0){e.preventDefault();scrollTo({top:pos(ch-1),behavior:'smooth'})}});
+  function f(){tk=0;if(getComputedStyle(pin).display==='none')return;var r=pn.getBoundingClientRect(),len=pn.offsetHeight-innerHeight;
+    var c=r.top>0?0:Math.min(NC-1,Math.floor(-r.top/len*NC));if(r.top>innerHeight)return;go(c)}
 
   /* 목업 화면 안 스크롤: 휠/트랙패드는 기본 스크롤(끝에 닿으면 페이지로 이어짐), 마우스는 드래그로도 */
   var sb=document.createElement('span');sb.className='pn-sb';document.getElementById('pnScr').appendChild(sb);var sbt;
@@ -2537,7 +2731,7 @@ function PinLock(sec,active,next){var on=false,ty=0,cool=0;
   /* 스크롤 단계: 0 지도 · 1 리스트 · 2 상세 · 3 상세 끝까지 · 4 패스프린트 UX 포인트 · 5 서비스 */
   var N=6,wide=function(){return innerWidth>900};
   function cls(n){sec.classList.toggle('pass',n>=4);var z=wide()&&n>=4;sec.classList.toggle('szoom',z);sec.classList.toggle('z1',z&&n===4);sec.classList.toggle('z1m',z&&n===4);sec.classList.toggle('z2',z&&n===5)}
-  function setS(n){clear();i=Math.min(n,2);lay();scroll3(n>=3);cls(n);sec.classList.toggle('fin',n===5&&done)}
+  function setS(n){clear();i=Math.min(n,2);lay();scroll3(n>=3);cls(n);sec.classList.toggle('fin',n===5)}
   var stT=0;function apply(n){var prev=stage;stage=n;stT=performance.now();
     if(rm||n!==prev+1){setS(n);return}
     clear();
@@ -2546,16 +2740,11 @@ function PinLock(sec,active,next){var on=false,ty=0,cool=0;
     else if(n===3){scroll3(true)}
     else if(n===4){sec.classList.add('pass');at(300,function(){tapAt(50,94.2,function(){if(!wide())return;sec.classList.add('szoom','z1');at(450,function(){sec.classList.add('z1m')})})})}
     else if(n===5){cls(5);at(rm?0:2200,function(){if(stage===5)sec.classList.add('fin')})}}
-  /* 자동 재생: 지도 → 리스트 → 상세 → 상세 끝까지 → 패스프린트 UX 포인트 → 서비스, 끝나기 전에는 아래로 넘어가지 않아요 */
-  var DWS=[2600,2600,1600,3200,4800,4600],ptm=[],started=false,done=false;
-  function stopPlay(){ptm.forEach(clearTimeout);ptm=[]}
-  function play(){stopPlay();(function next(){ptm.push(setTimeout(function(){
-      if(stage>=N-1){done=true;sec.classList.add('fin');lock.release();return}apply(stage+1);next()},rm?300:DWS[stage]))})()}
-  function skip(){if(!started||performance.now()-stT<(stage>=3?2000:1000))return;stopPlay();if(stage>=N-1){done=true;sec.classList.add('fin');return}apply(stage+1);play()}
-  var lock=PinLock(sec,function(){return !done},skip);
-  function f(){tk=0;var r=sec.getBoundingClientRect();
-    if(r.top>innerHeight*.6){if(started&&!done){started=false;stopPlay();stage=0;setS(0)}return}
-    if(!started&&r.top<innerHeight*.35){started=true;stage=0;setS(0);play()}}
+  /* 스크롤 단계형: 스크롤 위치에 따라 단계가 바뀌어요(자동 재생 없음) */
+  function f(){tk=0;var r=sec.getBoundingClientRect(),len=r.height-innerHeight;if(len<=0)return;
+    var n=r.top>0?0:Math.min(N-1,Math.floor(-r.top/len*N));if(n===stage)return;
+    if(n===stage+1)apply(n);else{stage=n;setS(n)}
+    sec.classList.toggle('fin',n===N-1)}
   lay();addEventListener('resize',function(){lay();scroll3(stage>=3)});
   addEventListener('scroll',function(){if(!tk){tk=1;requestAnimationFrame(f)}},{passive:true});f();
 })();
